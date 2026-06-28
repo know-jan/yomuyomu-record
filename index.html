@@ -786,7 +786,12 @@
         
         const config = {
           fps: 15,
-          qrbox: { width: 300, height: 150 },
+          qrbox: function(width, height) {
+            // 画面の表示幅に合わせてはみ出さないようにレスポンシブ調整 (横幅80%, 縦幅30%)
+            const boxWidth = Math.floor(width * 0.8);
+            const boxHeight = Math.floor(height * 0.3);
+            return { width: boxWidth, height: boxHeight };
+          },
           // HD解像度の優先指定 (EAN-13読み取り率向上のためのライブラリ公式指定方法)
           videoConstraints: {
             width: { ideal: 1280 },
@@ -997,7 +1002,12 @@
           
           const config = {
             fps: 15,
-            qrbox: { width: 300, height: 150 },
+            qrbox: function(width, height) {
+              // 画面の表示幅に合わせてはみ出さないようにレスポンシブ調整 (横幅80%, 縦幅30%)
+              const boxWidth = Math.floor(width * 0.8);
+              const boxHeight = Math.floor(height * 0.3);
+              return { width: boxWidth, height: boxHeight };
+            },
             // HD解像度の優先指定 (EAN-13読み取り率向上のためのライブラリ公式指定方法)
             videoConstraints: {
               width: { ideal: 1280 },
