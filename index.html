@@ -757,9 +757,9 @@
         const config = {
           fps: 15,
           qrbox: function(width, height) {
-            const minEdge = Math.min(width, height);
-            const boxWidth = Math.floor(minEdge * 0.85);
-            const boxHeight = Math.floor(boxWidth * 0.45);
+            // 1Dバーコード用：横長で横いっぱいに広げる（横幅の90%、縦幅の35%）
+            const boxWidth = Math.floor(width * 0.9);
+            const boxHeight = Math.floor(height * 0.35);
             return { width: boxWidth, height: boxHeight };
           },
           formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
@@ -780,9 +780,13 @@
         observer.observe(readerDiv, { childList: true, subtree: true });
 
         try {
-          // iOS Safari向けに environment で起動
+          // iOS Safari向けに environment & HD解像度指定で起動
           await scannerQrCode.start(
-            { facingMode: "environment" },
+            { 
+              facingMode: "environment",
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
             config,
             onScannerScanSuccess,
             (errorMessage) => {}
@@ -790,7 +794,10 @@
         } catch (cameraInitErr) {
           console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
           await scannerQrCode.start(
-            { video: true },
+            { 
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
             config,
             onScannerScanSuccess,
             (errorMessage) => {}
@@ -963,10 +970,9 @@
           const config = {
             fps: 15,
             qrbox: function(width, height) {
-              // 1Dバーコード用（横長）の最適サイズ
-              const minEdge = Math.min(width, height);
-              const boxWidth = Math.floor(minEdge * 0.85);
-              const boxHeight = Math.floor(boxWidth * 0.45);
+              // 1Dバーコード用：横長で横いっぱいに広げる（横幅の90%、縦幅の35%）
+              const boxWidth = Math.floor(width * 0.9);
+              const boxHeight = Math.floor(height * 0.35);
               return { width: boxWidth, height: boxHeight };
             },
             // EAN-13 (ISBN-13) のみを指定してパフォーマンスを向上
@@ -988,18 +994,24 @@
           observer.observe(readerDiv, { childList: true, subtree: true });
 
           try {
-            // iOS Safariでは「exact(絶対一致)」を外し、環境優先にする方が成功率が上がります
+            // iOS Safari向けに environment & HD解像度指定で起動
             await html5QrCode.start(
-              { facingMode: "environment" },
+              { 
+                facingMode: "environment",
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              },
               config,
               onScanSuccess,
               (errorMessage) => {}
             );
           } catch (cameraInitErr) {
             console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
-            // 背面指定でエラーが出た場合は、デバイスが利用可能な任意のカメラ（video: true）で強制起動を試みます
             await html5QrCode.start(
-              { video: true },
+              { 
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              },
               config,
               onScanSuccess,
               (errorMessage) => {}
@@ -1066,33 +1078,54 @@
       addTempBookPlaceholder(isbn);
     }
 
-    // ================= Google Books API 連携 =================
+    // ================= openBD + Google Books ダブル検索 =================
     async function fetchBookInfo(isbn) {
-      const url = 'https://www.googleapis.com/books/v1/volumes?q=isbn=' + isbn;
+      // 1. まずは日本国内に非常に強い openBD API を試す
       try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Network response was not ok");
-        
-        const data = await response.json();
-        if (data.totalItems > 0 && data.items && data.items[0]) {
-          const volumeInfo = data.items[0].volumeInfo;
-          let coverUrl = "";
-          if (volumeInfo.imageLinks) {
-            coverUrl = volumeInfo.imageLinks.thumbnail || volumeInfo.imageLinks.smallThumbnail || "";
-            // SSL化
-            if (coverUrl.startsWith("http://")) {
-              coverUrl = coverUrl.replace("http://", "https://");
-            }
+        const openBdUrl = 'https://api.openbd.jp/v1/get?isbn=' + isbn;
+        const response = await fetch(openBdUrl);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data[0] && data[0].summary) {
+            const summary = data[0].summary;
+            return {
+              title: summary.title || "",
+              author: summary.author || "（著者不明）",
+              coverUrl: summary.cover || ""
+            };
           }
-          return {
-            title: volumeInfo.title || "",
-            author: volumeInfo.authors ? volumeInfo.authors.join(", ") : "",
-            coverUrl: coverUrl
-          };
         }
       } catch (e) {
-        console.error("Books API error:", e);
+        console.warn("openBD API error:", e);
       }
+
+      // 2. フォールバックとして Google Books API を試す
+      try {
+        const googleUrl = 'https://www.googleapis.com/books/v1/volumes?q=isbn=' + isbn;
+        const response = await fetch(googleUrl);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.totalItems > 0 && data.items && data.items[0]) {
+            const volumeInfo = data.items[0].volumeInfo;
+            let coverUrl = "";
+            if (volumeInfo.imageLinks) {
+              coverUrl = volumeInfo.imageLinks.thumbnail || volumeInfo.imageLinks.smallThumbnail || "";
+              if (coverUrl.startsWith("http://")) {
+                coverUrl = coverUrl.replace("http://", "https://");
+              }
+            }
+            return {
+              title: volumeInfo.title || "",
+              author: volumeInfo.authors ? volumeInfo.authors.join(", ") : "",
+              coverUrl: coverUrl
+            };
+          }
+        }
+      } catch (e) {
+        console.error("Google Books API error:", e);
+      }
+
+      // 3. 両方で見つからなかった場合は空データ
       return { title: "", author: "", coverUrl: "" };
     }
 

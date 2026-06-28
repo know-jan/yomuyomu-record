@@ -232,11 +232,31 @@ function onEdit(e) {
   }
 }
 
-// バックエンド用の書籍情報フェッチ関数
+// バックエンド用の書籍情報フェッチ関数 (openBD + Google Books API 二段構え)
 function fetchBookInfoBackend(isbn) {
-  var url = 'https://www.googleapis.com/books/v1/volumes?q=isbn=' + isbn;
+  // 1. まずは日本国内に強い openBD API を試す
   try {
-    var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    var openBdUrl = 'https://api.openbd.jp/v1/get?isbn=' + isbn;
+    var response = UrlFetchApp.fetch(openBdUrl, { muteHttpExceptions: true });
+    if (response.getResponseCode() === 200) {
+      var data = JSON.parse(response.getContentText());
+      if (data && data[0] && data[0].summary) {
+        var summary = data[0].summary;
+        return {
+          title: summary.title || "",
+          author: summary.author || "（著者不明）",
+          coverUrl: summary.cover || ""
+        };
+      }
+    }
+  } catch (e) {
+    Logger.log("openBD fetch error: " + e.message);
+  }
+
+  // 2. フォールバックとして Google Books API を試す
+  var googleUrl = 'https://www.googleapis.com/books/v1/volumes?q=isbn=' + isbn;
+  try {
+    var response = UrlFetchApp.fetch(googleUrl, { muteHttpExceptions: true });
     if (response.getResponseCode() === 200) {
       var data = JSON.parse(response.getContentText());
       if (data.totalItems > 0 && data.items && data.items[0]) {
@@ -256,7 +276,7 @@ function fetchBookInfoBackend(isbn) {
       }
     }
   } catch (e) {
-    Logger.log("fetchBookInfoBackend error: " + e.message);
+    Logger.log("Google Books API error: " + e.message);
   }
   return { title: "", author: "", coverUrl: "" };
 }
