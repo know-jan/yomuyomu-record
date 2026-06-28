@@ -706,12 +706,9 @@
       initAudio();
       playBeep();
       
-      const url = dbDriver.getGasUrl();
-      if (!url) {
-        showSettingsModal(true);
-        return;
-      }
-      const scanUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + 'mode=scanner';
+      // NetlifyのURLをベースにして別ウィンドウを開きます（GASのURLを直接開くとiframe制限でカメラが起動しません）
+      const currentUrl = window.location.href;
+      const scanUrl = currentUrl + (currentUrl.indexOf('?') === -1 ? '?' : '&') + 'mode=scanner';
       window.open(scanUrl, '_blank');
     }
 
