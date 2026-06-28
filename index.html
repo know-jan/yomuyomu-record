@@ -847,19 +847,15 @@
     function onScannerScanSuccess(decodedText, decodedResult) {
       const isbn = decodedText.trim();
       
-      // 日本の書籍用：本のバーコードは978から始まる。192始まりのCコードは無視する。
+      // 日本の書籍用：本のバーコードは978から始まる
       if (!isbn.startsWith("978")) {
-        updateDebugStatus(true, null, `検出スキップ: ${isbn} (書籍以外のバーコードです)`);
         return;
       }
       
       const now = Date.now();
       if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
-        updateDebugStatus(true, null, `検出スキップ: ${isbn} (5秒以内の重複スキャンです)`);
         return;
       }
-      
-      updateDebugStatus(true, null, `検知成功！: ${isbn}`);
       
       lastScannedIsbn = isbn;
       lastScannedTime = now;
@@ -874,7 +870,7 @@
         const readerDiv = document.getElementById('scanner-reader');
         readerDiv.style.borderColor = '#10b981';
         setTimeout(() => {
-          readerDiv.style.borderColor = '#475569'; // border-slate-600相当
+          readerDiv.style.borderColor = '#475569';
         }, 1000);
       } else {
         alert("メイン画面（親ウィンドウ）が見つかりません。連携できませんでした。");
@@ -1096,20 +1092,16 @@
     function onScanSuccess(decodedText, decodedResult) {
       const isbn = decodedText.trim();
       
-      // 日本の書籍用：本のバーコードは978から始まる。192始まりのCコードは無視する。
+      // 日本の書籍用：本のバーコードは978から始まる
       if (!isbn.startsWith("978")) {
-        updateDebugStatus(false, null, `検出スキップ: ${isbn} (書籍以外のバーコードです)`);
         return;
       }
       
       const now = Date.now();
       // 同一ISBNの重複読み取り防止（5秒間スキップ）
       if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
-        updateDebugStatus(false, null, `検出スキップ: ${isbn} (5秒以内の重複スキャンです)`);
         return;
       }
-      
-      updateDebugStatus(false, null, `検知成功！: ${isbn}`);
       
       lastScannedIsbn = isbn;
       lastScannedTime = now;
