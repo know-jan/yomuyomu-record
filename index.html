@@ -756,21 +756,45 @@
     }
 
     // ================= スキャナー専用画面用の処理 =================
+    // ================= スキャナー専用画面用の処理 =================
     let scannerQrCode = null;
     let isScannerCameraRunning = false;
+    let scannerNativeStream = null;
+    let scannerNativeVideoEl = null;
+    let scannerNativeLoopId = null;
+    let isScannerNativeRunning = false;
 
     async function startScannerModeCamera() {
       const startBtn = document.getElementById('scanner-start-btn');
       const readerDiv = document.getElementById('scanner-reader');
       
       if (isScannerCameraRunning) {
+        // ネイティブBarcodeDetectorの停止
+        isScannerNativeRunning = false;
+        if (scannerNativeLoopId) {
+          cancelAnimationFrame(scannerNativeLoopId);
+          scannerNativeLoopId = null;
+        }
+        if (scannerNativeStream) {
+          scannerNativeStream.getTracks().forEach(track => track.stop());
+          scannerNativeStream = null;
+        }
+        if (scannerNativeVideoEl) {
+          scannerNativeVideoEl.pause();
+          scannerNativeVideoEl.srcObject = null;
+          scannerNativeVideoEl = null;
+        }
+
+        // html5-qrcodeの停止
         if (scannerQrCode) {
           try {
             await scannerQrCode.stop();
           } catch(e) {}
           scannerQrCode = null;
         }
+        
         isScannerCameraRunning = false;
+        readerDiv.innerHTML = ''; // 映像関連のDOM要素を完全にクリア
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
         startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> カメラをスタート！';
         document.getElementById('scanner-hint-text').classList.add('hidden');
@@ -781,58 +805,117 @@
         isScannerCameraRunning = true;
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-rose-500 hover:bg-rose-600 text-white shadow-lg flex items-center justify-center gap-2";
         startBtn.innerHTML = '<i class="fa-solid fa-circle-stop"></i> カメラをとめる';
-        
-        scannerQrCode = new Html5Qrcode("scanner-reader");
-        
-        const config = {
-          fps: 15,
-          qrbox: function(width, height) {
-            // 画面の表示幅に合わせてはみ出さないようにレスポンシブ調整 (横幅80%, 縦幅30%)
-            const boxWidth = Math.floor(width * 0.8);
-            const boxHeight = Math.floor(height * 0.3);
-            return { width: boxWidth, height: boxHeight };
-          },
-          // HD解像度の優先指定 (EAN-13読み取り率向上のためのライブラリ公式指定方法)
-          videoConstraints: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: "environment"
-          }
-        };
-
         document.getElementById('scanner-hint-text').classList.remove('hidden');
 
-        // playsinlineの強制適用 (iOS/iPad Safari対策)
-        const observer = new MutationObserver((mutations) => {
-          const videoEl = readerDiv.querySelector('video');
-          if (videoEl) {
-            videoEl.setAttribute('playsinline', 'true');
-            videoEl.setAttribute('webkit-playsinline', 'true');
-            videoEl.setAttribute('autoplay', 'true');
-            videoEl.setAttribute('muted', 'true');
-            videoEl.play().catch(err => console.log("Video play intercept failed:", err));
-            observer.disconnect();
-          }
-        });
-        observer.observe(readerDiv, { childList: true, subtree: true });
+        // BarcodeDetectorのチェック
+        if ('BarcodeDetector' in window) {
+          console.log("Scanner mode: Using native BarcodeDetector API");
+          readerDiv.innerHTML = '';
+          
+          const constraints = {
+            video: {
+              facingMode: "environment",
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            },
+            audio: false
+          };
+          
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          scannerNativeStream = stream;
+          
+          const video = document.createElement('video');
+          video.srcObject = stream;
+          video.setAttribute('playsinline', 'true');
+          video.setAttribute('webkit-playsinline', 'true');
+          video.setAttribute('autoplay', 'true');
+          video.setAttribute('muted', 'true');
+          video.style.width = '100%';
+          video.style.height = '100%';
+          video.style.objectFit = 'cover';
+          
+          readerDiv.appendChild(video);
+          scannerNativeVideoEl = video;
+          
+          await video.play();
+          
+          const detector = new BarcodeDetector({ formats: ['ean_13'] });
+          isScannerNativeRunning = true;
+          
+          const tick = async () => {
+            if (!isScannerNativeRunning) return;
+            
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+              try {
+                const barcodes = await detector.detect(video);
+                if (barcodes.length > 0) {
+                  for (const barcode of barcodes) {
+                    if (barcode.format === 'ean_13') {
+                      onScannerScanSuccess(barcode.rawValue);
+                    }
+                  }
+                }
+              } catch (err) {
+                console.error("Scanner mode barcode detection error:", err);
+              }
+            }
+            if (isScannerNativeRunning) {
+              scannerNativeLoopId = requestAnimationFrame(tick);
+            }
+          };
+          scannerNativeLoopId = requestAnimationFrame(tick);
+          
+        } else {
+          // フォールバック: html5-qrcode
+          console.log("Scanner mode: Using html5-qrcode fallback");
+          
+          scannerQrCode = new Html5Qrcode("scanner-reader", {
+            formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
+          });
+          
+          const config = {
+            fps: 15,
+            qrbox: function(width, height) {
+              const boxWidth = Math.floor(width * 0.8);
+              const boxHeight = Math.floor(height * 0.3);
+              return { width: boxWidth, height: boxHeight };
+            },
+            videoConstraints: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: "environment"
+            }
+          };
 
-        try {
-          // iOS Safari向けに environment で起動
-          await scannerQrCode.start(
-            { facingMode: "environment" },
-            config,
-            onScannerScanSuccess,
-            (errorMessage) => {}
-          );
-        } catch (cameraInitErr) {
-          console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
-          // デバイスのデフォルトカメラ（内蔵フロントカメラなど）で起動
-          await scannerQrCode.start(
-            {},
-            config,
-            onScannerScanSuccess,
-            (errorMessage) => {}
-          );
+          const observer = new MutationObserver((mutations) => {
+            const videoEl = readerDiv.querySelector('video');
+            if (videoEl) {
+              videoEl.setAttribute('playsinline', 'true');
+              videoEl.setAttribute('webkit-playsinline', 'true');
+              videoEl.setAttribute('autoplay', 'true');
+              videoEl.setAttribute('muted', 'true');
+              videoEl.play().catch(err => console.log("Video play intercept failed:", err));
+              observer.disconnect();
+            }
+          });
+          observer.observe(readerDiv, { childList: true, subtree: true });
+
+          try {
+            await scannerQrCode.start(
+              { facingMode: "environment" },
+              config,
+              onScannerScanSuccess,
+              (errorMessage) => {}
+            );
+          } catch (cameraInitErr) {
+            console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
+            await scannerQrCode.start(
+              {},
+              config,
+              onScannerScanSuccess,
+              (errorMessage) => {}
+            );
+          }
         }
         
       } catch (e) {
@@ -978,6 +1061,11 @@
     }
 
     // ================= カメラ・バーコード連続スキャン =================
+    let nativeStream = null;
+    let nativeVideoEl = null;
+    let nativeLoopId = null;
+    let isNativeRunning = false;
+
     async function toggleCamera() {
       initAudio(); // ユーザー操作契機でオーディオ有効化
       
@@ -998,55 +1086,113 @@
           cameraBtnText.textContent = "カメラをとめる";
           cameraIcon.className = "fa-solid fa-circle-stop text-xl animate-pulse";
           
-          html5QrCode = new Html5Qrcode("reader");
-          
-          const config = {
-            fps: 15,
-            qrbox: function(width, height) {
-              // 画面の表示幅に合わせてはみ出さないようにレスポンシブ調整 (横幅80%, 縦幅30%)
-              const boxWidth = Math.floor(width * 0.8);
-              const boxHeight = Math.floor(height * 0.3);
-              return { width: boxWidth, height: boxHeight };
-            },
-            // HD解像度の優先指定 (EAN-13読み取り率向上のためのライブラリ公式指定方法)
-            videoConstraints: {
-              width: { ideal: 1280 },
-              height: { ideal: 720 },
-              facingMode: "environment"
-            }
-          };
-          
-          // playsinlineの強制適用 (iOS/iPad Safari対策)
-          const observer = new MutationObserver((mutations) => {
-            const videoEl = readerDiv.querySelector('video');
-            if (videoEl) {
-              videoEl.setAttribute('playsinline', 'true');
-              videoEl.setAttribute('webkit-playsinline', 'true');
-              videoEl.setAttribute('autoplay', 'true');
-              videoEl.setAttribute('muted', 'true');
-              videoEl.play().catch(err => console.log("Video play intercept failed:", err));
-              observer.disconnect();
-            }
-          });
-          observer.observe(readerDiv, { childList: true, subtree: true });
+          if ('BarcodeDetector' in window) {
+            console.log("Using native BarcodeDetector API");
+            readerDiv.innerHTML = '';
+            
+            const constraints = {
+              video: {
+                facingMode: "environment",
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              },
+              audio: false
+            };
+            
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            nativeStream = stream;
+            
+            const video = document.createElement('video');
+            video.srcObject = stream;
+            video.setAttribute('playsinline', 'true');
+            video.setAttribute('webkit-playsinline', 'true');
+            video.setAttribute('autoplay', 'true');
+            video.setAttribute('muted', 'true');
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
+            
+            readerDiv.appendChild(video);
+            nativeVideoEl = video;
+            
+            await video.play();
+            
+            const detector = new BarcodeDetector({ formats: ['ean_13'] });
+            isNativeRunning = true;
+            
+            const tick = async () => {
+              if (!isNativeRunning) return;
+              
+              if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                try {
+                  const barcodes = await detector.detect(video);
+                  if (barcodes.length > 0) {
+                    for (const barcode of barcodes) {
+                      if (barcode.format === 'ean_13') {
+                        onScanSuccess(barcode.rawValue);
+                      }
+                    }
+                  }
+                } catch (err) {
+                  console.error("Barcode detection error:", err);
+                }
+              }
+              if (isNativeRunning) {
+                nativeLoopId = requestAnimationFrame(tick);
+              }
+            };
+            nativeLoopId = requestAnimationFrame(tick);
+            
+          } else {
+            console.log("Using html5-qrcode fallback");
+            
+            html5QrCode = new Html5Qrcode("reader", {
+              formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
+            });
+            
+            const config = {
+              fps: 15,
+              qrbox: function(width, height) {
+                const boxWidth = Math.floor(width * 0.8);
+                const boxHeight = Math.floor(height * 0.3);
+                return { width: boxWidth, height: boxHeight };
+              },
+              videoConstraints: {
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+                facingMode: "environment"
+              }
+            };
+            
+            const observer = new MutationObserver((mutations) => {
+              const videoEl = readerDiv.querySelector('video');
+              if (videoEl) {
+                videoEl.setAttribute('playsinline', 'true');
+                videoEl.setAttribute('webkit-playsinline', 'true');
+                videoEl.setAttribute('autoplay', 'true');
+                videoEl.setAttribute('muted', 'true');
+                videoEl.play().catch(err => console.log("Video play intercept failed:", err));
+                observer.disconnect();
+              }
+            });
+            observer.observe(readerDiv, { childList: true, subtree: true });
 
-          try {
-            // iOS Safari向けに environment で起動
-            await html5QrCode.start(
-              { facingMode: "environment" },
-              config,
-              onScanSuccess,
-              (errorMessage) => {}
-            );
-          } catch (cameraInitErr) {
-            console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
-            // デバイスのデフォルトカメラ（内蔵フロントカメラなど）で起動
-            await html5QrCode.start(
-              {},
-              config,
-              onScanSuccess,
-              (errorMessage) => {}
-            );
+            try {
+              await html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                onScanSuccess,
+                (errorMessage) => {}
+              );
+            } catch (cameraInitErr) {
+              console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
+              await html5QrCode.start(
+                {},
+                config,
+                onScanSuccess,
+                (errorMessage) => {}
+              );
+            }
           }
           
         } catch (e) {
@@ -1062,6 +1208,23 @@
     }
 
     async function stopCamera() {
+      // ネイティブBarcodeDetectorの停止
+      isNativeRunning = false;
+      if (nativeLoopId) {
+        cancelAnimationFrame(nativeLoopId);
+        nativeLoopId = null;
+      }
+      if (nativeStream) {
+        nativeStream.getTracks().forEach(track => track.stop());
+        nativeStream = null;
+      }
+      if (nativeVideoEl) {
+        nativeVideoEl.pause();
+        nativeVideoEl.srcObject = null;
+        nativeVideoEl = null;
+      }
+
+      // html5-qrcodeの停止
       if (html5QrCode && isCameraRunning) {
         try {
           await html5QrCode.stop();
@@ -1077,6 +1240,7 @@
       const cameraIcon = document.getElementById('camera-btn-icon');
       const readerDiv = document.getElementById('reader');
       
+      readerDiv.innerHTML = ''; // 映像関連のDOM要素を完全にクリア
       readerDiv.classList.add('hidden');
       cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
       cameraBtnText.textContent = "カメラをスタート！";
