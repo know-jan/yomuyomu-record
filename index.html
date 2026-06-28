@@ -792,6 +792,8 @@
             const boxHeight = Math.floor(height * 0.35);
             return { width: boxWidth, height: boxHeight };
           },
+          // EAN_13 のみを指定して読み取り速度を劇的に向上 (余計なコードの誤検知も防ぐ)
+          formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ],
           // HD解像度の優先指定 (EAN-13読み取り率向上のためのライブラリ公式指定方法)
           videoConstraints: {
             width: { ideal: 1280 },
@@ -846,7 +848,8 @@
 
     function onScannerScanSuccess(decodedText, decodedResult) {
       const isbn = decodedText.trim();
-      if (!/^\d{10}$|^\d{13}$/.test(isbn)) return;
+      // 日本の書籍用：本のバーコードは978から始まる。192始まりのCコードは無視する。
+      if (!isbn.startsWith("978")) return;
       
       const now = Date.now();
       if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) return;
@@ -1007,6 +1010,8 @@
               const boxHeight = Math.floor(height * 0.35);
               return { width: boxWidth, height: boxHeight };
             },
+            // EAN_13 のみを指定して読み取り速度を劇的に向上 (余計なコードの誤検知も防ぐ)
+            formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ],
             // HD解像度の優先指定 (EAN-13読み取り率向上のためのライブラリ公式指定方法)
             videoConstraints: {
               width: { ideal: 1280 },
@@ -1087,8 +1092,8 @@
     function onScanSuccess(decodedText, decodedResult) {
       const isbn = decodedText.trim();
       
-      // ISBNの簡易バリデーション (数字10桁または13桁)
-      if (!/^\d{10}$|^\d{13}$/.test(isbn)) {
+      // 日本の書籍用：本のバーコードは978から始まる。192始まりのCコードは無視する。
+      if (!isbn.startsWith("978")) {
         return;
       }
       
