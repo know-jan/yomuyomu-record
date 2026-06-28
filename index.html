@@ -1102,16 +1102,55 @@
       addTempBookPlaceholder(isbn);
     }
 
-    // ================= openBD + Google Books バックエンド経由検索 =================
-    function fetchBookInfo(isbn) {
-      return new Promise((resolve) => {
-        dbDriver.fetchBookInfo(isbn, function(info) {
-          resolve(info);
-        }, function(err) {
-          console.error("Backend fetchBookInfo failed, falling back to empty:", err);
-          resolve({ title: "", author: "", coverUrl: "" });
-        });
-      });
+    // ================= openBD + Google Books クライアント側直接検索 =================
+    async function fetchBookInfo(isbn) {
+      // 1. まずは日本国内に非常に強い openBD API をブラウザから直接試す (CORSサポート)
+      try {
+        const openBdUrl = 'https://api.openbd.jp/v1/get?isbn=' + isbn;
+        const response = await fetch(openBdUrl);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data[0] && data[0].summary) {
+            const summary = data[0].summary;
+            return {
+              title: summary.title || "",
+              author: summary.author || "（著者不明）",
+              coverUrl: summary.cover || ""
+            };
+          }
+        }
+      } catch (e) {
+        console.warn("openBD API browser fetch error:", e);
+      }
+
+      // 2. フォールバックとして Google Books API をブラウザから直接試す (CORSサポート)
+      try {
+        const googleUrl = 'https://www.googleapis.com/books/v1/volumes?q=isbn=' + isbn;
+        const response = await fetch(googleUrl);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.totalItems > 0 && data.items && data.items[0]) {
+            const volumeInfo = data.items[0].volumeInfo;
+            let coverUrl = "";
+            if (volumeInfo.imageLinks) {
+              coverUrl = volumeInfo.imageLinks.thumbnail || volumeInfo.imageLinks.smallThumbnail || "";
+              if (coverUrl.startsWith("http://")) {
+                coverUrl = coverUrl.replace("http://", "https://");
+              }
+            }
+            return {
+              title: volumeInfo.title || "",
+              author: volumeInfo.authors ? volumeInfo.authors.join(", ") : "",
+              coverUrl: coverUrl
+            };
+          }
+        }
+      } catch (e) {
+        console.error("Google Books API browser fetch error:", e);
+      }
+
+      // 3. 両方で見つからなかった場合は空データ
+      return { title: "", author: "", coverUrl: "" };
     }
 
     // ================= 一時リスト管理 & 編集 =================
