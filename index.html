@@ -558,8 +558,11 @@
 
     // ホスト名にgoogleが含まれる場合はGAS環境と判定
     const isGAS = window.location.hostname.indexOf('google') !== -1;
+    // GASのURLが設定されているか確認
+    const hasGasUrl = !!safeStorage.getItem('yomuyomu_gas_url');
 
-    if (!isGAS && typeof google === 'undefined') {
+    // GAS環境ではなく、かつGASのURLも設定されていない場合のみ、テスト用のモック（疑似）DBを起動する
+    if (!isGAS && !hasGasUrl && typeof google === 'undefined') {
       console.warn("Running in local mock mode (google.script.run is not available).");
       
       const MOCK_DB_KEY = 'yomuyomu_mock_db';
