@@ -786,14 +786,7 @@
         
         const config = {
           fps: 15,
-          qrbox: function(width, height) {
-            // 1Dバーコード用：横長で横いっぱいに広げる（横幅の90%、縦幅の35%）
-            const boxWidth = Math.floor(width * 0.9);
-            const boxHeight = Math.floor(height * 0.35);
-            return { width: boxWidth, height: boxHeight };
-          },
-          // EAN_13 のみを指定して読み取り速度を劇的に向上 (余計なコードの誤検知も防ぐ)
-          formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ],
+          qrbox: { width: 300, height: 150 },
           // HD解像度の優先指定 (EAN-13読み取り率向上のためのライブラリ公式指定方法)
           videoConstraints: {
             width: { ideal: 1280 },
@@ -1004,14 +997,7 @@
           
           const config = {
             fps: 15,
-            qrbox: function(width, height) {
-              // 1Dバーコード用：横長で横いっぱいに広げる（横幅の90%、縦幅の35%）
-              const boxWidth = Math.floor(width * 0.9);
-              const boxHeight = Math.floor(height * 0.35);
-              return { width: boxWidth, height: boxHeight };
-            },
-            // EAN_13 のみを指定して読み取り速度を劇的に向上 (余計なコードの誤検知も防ぐ)
-            formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ],
+            qrbox: { width: 300, height: 150 },
             // HD解像度の優先指定 (EAN-13読み取り率向上のためのライブラリ公式指定方法)
             videoConstraints: {
               width: { ideal: 1280 },
