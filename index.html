@@ -209,7 +209,12 @@
             </div>
             
             <!-- カメラプレビュー表示領域 -->
-            <div id="reader" class="hidden w-full overflow-hidden rounded-2xl aspect-[4/3] bg-black relative border-4 border-brand-300 shadow-md"></div>
+            <div class="relative">
+              <div id="reader" class="hidden w-full overflow-hidden rounded-2xl aspect-[4/3] bg-black relative border-4 border-brand-300 shadow-md"></div>
+              <div id="camera-hint-text" class="hidden text-center text-xs text-brand-600 font-bold mt-2 animate-pulse">
+                💡 バーコードを少しはなして（20cmくらい）、ピントをあわせてね！
+              </div>
+            </div>
             
             <!-- バーコード数字手入力エリア (iOS Safariカメラ制限対策) -->
             <div class="pt-4 border-t border-brand-200/50 space-y-2 select-text">
@@ -768,6 +773,7 @@
         isScannerCameraRunning = false;
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
         startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> カメラをスタート！';
+        document.getElementById('scanner-hint-text').classList.add('hidden');
         return;
       }
       
@@ -786,8 +792,15 @@
             const boxHeight = Math.floor(height * 0.35);
             return { width: boxWidth, height: boxHeight };
           },
-          formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
+          // HD解像度の優先指定 (EAN-13読み取り率向上のためのライブラリ公式指定方法)
+          videoConstraints: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: "environment"
+          }
         };
+
+        document.getElementById('scanner-hint-text').classList.remove('hidden');
 
         // playsinlineの強制適用 (iOS/iPad Safari対策)
         const observer = new MutationObserver((mutations) => {
@@ -978,6 +991,7 @@
         try {
           isCameraRunning = true;
           readerDiv.classList.remove('hidden');
+          document.getElementById('camera-hint-text').classList.remove('hidden');
           
           cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-rose-500 hover:bg-rose-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
           cameraBtnText.textContent = "カメラをとめる";
@@ -993,8 +1007,12 @@
               const boxHeight = Math.floor(height * 0.35);
               return { width: boxWidth, height: boxHeight };
             },
-            // EAN-13 (ISBN-13) のみを指定してパフォーマンスを向上
-            formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
+            // HD解像度の優先指定 (EAN-13読み取り率向上のためのライブラリ公式指定方法)
+            videoConstraints: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: "environment"
+            }
           };
           
           // playsinlineの強制適用 (iOS/iPad Safari対策)
@@ -1062,6 +1080,7 @@
       cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
       cameraBtnText.textContent = "カメラをスタート！";
       cameraIcon.className = "fa-solid fa-camera-retro text-xl";
+      document.getElementById('camera-hint-text').classList.add('hidden');
     }
 
     // バーコード検知時の処理
@@ -1783,8 +1802,13 @@
       <p class="text-xs text-slate-400 mt-1">メイン画面と連動してバーコードを読み取ります</p>
     </div>
     
-    <div id="scanner-reader" class="w-full max-w-md aspect-square bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-600 relative">
-      <!-- カメラ表示領域 -->
+    <div class="relative w-full max-w-md aspect-square mb-2">
+      <div id="scanner-reader" class="w-full h-full bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-600 relative">
+        <!-- カメラ表示領域 -->
+      </div>
+      <div id="scanner-hint-text" class="hidden text-center text-xs text-slate-400 font-bold mt-3 animate-pulse">
+        💡 バーコードを少しはなして（20cmくらい）、ピントをあわせてね！
+      </div>
     </div>
     
     <div class="mt-6 w-full max-w-md flex flex-col gap-4">
