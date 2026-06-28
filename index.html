@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.4</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.5</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.4</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.5</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -757,6 +757,18 @@
       fetchRegisteredBooks();
     }
 
+    // html5-qrcode の SupportedFormats 定義のクラッシュを防ぐヘルパー
+    function getFormatsToSupport() {
+      if (typeof window.Html5QrcodeSupportedFormats !== 'undefined' && window.Html5QrcodeSupportedFormats.EAN_13 !== undefined) {
+        return [ window.Html5QrcodeSupportedFormats.EAN_13 ];
+      }
+      if (typeof window.Html5Qrcode !== 'undefined' && window.Html5Qrcode.SupportedFormats && window.Html5Qrcode.SupportedFormats.EAN_13 !== undefined) {
+        return [ window.Html5Qrcode.SupportedFormats.EAN_13 ];
+      }
+      // どちらも未定義の場合はnullを返し、クラッシュせず全スキャン対応にフォールバックさせる
+      return null;
+    }
+
     function isIOS() {
       // iPad Safari (デスクトップモード含む) および iPhone の判定
       const isIPad = navigator.userAgent.includes('Macintosh') && navigator.maxTouchPoints > 1;
@@ -912,9 +924,10 @@
               // コンテナを確実にクリア
               readerDiv.innerHTML = '';
 
-              scannerQrCode = new Html5Qrcode("scanner-reader", {
-                formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
-              });
+              const formats = getFormatsToSupport();
+              scannerQrCode = new Html5Qrcode("scanner-reader", formats ? {
+                formatsToSupport: formats
+              } : undefined);
               
               const config = {
                 fps: 15,
@@ -972,9 +985,10 @@
                 
                 // エラーでロックされたインスタンスを破棄して再作成
                 readerDiv.innerHTML = '';
-                scannerQrCode = new Html5Qrcode("scanner-reader", {
-                  formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
-                });
+                const fallbackFormats = getFormatsToSupport();
+                scannerQrCode = new Html5Qrcode("scanner-reader", fallbackFormats ? {
+                  formatsToSupport: fallbackFormats
+                } : undefined);
 
                 await scannerQrCode.start(
                   {},
@@ -1238,9 +1252,10 @@
               // コンテナを確実にクリア
               readerDiv.innerHTML = '';
 
-              html5QrCode = new Html5Qrcode("reader", {
-                formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
-              });
+              const formats = getFormatsToSupport();
+              html5QrCode = new Html5Qrcode("reader", formats ? {
+                formatsToSupport: formats
+              } : undefined);
               
               const config = {
                 fps: 15,
@@ -1298,9 +1313,10 @@
                 
                 // エラーでロックされたインスタンスを破棄して再作成
                 readerDiv.innerHTML = '';
-                html5QrCode = new Html5Qrcode("reader", {
-                  formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
-                });
+                const fallbackFormats = getFormatsToSupport();
+                html5QrCode = new Html5Qrcode("reader", fallbackFormats ? {
+                  formatsToSupport: fallbackFormats
+                } : undefined);
 
                 await html5QrCode.start(
                   {},
@@ -2059,7 +2075,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v1.4</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v1.5</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
