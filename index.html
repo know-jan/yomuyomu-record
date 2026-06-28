@@ -138,15 +138,17 @@
           <p class="text-xs md:text-sm font-bold text-brand-700 mt-1">バーコードをピッとスキャンして、きみの読書貯金をつくろう！</p>
         </div>
         <!-- スマホ/タブレット用 設定ギアボタン -->
-        <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform">
+        <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.1</span>
         </button>
       </div>
       
       <div class="flex items-center gap-3">
         <!-- PC用 設定ギアボタン -->
-        <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center">
+        <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.1</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -755,7 +757,18 @@
       fetchRegisteredBooks();
     }
 
-    // ================= スキャナー専用画面用の処理 =================
+    // BarcodeDetectorが実際にean_13をサポートしているか非同期でチェック
+    async function checkBarcodeDetectorSupport() {
+      if (!('BarcodeDetector' in window)) return false;
+      if (typeof BarcodeDetector.getSupportedFormats !== 'function') return false;
+      try {
+        const formats = await BarcodeDetector.getSupportedFormats();
+        return formats.includes('ean_13');
+      } catch (e) {
+        return false;
+      }
+    }
+
     // ================= スキャナー専用画面用の処理 =================
     let scannerQrCode = null;
     let isScannerCameraRunning = false;
@@ -808,7 +821,8 @@
         document.getElementById('scanner-hint-text').classList.remove('hidden');
 
         // BarcodeDetectorのチェック
-        if ('BarcodeDetector' in window) {
+        const isNativeSupported = await checkBarcodeDetectorSupport();
+        if (isNativeSupported) {
           console.log("Scanner mode: Using native BarcodeDetector API");
           readerDiv.innerHTML = '';
           
@@ -1086,7 +1100,8 @@
           cameraBtnText.textContent = "カメラをとめる";
           cameraIcon.className = "fa-solid fa-circle-stop text-xl animate-pulse";
           
-          if ('BarcodeDetector' in window) {
+          const isNativeSupported = await checkBarcodeDetectorSupport();
+          if (isNativeSupported) {
             console.log("Using native BarcodeDetector API");
             readerDiv.innerHTML = '';
             
@@ -1932,7 +1947,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定
+          システム設定 <span class="text-xs font-bold text-slate-400">v1.1</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
