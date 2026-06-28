@@ -1,0 +1,13 @@
+# System Files
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor configs / caches
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

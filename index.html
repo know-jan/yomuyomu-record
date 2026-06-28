@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- エラー検知デバッグスクリプト -->
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.position = 'fixed';
+      errorDiv.style.top = '0';
+      errorDiv.style.left = '0';
+      errorDiv.style.width = '100%';
+      errorDiv.style.backgroundColor = '#fee2e2';
+      errorDiv.style.color = '#991b1b';
+      errorDiv.style.padding = '16px';
+      errorDiv.style.borderBottom = '4px solid #f87171';
+      errorDiv.style.zIndex = '99999';
+      errorDiv.style.fontFamily = 'monospace';
+      errorDiv.style.fontSize = '12px';
+      errorDiv.style.whiteSpace = 'pre-wrap';
+      errorDiv.style.userSelect = 'text';
+      errorDiv.style.webkitUserSelect = 'text';
+      errorDiv.innerHTML = '<strong>[JS Error]</strong> ' + message + '<br>場所: ' + source + ':' + lineno + ':' + colno;
+      
+      if (document.body) {
+        document.body.appendChild(errorDiv);
+      } else {
+        window.addEventListener('DOMContentLoaded', () => {
+          document.body.appendChild(errorDiv);
+        });
+      }
+      return false;
+    };
+  </script>
+  <meta charset="UTF-8">
+  <title>よむよむレコード 📚</title>
+  
+  <!-- Apple Safari PWA (ホーム画面に追加) 用のメタ設定 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b', /* あたたかみのあるオレンジイエロー */
+              600: '#d97706',
+              700: '#b45309',
+            },
+            accent: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981', /* たのしいエメラルドグリーン */
+              600: '#059669',
+            },
+            sky: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9', /* さわやかなスカイブルー */
+              600: '#0284c7',
+            }
+          },
+          fontFamily: {
+            sans: ['"Outfit"', '"Noto Sans JP"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* iOS Safariでのタップ時のグレーのハイライトを無効化 */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    input, textarea {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+    }
+    
+    /* スムーズなスクロール */
+    body {
+      font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+      overscroll-behavior-y: contain; /* PWAでの引っ張りリフレッシュを防止 */
+    }
+    
+    /* html5-qrcode内のレイアウト微調整 */
+    #reader {
+      border: none !important;
+    }
+    #reader video {
+      border-radius: 20px !important;
+      object-fit: cover !important;
+    }
+    #reader__scan_region {
+      background: #000;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    #reader__dashboard {
+      padding: 10px 0 !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-brand-50 via-orange-50/20 to-brand-100/40 p-4 pb-24 md:p-8 md:pb-28">
+
+  <!-- メインコンテナ -->
+  <div id="main-app-container" class="max-w-5xl mx-auto bg-white/90 backdrop-blur-md rounded-[32px] shadow-xl border-4 border-brand-200 overflow-hidden flex flex-col min-h-[85vh]">
+    
+    <!-- ヘッダーエリア -->
+    <header class="p-6 md:p-8 border-b-4 border-brand-100 bg-brand-50/50 flex flex-col md:flex-row justify-between items-center gap-4 relative">
+      <div class="w-full md:w-auto flex justify-between items-start md:block">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-black bg-gradient-to-r from-brand-600 to-orange-500 bg-clip-text text-transparent flex items-center gap-2">
+            <span>📚 よむよむレコード</span>
+          </h1>
+          <p class="text-xs md:text-sm font-bold text-brand-700 mt-1">バーコードをピッとスキャンして、きみの読書貯金をつくろう！</p>
+        </div>
+        <!-- スマホ/タブレット用 設定ギアボタン -->
+        <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform">
+          <i class="fa-solid fa-gear text-2xl"></i>
+        </button>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <!-- PC用 設定ギアボタン -->
+        <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center">
+          <i class="fa-solid fa-gear text-xl"></i>
+        </button>
+        
+        <!-- 読書貯金カウンター (コイン風UI) -->
+        <div class="flex items-center gap-3 bg-amber-100/90 px-6 py-3 rounded-full border-2 border-brand-300 shadow-inner select-none active:scale-98 transition-transform cursor-pointer" onclick="switchTab('tab-gallery')">
+          <span class="text-3xl animate-bounce">🪙</span>
+          <div>
+            <div class="text-[10px] font-black text-brand-700 uppercase tracking-widest leading-none">よんだ本</div>
+            <div class="text-2xl font-black text-brand-600 leading-none mt-1">
+              <span id="dashboard-counter" class="text-3xl">0</span> 冊
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ナビゲーションタブ (iPad対応・大型タップ領域) -->
+    <nav class="flex p-3 bg-brand-50/30 gap-2 border-b-2 border-brand-100/60">
+      <button type="button" id="nav-btn-scan" onclick="switchTab('tab-scan')" class="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-black text-lg transition-all transform scale-102 bg-brand-400 text-white shadow-lg border border-brand-300">
+        <i class="fa-solid fa-camera-retro text-xl"></i>
+        <span>バーコードでスキャン</span>
+      </button>
+      <button type="button" id="nav-btn-manual" onclick="switchTab('tab-manual')" class="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-bold text-lg transition-all text-brand-700 bg-brand-50/50 hover:bg-brand-100/50 border border-brand-200/60">
+        <i class="fa-solid fa-pen-to-square text-xl"></i>
+        <span>手動で登録する</span>
+      </button>
+      <button type="button" id="nav-btn-gallery" onclick="switchTab('tab-gallery')" class="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-bold text-lg transition-all text-brand-700 bg-brand-50/50 hover:bg-brand-100/50 border border-brand-200/60">
+        <i class="fa-solid fa-images text-xl"></i>
+        <span>よんだ本の一覧</span>
+      </button>
+    </nav>
+
+    <!-- メインコンテンツ -->
+    <main class="flex-grow p-6 md:p-8">
+      
+      <!-- ================= 1. バーコードスキャンタブ ================= -->
+      <section id="tab-scan" class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- スキャン操作エリア (左側) -->
+          <div class="lg:col-span-5 bg-brand-50/30 p-5 rounded-[24px] border-2 border-brand-200/60 space-y-4">
+            <h2 class="text-xl font-black text-brand-800 flex items-center gap-2">
+              <i class="fa-solid fa-barcode text-brand-500"></i>
+              カメラでスキャンする
+            </h2>
+            <p class="text-xs text-brand-600 leading-relaxed">
+              本のうしろにある「バーコード」をカメラにうつすと、本のなまえを自動でさがします。連続でどんどんスキャンできるよ！
+            </p>
+            
+            <!-- カメラ起動/終了ボタン -->
+            <div class="space-y-2">
+              <button type="button" id="camera-toggle-btn" onclick="toggleCamera()" class="w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all">
+                <i id="camera-btn-icon" class="fa-solid fa-camera-retro text-xl"></i>
+                <span id="camera-btn-text">カメラをスタート！</span>
+              </button>
+              
+              <button type="button" onclick="openScannerWindow()" class="w-full py-3.5 rounded-2xl font-bold text-xs bg-slate-800 hover:bg-slate-700 active:scale-98 text-brand-300 shadow-md flex items-center justify-center gap-2 transition-all">
+                <i class="fa-solid fa-up-right-from-square"></i>
+                iPadで動かない時はこちら（別ウィンドウで開く）
+              </button>
+            </div>
+            
+            <!-- カメラプレビュー表示領域 -->
+            <div id="reader" class="hidden w-full overflow-hidden rounded-2xl aspect-[4/3] bg-black relative border-4 border-brand-300 shadow-md"></div>
+            
+            <!-- バーコード数字手入力エリア (iOS Safariカメラ制限対策) -->
+            <div class="pt-4 border-t border-brand-200/50 space-y-2 select-text">
+              <label class="block text-xs font-bold text-brand-700">バーコードの数字をて入力する</label>
+              <div class="flex gap-2">
+                <input type="text" id="manual-isbn-input" class="flex-grow bg-white text-md text-gray-800 px-4 py-3 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="978から始まる13けたの数字">
+                <button type="button" onclick="submitManualIsbn()" class="px-5 py-3 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-black text-sm rounded-xl shadow-md transition-all flex-shrink-0">
+                  しらべる
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 一時リスト表示エリア (右側) -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="flex justify-between items-center">
+              <h2 class="text-xl font-black text-brand-800 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-list text-brand-500"></i>
+                スキャンした本（一時リスト）
+              </h2>
+              <button type="button" onclick="clearTempListConfirm()" class="text-xs font-bold text-rose-500 hover:underline">
+                リストをからにする
+              </button>
+            </div>
+            
+            <!-- スキャン済み一時カードリスト -->
+            <div id="temp-list-container" class="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+              <!-- 初期表示 (空状態) -->
+              <div class="text-center py-16 px-4 border-4 border-dashed border-brand-200 rounded-3xl bg-brand-50/20">
+                <i class="fa-solid fa-camera-retro text-5xl text-brand-300 mb-4 animate-bounce"></i>
+                <p class="text-lg font-black text-brand-700">スキャンした本がここにでるよ！</p>
+                <p class="text-xs text-brand-500 mt-2">上の「カメラをスタート！」ボタンをおして、バーコードをうつしてね。</p>
+              </div>
+            </div>
+            
+            <!-- まとめて登録ボタン（一括書き込み） -->
+            <div id="batch-submit-btn-container" class="p-4 bg-brand-100/70 border border-brand-200 rounded-[24px] flex flex-col sm:flex-row justify-between items-center gap-4 hidden">
+              <div>
+                <p class="text-md font-black text-brand-800">
+                  <span id="temp-count-badge" class="bg-brand-500 text-white px-3 py-1 rounded-full text-xs font-black mr-1">0</span>冊の本が並んでいるよ！
+                </p>
+                <p class="text-[11px] text-brand-600 mt-0.5">本のなまえや感想を直して、下のボタンをおしてね。</p>
+              </div>
+              <button type="button" onclick="submitBatchBooks()" class="w-full sm:w-auto px-6 py-3.5 bg-accent-500 hover:bg-accent-600 active:scale-95 text-white font-black text-md rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
+                <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+                まとめて登録する！
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. 手動登録タブ ================= -->
+      <section id="tab-manual" class="max-w-2xl mx-auto hidden bg-brand-50/20 p-6 md:p-8 rounded-[28px] border-2 border-brand-200/50">
+        <h2 class="text-2xl font-black text-brand-800 mb-6 flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-brand-500"></i>
+          ていねいに手動で登録する
+        </h2>
+        
+        <form onsubmit="submitManualForm(event)" class="space-y-5">
+          <!-- タイトル -->
+          <div>
+            <label class="block text-sm font-bold text-brand-700 mb-1">本のなまえ（必須）</label>
+            <input type="text" id="manual-title" required class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="本のタイトルを書いてね">
+          </div>
+          
+          <!-- 著者 -->
+          <div>
+            <label class="block text-sm font-bold text-brand-700 mb-1">かいた人（著者）</label>
+            <input type="text" id="manual-author" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="作者のなまえ">
+          </div>
+          
+          <!-- ジャンルと所有区分 (グリッド) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- 所有区分 -->
+            <div>
+              <label class="block text-sm font-bold text-brand-700 mb-1.5">どこにある本？</label>
+              <div class="flex bg-white p-1 rounded-xl border-2 border-brand-200">
+                <label class="flex-1 text-center py-2.5 rounded-lg font-bold text-sm cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
+                  <input type="radio" name="manual-owner" value="図書館で借りた本" checked class="sr-only">
+                  図書館の本
+                </label>
+                <label class="flex-1 text-center py-2.5 rounded-lg font-bold text-sm cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
+                  <input type="radio" name="manual-owner" value="おうちの本" class="sr-only">
+                  おうちの本
+                </label>
+              </div>
+            </div>
+            
+            <!-- ジャンル -->
+            <div>
+              <label class="block text-sm font-bold text-brand-700 mb-1.5">どんな本？（ジャンル）</label>
+              <select id="manual-genre" class="w-full bg-white text-md font-bold p-3.5 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none">
+                <option value="物語" selected>📕 物語 (おはなし)</option>
+                <option value="図鑑・科学">🥦 図鑑・科学</option>
+                <option value="伝記">👑 伝記 (歴史や人物)</option>
+                <option value="絵本">🎨 絵本</option>
+                <option value="その他">⭐️ その他</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- 読んだ日付 -->
+          <div>
+            <label class="block text-sm font-bold text-brand-700 mb-1">読んだ日</label>
+            <input type="date" id="manual-date" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none">
+          </div>
+          
+          <!-- 評価（スターレーティング） -->
+          <div>
+            <label class="block text-sm font-bold text-brand-700 mb-1.5">お気に入り度（評価）</label>
+            <div class="flex items-center gap-2">
+              <input type="hidden" id="manual-rating" value="5">
+              <div id="manual-stars-container" class="flex bg-white px-4 py-2 rounded-xl border-2 border-brand-200">
+                <!-- JSでレンダリング -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- 感想 -->
+          <div>
+            <label class="block text-sm font-bold text-brand-700 mb-1">ひとことメモ（感想）</label>
+            <textarea id="manual-comment" rows="3" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="おもしろかったところや、みんなにおすすめしたいところを書いてね！"></textarea>
+          </div>
+          
+          <!-- 登録ボタン -->
+          <button type="submit" class="w-full py-4 bg-accent-500 hover:bg-accent-600 active:scale-95 text-white font-black text-xl rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all">
+            <i class="fa-solid fa-check text-lg"></i>
+            この本を登録する！
+          </button>
+        </form>
+      </section>
+
+      <!-- ================= 3. 読んだ本の一覧タブ ================= -->
+      <section id="tab-gallery" class="space-y-6 hidden">
+        
+        <!-- コントロールパネル (ソート・フィルタ) -->
+        <div class="bg-brand-50/30 p-5 rounded-[24px] border-2 border-brand-200/50 space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <!-- フィルタ：所有区分 (おうち/図書館) -->
+            <div class="space-y-1.5">
+              <span class="block text-xs font-bold text-brand-700">どこにある本？</span>
+              <div class="flex bg-white p-1 rounded-xl border border-brand-200">
+                <label class="px-4 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
+                  <input type="radio" name="filter-owner" value="すべて" checked onchange="renderRegisteredBooks()" class="sr-only">
+                  すべて
+                </label>
+                <label class="px-4 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
+                  <input type="radio" name="filter-owner" value="図書館で借りた本" onchange="renderRegisteredBooks()" class="sr-only">
+                  図書館の本
+                </label>
+                <label class="px-4 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
+                  <input type="radio" name="filter-owner" value="おうちの本" onchange="renderRegisteredBooks()" class="sr-only">
+                  おうちの本
+                </label>
+              </div>
+            </div>
+            
+            <!-- フィルタ：ジャンル -->
+            <div class="space-y-1.5 flex-grow max-w-xs">
+              <span class="block text-xs font-bold text-brand-700">どんな本？（ジャンル）</span>
+              <select id="filter-genre" onchange="renderRegisteredBooks()" class="w-full bg-white text-xs font-bold p-2.5 rounded-xl border border-brand-200 focus:outline-none">
+                <option value="すべて">🌈 すべてのジャンル</option>
+                <option value="物語">📕 物語 (おはなし)</option>
+                <option value="図鑑・科学">🥦 図鑑・科学</option>
+                <option value="伝記">👑 伝記</option>
+                <option value="絵本">🎨 絵本</option>
+                <option value="その他">⭐️ その他</option>
+              </select>
+            </div>
+            
+            <!-- ソート：日付、評価 -->
+            <div class="space-y-1.5 flex-grow max-w-xs">
+              <span class="block text-xs font-bold text-brand-700">ならびかえ</span>
+              <select id="sort-by" onchange="renderRegisteredBooks()" class="w-full bg-white text-xs font-bold p-2.5 rounded-xl border border-brand-200 focus:outline-none">
+                <option value="date-desc" selected>📅 読んだ日 (新しいじゅん)</option>
+                <option value="date-asc">📅 読んだ日 (古いじゅん)</option>
+                <option value="rating-desc">🏆 お気に入り度 (高いじゅん)</option>
+              </select>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- 本の一覧表示グリッド (カード型) -->
+        <div id="registered-list-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <!-- 読込完了後にJSでカードが追加されます -->
+        </div>
+      </section>
+      
+    </main>
+  </div>
+
+  <!-- 全画面ローディングオーバーレイ (スピナー) -->
+  <div id="loading-overlay" class="fixed inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center z-50 transition-all duration-300 opacity-0 pointer-events-none">
+    <div class="bg-white p-8 rounded-[32px] border-4 border-brand-300 shadow-2xl flex flex-col items-center gap-4 text-center max-w-sm">
+      <div class="relative w-20 h-20">
+        <!-- 外側の回転リング -->
+        <div class="absolute inset-0 rounded-full border-8 border-brand-100"></div>
+        <div class="absolute inset-0 rounded-full border-8 border-brand-400 border-t-transparent animate-spin"></div>
+        <!-- 中央のアイコン -->
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="text-3xl animate-bounce">📚</span>
+        </div>
+      </div>
+      <p class="text-lg font-black text-brand-800 mt-2">スプレッドシートと<br>おはなししているよ...</p>
+      <p class="text-xs text-brand-500">ちょっとまってね</p>
+    </div>
+  </div>
+
+  <!-- トースト通知 -->
+  <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900/90 backdrop-blur text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 transition-all duration-300 translate-y-24 opacity-0 z-50 pointer-events-none">
+    <span class="text-xl">🔔</span>
+    <p id="toast-text" class="font-bold text-sm sm:text-md"></p>
+  </div>
+
+  <!-- Html5Qrcode ライブラリ -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  
+  <script>
+    // 別ウィンドウで開かれたスキャナーモードかどうかの判定
+    const urlParams = new URLSearchParams(window.location.search);
+    const isScannerMode = urlParams.get('mode') === 'scanner';
+    let webAppUrl = ''; // GASで実行された場合に自動インジェクションされます
+
+    // 統合データベースドライバー
+    const dbDriver = {
+      getGasUrl: function() {
+        if (webAppUrl && webAppUrl.trim() !== '') {
+          return webAppUrl;
+        }
+        return safeStorage.getItem('yomuyomu_gas_url') || '';
+      },
+      getBooks: function(successCb, failureCb) {
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(successCb)
+            .withFailureHandler(failureCb)
+            .getBooks();
+          return;
+        }
+        const url = this.getGasUrl();
+        if (!url) {
+          showSettingsModal(true);
+          failureCb(new Error("GAS URL not set"));
+          return;
+        }
+        fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=getBooks', {
+          method: 'GET',
+          mode: 'cors'
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("GET failed");
+          return response.json();
+        })
+        .then(data => successCb(data))
+        .catch(err => failureCb(err));
+      },
+      addBooks: function(booksPayload, successCb, failureCb) {
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(successCb)
+            .withFailureHandler(failureCb)
+            .addBooks(booksPayload);
+          return;
+        }
+        const url = this.getGasUrl();
+        if (!url) {
+          showSettingsModal(true);
+          failureCb(new Error("GAS URL not set"));
+          return;
+        }
+        fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=addBooks', {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'text/plain'
+          },
+          body: JSON.stringify(booksPayload)
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("POST failed");
+          return response.json();
+        })
+        .then(res => successCb(res))
+        .catch(err => failureCb(err));
+      }
+    };
+
+    // --- PC/iPhoneローカルテスト用の疑似データベース(LocalStorage)設定 ---
+    let isLocalStorageAvailable = false;
+    const memoryStorage = {};
+    try {
+      const testKey = '__storage_test__';
+      window.localStorage.setItem(testKey, testKey);
+      window.localStorage.removeItem(testKey);
+      isLocalStorageAvailable = true;
+    } catch (e) {
+      console.warn("LocalStorage is not available. In-memory storage will be used.");
+    }
+
+    const safeStorage = {
+      getItem: function(key) {
+        if (isLocalStorageAvailable) {
+          try {
+            return window.localStorage.getItem(key);
+          } catch (e) {}
+        }
+        return memoryStorage[key] || null;
+      },
+      setItem: function(key, value) {
+        if (isLocalStorageAvailable) {
+          try {
+            window.localStorage.setItem(key, value);
+            return;
+          } catch (e) {}
+        }
+        memoryStorage[key] = String(value);
+      }
+    };
+
+    // ホスト名にgoogleが含まれる場合はGAS環境と判定
+    const isGAS = window.location.hostname.indexOf('google') !== -1;
+
+    if (!isGAS && typeof google === 'undefined') {
+      console.warn("Running in local mock mode (google.script.run is not available).");
+      
+      const MOCK_DB_KEY = 'yomuyomu_mock_db';
+      // 初期モックデータの作成
+      if (!safeStorage.getItem(MOCK_DB_KEY)) {
+        const initialMockData = [
+          {
+            id: "id_mock_1",
+            date: "2026/06/28 12:00:00",
+            isbn: "9784041012345",
+            title: "モモ",
+            author: "ミヒャエル・エンデ",
+            coverUrl: "",
+            ownerType: "図書館で借りた本",
+            genre: "物語",
+            comment: "時間をぬすんだ「時間どろぼう」に立ち向かう女の子のお話。とてもわくわくした！",
+            rating: 5
+          },
+          {
+            id: "id_mock_2",
+            date: "2026/06/27 15:30:00",
+            isbn: "9784834000825",
+            title: "ぐりとぐら",
+            author: "なかがわ りえこ, おおむら ゆりこ",
+            coverUrl: "",
+            ownerType: "おうちの本",
+            genre: "絵本",
+            comment: "おおきなカステラをつくるお話。みんなでおいしそうにたべるところがすき。",
+            rating: 4
+          }
+        ];
+        safeStorage.setItem(MOCK_DB_KEY, JSON.stringify(initialMockData));
+      }
+
+      // google.script.runの挙動をモック
+      window.google = {
+        script: {
+          run: {
+            withSuccessHandler: function(successCb) {
+              return {
+                withFailureHandler: function(failureCb) {
+                  return {
+                    getBooks: function() {
+                      setTimeout(() => {
+                        try {
+                          const data = JSON.parse(safeStorage.getItem(MOCK_DB_KEY) || '[]');
+                          successCb(data);
+                        } catch (e) {
+                          failureCb(e);
+                        }
+                      }, 500);
+                    },
+                    addBooks: function(newBooks) {
+                      setTimeout(() => {
+                        try {
+                          const data = JSON.parse(safeStorage.getItem(MOCK_DB_KEY) || '[]');
+                          const now = new Date();
+                          const timestamp = now.getFullYear() + "/" + 
+                            String(now.getMonth() + 1).padStart(2, '0') + "/" + 
+                            String(now.getDate()).padStart(2, '0') + " " + 
+                            String(now.getHours()).padStart(2, '0') + ":" + 
+                            String(now.getMinutes()).padStart(2, '0') + ":" + 
+                            String(now.getSeconds()).padStart(2, '0');
+                            
+                          const saved = newBooks.map(b => {
+                            const id = "id_mock_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+                            const bookDate = b.date ? b.date.replace(/-/g, "/") + " 00:00:00" : timestamp;
+                            return {
+                              id: id,
+                              date: bookDate,
+                              isbn: b.isbn || "",
+                              title: b.title || "（タイトルなし）",
+                              author: b.author || "（著者不明）",
+                              coverUrl: b.coverUrl || "",
+                              ownerType: b.ownerType || "図書館で借りた本",
+                              genre: b.genre || "その他",
+                              comment: b.comment || "",
+                              rating: b.rating || 3
+                            };
+                          });
+                          
+                          // 新しい本を配列の先頭に追加
+                          const updated = [...saved, ...data];
+                          safeStorage.setItem(MOCK_DB_KEY, JSON.stringify(updated));
+                          successCb({ success: true, count: newBooks.length });
+                        } catch (e) {
+                          failureCb(e);
+                        }
+                      }, 800);
+                    }
+                  };
+                }
+              };
+            }
+          }
+        }
+      };
+    }
+
+    // グローバル状態
+    let tempBooks = [];          // スキャン済み一時リスト
+    let allRegisteredBooks = []; // DBから読み込んだ登録済みの本
+    let audioCtx = null;         // iOS用AudioContext
+    let html5QrCode = null;      // カメラオブジェクト
+    let isCameraRunning = false;  // カメラ稼働中フラグ
+    let lastScannedIsbn = "";    // 直前スキャンISBN (重複防止)
+    let lastScannedTime = 0;     // 直前スキャン時間 (ミリ秒)
+
+    // ================= アプリ初期化 =================
+    window.addEventListener('DOMContentLoaded', () => {
+      if (isScannerMode) {
+        // メインアプリ画面を非表示にして、スキャナー画面を表示
+        document.getElementById('main-app-container').classList.add('hidden');
+        document.getElementById('scanner-only-container').classList.remove('hidden');
+        return; // メインアプリのロードはスキップ
+      }
+
+      // 本日の日付を手動登録の初期値に設定
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('manual-date').value = today;
+      
+      // 手動登録用のスター評価初期化
+      renderManualStars(5);
+      
+      // 登録された本をロード
+      fetchRegisteredBooks();
+
+      // 別ウィンドウのカメラからのデータ受信リスナー
+      window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'isbn_scanned') {
+          const isbn = event.data.isbn;
+          addTempBookPlaceholder(isbn);
+          showToast("別画面でバーコードを検知したよ！");
+        }
+      });
+    });
+
+    // ================= 別ウィンドウカメラ起動 (iOS/iPadOS対策) =================
+    function openScannerWindow() {
+      // 音声初期化と呼び出しテスト
+      initAudio();
+      playBeep();
+      
+      const url = dbDriver.getGasUrl();
+      if (!url) {
+        showSettingsModal(true);
+        return;
+      }
+      const scanUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + 'mode=scanner';
+      window.open(scanUrl, '_blank');
+    }
+
+    // ================= 設定管理モーダル制御 =================
+    function showSettingsModal(show) {
+      const modal = document.getElementById('settings-modal');
+      const input = document.getElementById('settings-gas-url-input');
+      
+      if (show) {
+        input.value = dbDriver.getGasUrl();
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+      } else {
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function saveGasUrlSettings() {
+      const input = document.getElementById('settings-gas-url-input');
+      const url = input.value.trim();
+      
+      if (url === "") {
+        showToast("URLを入力してください");
+        return;
+      }
+      
+      if (url.indexOf("https://script.google.com/") !== 0) {
+        showToast("有効なGASウェブアプリのURLではありません");
+        return;
+      }
+      
+      safeStorage.setItem('yomuyomu_gas_url', url);
+      showToast("GASウェブアプリのURLを保存したよ！🎉");
+      showSettingsModal(false);
+      
+      // リロードしてデータを再読み込み
+      showLoading(true);
+      fetchRegisteredBooks();
+    }
+
+    // ================= スキャナー専用画面用の処理 =================
+    let scannerQrCode = null;
+    let isScannerCameraRunning = false;
+
+    async function startScannerModeCamera() {
+      const startBtn = document.getElementById('scanner-start-btn');
+      const readerDiv = document.getElementById('scanner-reader');
+      
+      if (isScannerCameraRunning) {
+        if (scannerQrCode) {
+          try {
+            await scannerQrCode.stop();
+          } catch(e) {}
+          scannerQrCode = null;
+        }
+        isScannerCameraRunning = false;
+        startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
+        startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> カメラをスタート！';
+        return;
+      }
+      
+      try {
+        isScannerCameraRunning = true;
+        startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-rose-500 hover:bg-rose-600 text-white shadow-lg flex items-center justify-center gap-2";
+        startBtn.innerHTML = '<i class="fa-solid fa-circle-stop"></i> カメラをとめる';
+        
+        scannerQrCode = new Html5Qrcode("scanner-reader");
+        
+        const config = {
+          fps: 15,
+          qrbox: function(width, height) {
+            const minEdge = Math.min(width, height);
+            const boxWidth = Math.floor(minEdge * 0.85);
+            const boxHeight = Math.floor(boxWidth * 0.45);
+            return { width: boxWidth, height: boxHeight };
+          },
+          formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
+        };
+
+        // playsinlineの強制適用 (iOS/iPad Safari対策)
+        const observer = new MutationObserver((mutations) => {
+          const videoEl = readerDiv.querySelector('video');
+          if (videoEl) {
+            videoEl.setAttribute('playsinline', 'true');
+            videoEl.setAttribute('webkit-playsinline', 'true');
+            videoEl.setAttribute('autoplay', 'true');
+            videoEl.setAttribute('muted', 'true');
+            videoEl.play().catch(err => console.log("Video play intercept failed:", err));
+            observer.disconnect();
+          }
+        });
+        observer.observe(readerDiv, { childList: true, subtree: true });
+
+        try {
+          // iOS Safari向けに environment で起動
+          await scannerQrCode.start(
+            { facingMode: "environment" },
+            config,
+            onScannerScanSuccess,
+            (errorMessage) => {}
+          );
+        } catch (cameraInitErr) {
+          console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
+          await scannerQrCode.start(
+            { video: true },
+            config,
+            onScannerScanSuccess,
+            (errorMessage) => {}
+          );
+        }
+        
+      } catch (e) {
+        console.error("Scanner mode camera error:", e);
+        alert("カメラをスタートできませんでした。カメラへのアクセスを許可してね。");
+        isScannerCameraRunning = false;
+        startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
+        startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> カメラをスタート！';
+      }
+    }
+
+    function onScannerScanSuccess(decodedText, decodedResult) {
+      const isbn = decodedText.trim();
+      if (!/^\d{10}$|^\d{13}$/.test(isbn)) return;
+      
+      const now = Date.now();
+      if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) return;
+      
+      lastScannedIsbn = isbn;
+      lastScannedTime = now;
+      
+      playBeep();
+      
+      // 親ウィンドウに結果を送信
+      if (window.opener) {
+        window.opener.postMessage({ type: 'isbn_scanned', isbn: isbn }, '*');
+        
+        // 画面を緑に光らせて通知
+        const readerDiv = document.getElementById('scanner-reader');
+        readerDiv.style.borderColor = '#10b981';
+        setTimeout(() => {
+          readerDiv.style.borderColor = '#475569'; // border-slate-600相当
+        }, 1000);
+      } else {
+        alert("メイン画面（親ウィンドウ）が見つかりません。連携できませんでした。");
+      }
+    }
+
+    // ================= 音声・ビープ音制御 =================
+    // iPad Safari等の音声開始ブロック解除用
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // ピピッというビープ音の再生
+    function playBeep() {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        
+        const now = audioCtx.currentTime;
+        
+        // 1音目 (ピッ)
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(1000, now);
+        gain1.gain.setValueAtTime(0.08, now);
+        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc1.start(now);
+        osc1.stop(now + 0.08);
+        
+        // 2音目 (ピピッの後半部分)
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1300, now + 0.09);
+        gain2.gain.setValueAtTime(0.08, now + 0.09);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc2.start(now + 0.09);
+        osc2.stop(now + 0.18);
+        
+      } catch (e) {
+        console.warn("ビープ音の再生に失敗しました:", e);
+      }
+    }
+
+    // ================= トースト & ローディング制御 =================
+    function showToast(message) {
+      const toast = document.getElementById('toast-container');
+      const toastText = document.getElementById('toast-text');
+      toastText.textContent = message;
+      
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3000);
+    }
+
+    function showLoading(show) {
+      const overlay = document.getElementById('loading-overlay');
+      if (show) {
+        overlay.classList.remove('opacity-0', 'pointer-events-none');
+        overlay.classList.add('opacity-100');
+      } else {
+        overlay.classList.remove('opacity-100');
+        overlay.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    // ================= タブ切り替え =================
+    function switchTab(tabId) {
+      document.getElementById('tab-scan').classList.add('hidden');
+      document.getElementById('tab-manual').classList.add('hidden');
+      document.getElementById('tab-gallery').classList.add('hidden');
+      
+      document.getElementById(tabId).classList.remove('hidden');
+      
+      const tabNames = ['scan', 'manual', 'gallery'];
+      tabNames.forEach(t => {
+        const btn = document.getElementById('nav-btn-' + t);
+        if (('tab-' + t) === tabId) {
+          btn.className = "flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-black text-lg transition-all transform scale-102 bg-brand-400 text-white shadow-lg border border-brand-300";
+        } else {
+          btn.className = "flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-bold text-lg transition-all text-brand-700 bg-brand-50/50 hover:bg-brand-100/50 border border-brand-200/60";
+        }
+      });
+      
+      // カメラ作動中かつスキャンタブ以外に移動した場合はカメラ停止
+      if (tabId !== 'tab-scan' && isCameraRunning) {
+        stopCamera();
+      }
+      
+      // 一覧タブを開いたときは最新情報に更新
+      if (tabId === 'tab-gallery') {
+        fetchRegisteredBooks();
+      }
+    }
+
+    // ================= カメラ・バーコード連続スキャン =================
+    async function toggleCamera() {
+      initAudio(); // ユーザー操作契機でオーディオ有効化
+      
+      const cameraBtn = document.getElementById('camera-toggle-btn');
+      const cameraBtnText = document.getElementById('camera-btn-text');
+      const cameraIcon = document.getElementById('camera-btn-icon');
+      const readerDiv = document.getElementById('reader');
+      
+      if (isCameraRunning) {
+        await stopCamera();
+      } else {
+        try {
+          isCameraRunning = true;
+          readerDiv.classList.remove('hidden');
+          
+          cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-rose-500 hover:bg-rose-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
+          cameraBtnText.textContent = "カメラをとめる";
+          cameraIcon.className = "fa-solid fa-circle-stop text-xl animate-pulse";
+          
+          html5QrCode = new Html5Qrcode("reader");
+          
+          const config = {
+            fps: 15,
+            qrbox: function(width, height) {
+              // 1Dバーコード用（横長）の最適サイズ
+              const minEdge = Math.min(width, height);
+              const boxWidth = Math.floor(minEdge * 0.85);
+              const boxHeight = Math.floor(boxWidth * 0.45);
+              return { width: boxWidth, height: boxHeight };
+            },
+            // EAN-13 (ISBN-13) のみを指定してパフォーマンスを向上
+            formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
+          };
+          
+          // playsinlineの強制適用 (iOS/iPad Safari対策)
+          const observer = new MutationObserver((mutations) => {
+            const videoEl = readerDiv.querySelector('video');
+            if (videoEl) {
+              videoEl.setAttribute('playsinline', 'true');
+              videoEl.setAttribute('webkit-playsinline', 'true');
+              videoEl.setAttribute('autoplay', 'true');
+              videoEl.setAttribute('muted', 'true');
+              videoEl.play().catch(err => console.log("Video play intercept failed:", err));
+              observer.disconnect();
+            }
+          });
+          observer.observe(readerDiv, { childList: true, subtree: true });
+
+          try {
+            // iOS Safariでは「exact(絶対一致)」を外し、環境優先にする方が成功率が上がります
+            await html5QrCode.start(
+              { facingMode: "environment" },
+              config,
+              onScanSuccess,
+              (errorMessage) => {}
+            );
+          } catch (cameraInitErr) {
+            console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
+            // 背面指定でエラーが出た場合は、デバイスが利用可能な任意のカメラ（video: true）で強制起動を試みます
+            await html5QrCode.start(
+              { video: true },
+              config,
+              onScanSuccess,
+              (errorMessage) => {}
+            );
+          }
+          
+        } catch (e) {
+          console.error("Camera error:", e);
+          showToast("カメラをスタートできませんでした。カメラへのアクセスを許可してね。");
+          isCameraRunning = false;
+          readerDiv.classList.add('hidden');
+          cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
+          cameraBtnText.textContent = "カメラをスタート！";
+          cameraIcon.className = "fa-solid fa-camera-retro text-xl";
+        }
+      }
+    }
+
+    async function stopCamera() {
+      if (html5QrCode && isCameraRunning) {
+        try {
+          await html5QrCode.stop();
+        } catch (e) {
+          console.error("Stop camera error:", e);
+        }
+        html5QrCode = null;
+      }
+      isCameraRunning = false;
+      
+      const cameraBtn = document.getElementById('camera-toggle-btn');
+      const cameraBtnText = document.getElementById('camera-btn-text');
+      const cameraIcon = document.getElementById('camera-btn-icon');
+      const readerDiv = document.getElementById('reader');
+      
+      readerDiv.classList.add('hidden');
+      cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
+      cameraBtnText.textContent = "カメラをスタート！";
+      cameraIcon.className = "fa-solid fa-camera-retro text-xl";
+    }
+
+    // バーコード検知時の処理
+    function onScanSuccess(decodedText, decodedResult) {
+      const isbn = decodedText.trim();
+      
+      // ISBNの簡易バリデーション (数字10桁または13桁)
+      if (!/^\d{10}$|^\d{13}$/.test(isbn)) {
+        return;
+      }
+      
+      const now = Date.now();
+      // 同一ISBNの重複読み取り防止（5秒間スキップ）
+      if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
+        return;
+      }
+      
+      lastScannedIsbn = isbn;
+      lastScannedTime = now;
+      
+      // 成功通知
+      playBeep();
+      showToast("バーコードをみつけたよ！本の名前を調べています...");
+      
+      // 一時リストに追加 (ローディングプレースホルダー)
+      addTempBookPlaceholder(isbn);
+    }
+
+    // ================= Google Books API 連携 =================
+    async function fetchBookInfo(isbn) {
+      const url = 'https://www.googleapis.com/books/v1/volumes?q=isbn=' + isbn;
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Network response was not ok");
+        
+        const data = await response.json();
+        if (data.totalItems > 0 && data.items && data.items[0]) {
+          const volumeInfo = data.items[0].volumeInfo;
+          let coverUrl = "";
+          if (volumeInfo.imageLinks) {
+            coverUrl = volumeInfo.imageLinks.thumbnail || volumeInfo.imageLinks.smallThumbnail || "";
+            // SSL化
+            if (coverUrl.startsWith("http://")) {
+              coverUrl = coverUrl.replace("http://", "https://");
+            }
+          }
+          return {
+            title: volumeInfo.title || "",
+            author: volumeInfo.authors ? volumeInfo.authors.join(", ") : "",
+            coverUrl: coverUrl
+          };
+        }
+      } catch (e) {
+        console.error("Books API error:", e);
+      }
+      return { title: "", author: "", coverUrl: "" };
+    }
+
+    // ================= 一時リスト管理 & 編集 =================
+    function addTempBookPlaceholder(isbn) {
+      const tempId = 'temp_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      
+      const newBook = {
+        tempId: tempId,
+        isbn: isbn,
+        title: "しらべているよ...",
+        author: "しらべているよ...",
+        coverUrl: "",
+        ownerType: "図書館で借りた本", // 初期値: 図書館
+        genre: "物語",                // 初期値: 物語
+        comment: "",
+        rating: 5,                   // 初期値: 5
+        isLoading: true
+      };
+      
+      // 先頭に追加
+      tempBooks.unshift(newBook);
+      
+      // 一時リストエリアの初期テキスト（空状態）を消去する準備として、
+      // 最初の要素追加時のみ親コンテナの中身を空にする
+      const container = document.getElementById('temp-list-container');
+      if (tempBooks.length === 1) {
+        container.innerHTML = '';
+      }
+      
+      // DOMに新規カードを追加 (一から全部再描画せず、フォーカス維持のために個別追加)
+      container.insertAdjacentHTML('afterbegin', renderSingleTempBookHTML(newBook));
+      updateTempCountBadge();
+      
+      // 非同期で書籍情報を取得
+      fetchBookInfo(isbn).then(info => {
+        const book = tempBooks.find(b => b.tempId === tempId);
+        if (book) {
+          book.title = info.title || ('バーコードの本 (' + isbn + ')');
+          book.author = info.author || "（著者不明）";
+          book.coverUrl = info.coverUrl;
+          book.isLoading = false;
+          
+          // 該当カードのDOMのみ書き換える
+          updateTempBookCardDOM(book);
+        }
+      });
+    }
+
+    // ジャンルの色定義
+    function getGenreColor(genre) {
+      switch (genre) {
+        case '物語': return { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-300', fill: '#f43f5e' };
+        case '図鑑・科学': return { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300', fill: '#10b981' };
+        case '伝記': return { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-300', fill: '#6366f1' };
+        case '絵本': return { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300', fill: '#a855f7' };
+        default: return { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300', fill: '#f59e0b' };
+      }
+    }
+
+    // 本のカバーHTMLの取得
+    function getBookCoverHTML(coverUrl, title, genre) {
+      if (coverUrl && coverUrl.trim() !== "") {
+        return '<img src="' + coverUrl + '" alt="' + title + '" class="w-full h-full object-cover rounded-xl shadow border border-gray-100" onerror="this.src=\'\'; this.onerror=null; this.parentNode.innerHTML=getFallbackCoverHTML(\'' + (title || '無題').replace(/'/g, "\\'") + '\', \'' + genre + '\')">';
+      }
+      return getFallbackCoverHTML(title, genre);
+    }
+
+    // カバー画像が無い場合のフォールバックデザイン (ジャンル別色分け)
+    function getFallbackCoverHTML(title, genre) {
+      const colors = getGenreColor(genre);
+      return [
+        '<div class="w-full h-full ' + colors.bg + ' ' + colors.border + ' border-2 rounded-xl flex flex-col items-center justify-between p-3 shadow relative overflow-hidden">',
+        '  <!-- 飾り背表紙 -->',
+        '  <div class="absolute left-0 top-0 bottom-0 w-2.5 bg-black opacity-10"></div>',
+        '  <div class="w-full flex justify-end">',
+        '    <span class="text-[9px] font-black px-1.5 py-0.5 rounded-full ' + colors.bg + ' ' + colors.text + ' border border-current">' + genre + '</span>',
+        '  </div>',
+        '  <div class="my-auto text-center px-1">',
+        '    <i class="fa-solid fa-book text-3xl mb-1" style="color: ' + colors.fill + '"></i>',
+        '    <p class="text-xs font-black text-gray-800 line-clamp-3 leading-snug">' + (title || '無題') + '</p>',
+        '  </div>',
+        '  <div class="w-full text-center">',
+        '    <span class="text-[9px] text-gray-400 font-bold tracking-wider">よむよむ</span>',
+        '  </div>',
+        '</div>'
+      ].join('\n');
+    }
+
+    // スターのHTMLレンダリング
+    function renderStarsHTML(tempId, rating) {
+      let stars = '';
+      for (let i = 1; i <= 5; i++) {
+        const isGold = i <= rating;
+        const colorClass = isGold ? 'text-amber-400 scale-110' : 'text-gray-300';
+        stars += '<button type="button" onclick="setTempBookRating(\'' + tempId + '\', ' + i + ')" class="text-3xl focus:outline-none transition-transform active:scale-125 px-1">' +
+                 '<i class="fa-solid fa-star ' + colorClass + '"></i>' +
+                 '</button>';
+      }
+      return stars;
+    }
+
+    // 単一一時リストカードのHTML
+    function renderSingleTempBookHTML(book) {
+      const colors = getGenreColor(book.genre);
+      const isLoading = book.isLoading;
+      const opacityClass = isLoading ? 'opacity-70' : '';
+      
+      return [
+        '<div id="temp-card-' + book.tempId + '" class="bg-white rounded-[24px] p-5 shadow border-2 border-brand-100/80 flex flex-col md:flex-row gap-5 relative transition-all duration-300 ' + opacityClass + '">',
+        '  <!-- ローディング中スピナー -->',
+        '  <div class="card-loader absolute inset-0 bg-white/60 rounded-[24px] flex items-center justify-center z-10 ' + (isLoading ? '' : 'hidden') + '">',
+        '    <i class="fa-solid fa-circle-notch animate-spin text-3xl text-brand-500"></i>',
+        '  </div>',
+        '  ',
+        '  <!-- 削除ボタン (タップ領域拡大) -->',
+        '  <button type="button" onclick="deleteTempBook(\'' + book.tempId + '\')" class="absolute -top-3 -right-3 w-10 h-10 bg-rose-500 hover:bg-rose-600 active:scale-90 text-white rounded-full flex items-center justify-center shadow-lg transition-transform focus:outline-none z-20">',
+        '    <i class="fa-solid fa-trash-can text-lg"></i>',
+        '  </button>',
+        '',
+        '  <!-- 本のカバー -->',
+        '  <div class="cover-container w-24 h-32 mx-auto md:mx-0 flex-shrink-0">',
+        '    ' + getBookCoverHTML(book.coverUrl, book.title, book.genre),
+        '  </div>',
+        '',
+        '  <!-- 入力項目フォーム -->',
+        '  <div class="flex-grow flex flex-col justify-between gap-3">',
+        '    ',
+        '    <!-- タイトルと著者 (インライン編集可能) -->',
+        '    <div>',
+        '      <input type="text" value="' + book.title + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'title\', this.value)" class="title-input font-black text-lg text-gray-800 w-full border-b-2 border-dashed border-brand-200 focus:border-brand-500 focus:outline-none bg-transparent py-1 rounded" placeholder="本のなまえを入力してね" ' + (isLoading ? 'disabled' : '') + '>',
+        '      <input type="text" value="' + book.author + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'author\', this.value)" class="author-input text-sm text-gray-500 w-full border-b-2 border-dashed border-brand-100 focus:border-brand-400 focus:outline-none bg-transparent py-1 mt-1 rounded" placeholder="かいた人のなまえ" ' + (isLoading ? 'disabled' : '') + '>',
+        '    </div>',
+        '',
+        '    <!-- 所有とジャンル -->',
+        '    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">',
+        '      <!-- 所有区分トグルボタン -->',
+        '      <div>',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">どこにある本？</span>',
+        '        <div class="flex bg-brand-50/50 p-0.5 rounded-lg border border-brand-200">',
+        '          <button type="button" id="owner-lib-' + book.tempId + '" onclick="setTempBookOwner(\'' + book.tempId + '\', \'図書館で借りた本\')" class="flex-1 text-xs font-black py-1.5 rounded transition-all ' + (book.ownerType === '図書館で借りた本' ? 'bg-brand-400 text-white shadow-sm' : 'text-brand-700 hover:bg-brand-100/30') + '">図書館</button>',
+        '          <button type="button" id="owner-home-' + book.tempId + '" onclick="setTempBookOwner(\'' + book.tempId + '\', \'おうちの本\')" class="flex-1 text-xs font-black py-1.5 rounded transition-all ' + (book.ownerType === 'おうちの本' ? 'bg-brand-400 text-white shadow-sm' : 'text-brand-700 hover:bg-brand-100/30') + '">おうち</button>',
+        '        </div>',
+        '      </div>',
+        '      <div>',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">どんな本？</span>',
+        '        <select onchange="setTempBookGenre(\'' + book.tempId + '\', this.value)" class="w-full bg-white text-xs font-bold p-1.5 rounded-lg border border-brand-200 focus:border-brand-500 focus:outline-none">',
+        '          <option value="物語" ' + (book.genre === '物語' ? 'selected' : '') + '>📕 物語</option>',
+        '          <option value="図鑑・科学" ' + (book.genre === '図鑑・科学' ? 'selected' : '') + '>🥦 図鑑・科学</option>',
+        '          <option value="伝記" ' + (book.genre === '伝記' ? 'selected' : '') + '>👑 伝記</option>',
+        '          <option value="絵本" ' + (book.genre === '絵本' ? 'selected' : '') + '>🎨 絵本</option>',
+        '          <option value="その他" ' + (book.genre === 'その他' ? 'selected' : '') + '>⭐️ その他</option>',
+        '        </select>',
+        '      </div>',
+        '    </div>',
+        '',
+        '    <!-- 星評価とひとこと -->',
+        '    <div class="flex flex-wrap items-center gap-3 justify-between">',
+        '      <div>',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">お気に入り度</span>',
+        '        <div class="stars-container flex items-center bg-brand-50/50 px-2 py-0.5 rounded-xl border border-brand-200">',
+        '          ' + renderStarsHTML(book.tempId, book.rating),
+        '        </div>',
+        '      </div>',
+        '      <div class="flex-grow min-w-[180px]">',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">感想メモ</span>',
+        '        <input type="text" value="' + book.comment + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'comment\', this.value)" class="w-full bg-white text-xs text-gray-700 p-2 rounded-xl border border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="おもしろかったことなど">',
+        '      </div>',
+        '    </div>',
+        '  </div>',
+        '</div>'
+      ].join('\n');
+    }
+
+    // 非同期情報フェッチ完了時のDOM更新
+    function updateTempBookCardDOM(book) {
+      const cardEl = document.getElementById('temp-card-' + book.tempId);
+      if (!cardEl) return;
+      
+      // カバーの更新
+      const coverContainer = cardEl.querySelector('.cover-container');
+      if (coverContainer) {
+        coverContainer.innerHTML = getBookCoverHTML(book.coverUrl, book.title, book.genre);
+      }
+      
+      // 入力値の更新
+      const titleInput = cardEl.querySelector('.title-input');
+      if (titleInput) {
+        titleInput.value = book.title;
+        titleInput.disabled = false;
+      }
+      const authorInput = cardEl.querySelector('.author-input');
+      if (authorInput) {
+        authorInput.value = book.author;
+        authorInput.disabled = false;
+      }
+      
+      // ローディングの非表示
+      cardEl.classList.remove('opacity-70');
+      const loader = cardEl.querySelector('.card-loader');
+      if (loader) {
+        loader.classList.add('hidden');
+      }
+    }
+
+    // フィールド更新ハンドラー
+    function updateTempBookField(tempId, field, value) {
+      const book = tempBooks.find(b => b.tempId === tempId);
+      if (book) {
+        book[field] = value;
+      }
+    }
+
+    // 所有者選択ハンドラー
+    function setTempBookOwner(tempId, ownerType) {
+      const book = tempBooks.find(b => b.tempId === tempId);
+      if (book) {
+        book.ownerType = ownerType;
+        
+        const libBtn = document.getElementById('owner-lib-' + tempId);
+        const homeBtn = document.getElementById('owner-home-' + tempId);
+        
+        if (libBtn && homeBtn) {
+          if (ownerType === '図書館で借りた本') {
+            libBtn.className = "flex-1 text-xs font-black py-1.5 rounded transition-all bg-brand-400 text-white shadow-sm";
+            homeBtn.className = "flex-1 text-xs font-black py-1.5 rounded transition-all text-brand-700 hover:bg-brand-100/30";
+          } else {
+            homeBtn.className = "flex-1 text-xs font-black py-1.5 rounded transition-all bg-brand-400 text-white shadow-sm";
+            libBtn.className = "flex-1 text-xs font-black py-1.5 rounded transition-all text-brand-700 hover:bg-brand-100/30";
+          }
+        }
+      }
+    }
+
+    // ジャンル選択ハンドラー (フォールバックカバーが依存)
+    function setTempBookGenre(tempId, genre) {
+      const book = tempBooks.find(b => b.tempId === tempId);
+      if (book) {
+        book.genre = genre;
+        if (!book.coverUrl) {
+          const cardEl = document.getElementById('temp-card-' + tempId);
+          if (cardEl) {
+            const coverContainer = cardEl.querySelector('.cover-container');
+            if (coverContainer) {
+              coverContainer.innerHTML = getBookCoverHTML(book.coverUrl, book.title, book.genre);
+            }
+          }
+        }
+      }
+    }
+
+    // 星変更ハンドラー
+    function setTempBookRating(tempId, rating) {
+      const book = tempBooks.find(b => b.tempId === tempId);
+      if (book) {
+        book.rating = rating;
+        const cardEl = document.getElementById('temp-card-' + tempId);
+        if (cardEl) {
+          const starsContainer = cardEl.querySelector('.stars-container');
+          if (starsContainer) {
+            starsContainer.innerHTML = renderStarsHTML(tempId, rating);
+          }
+        }
+      }
+    }
+
+    // リストの個別削除
+    function deleteTempBook(tempId) {
+      tempBooks = tempBooks.filter(b => b.tempId !== tempId);
+      const cardEl = document.getElementById('temp-card-' + tempId);
+      if (cardEl) {
+        cardEl.remove();
+      }
+      
+      updateTempCountBadge();
+      
+      if (tempBooks.length === 0) {
+        renderTempListEmpty();
+      }
+    }
+
+    // 一時リスト空状態レンダリング
+    function renderTempListEmpty() {
+      const container = document.getElementById('temp-list-container');
+      container.innerHTML = [
+        '<div class="text-center py-16 px-4 border-4 border-dashed border-brand-200 rounded-3xl bg-brand-50/20">',
+        '  <i class="fa-solid fa-camera-retro text-5xl text-brand-300 mb-4 animate-bounce"></i>',
+        '  <p class="text-lg font-black text-brand-700">スキャンした本がここにでるよ！</p>',
+        '  <p class="text-xs text-brand-500 mt-2">上の「カメラをスタート！」ボタンをおして、バーコードをうつしてね。</p>',
+        '</div>'
+      ].join('\n');
+    }
+
+    // 一時リストのクリア
+    function clearTempListConfirm() {
+      if (tempBooks.length === 0) return;
+      if (confirm("一時リストをからにしますか？")) {
+        tempBooks = [];
+        renderTempListEmpty();
+        updateTempCountBadge();
+      }
+    }
+
+    // 一括登録バッジ＆ボタンの表示制御
+    function updateTempCountBadge() {
+      const badge = document.getElementById('temp-count-badge');
+      const count = tempBooks.length;
+      if (badge) {
+        badge.textContent = count;
+      }
+      const container = document.getElementById('batch-submit-btn-container');
+      if (container) {
+        if (count > 0) {
+          container.classList.remove('hidden');
+        } else {
+          container.classList.add('hidden');
+        }
+      }
+    }
+
+    // スキャン済み一時リストの一括登録処理
+    function submitBatchBooks() {
+      if (tempBooks.length === 0) return;
+      
+      // 未入力（タイトル無し）のチェック
+      const invalid = tempBooks.find(b => !b.title || b.title.trim() === "" || b.title === "しらべているよ...");
+      if (invalid) {
+        showToast("本のなまえを入力していないものがあるよ。書いてね！");
+        return;
+      }
+      
+      showLoading(true);
+      
+      // GAS送信用の配列に変換
+      const booksPayload = tempBooks.map(b => ({
+        isbn: b.isbn,
+        title: b.title,
+        author: b.author,
+        coverUrl: b.coverUrl,
+        ownerType: b.ownerType,
+        genre: b.genre,
+        comment: b.comment,
+        rating: b.rating
+      }));
+      
+      dbDriver.addBooks(booksPayload, function(res) {
+        showLoading(false);
+        if (res.success) {
+          showToast(res.count + '冊の本を新しく登録したよ！🎉');
+          
+          // 一時リストクリア
+          tempBooks = [];
+          renderTempListEmpty();
+          updateTempCountBadge();
+          
+          // 一覧タブへ切り替え & リロード
+          switchTab('tab-gallery');
+        } else {
+          showToast("登録にしっぱいしちゃった。");
+        }
+      }, function(err) {
+        showLoading(false);
+        console.error(err);
+        showToast("データベースとの通信に失敗しました。");
+      });
+    }
+
+    // ================= 手動登録管理 =================
+    // 手動スターのレンダリング
+    function renderManualStars(rating) {
+      const container = document.getElementById('manual-stars-container');
+      let html = '';
+      for (let i = 1; i <= 5; i++) {
+        const isGold = i <= rating;
+        const colorClass = isGold ? 'text-amber-400 scale-110' : 'text-gray-300';
+        html += '<button type="button" onclick="setManualRating(' + i + ')" class="text-3xl focus:outline-none transition-transform active:scale-125 px-1">' +
+                '<i class="fa-solid fa-star ' + colorClass + '"></i>' +
+                '</button>';
+      }
+      container.innerHTML = html;
+      document.getElementById('manual-rating').value = rating;
+    }
+
+    function setManualRating(rating) {
+      renderManualStars(rating);
+    }
+
+    // 手動フォーム送信処理
+    function submitManualForm(event) {
+      event.preventDefault();
+      
+      const title = document.getElementById('manual-title').value.trim();
+      const author = document.getElementById('manual-author').value.trim();
+      const genre = document.getElementById('manual-genre').value;
+      const ownerType = document.querySelector('[name="manual-owner"]:checked').value;
+      const dateVal = document.getElementById('manual-date').value;
+      const rating = Number(document.getElementById('manual-rating').value);
+      const comment = document.getElementById('manual-comment').value.trim();
+      
+      if (!title) {
+        showToast("本の名前を書いてね！");
+        return;
+      }
+      
+      showLoading(true);
+      
+      const singlePayload = [{
+        isbn: "",
+        title: title,
+        author: author,
+        coverUrl: "", // 手動は表紙無し
+        ownerType: ownerType,
+        genre: genre,
+        date: dateVal, // カスタム登録日
+        comment: comment,
+        rating: rating
+      }];
+      
+      dbDriver.addBooks(singlePayload, function(res) {
+        showLoading(false);
+        if (res.success) {
+          showToast("本を1冊登録したよ！📖");
+          
+          // フォームリセット
+          document.getElementById('manual-title').value = "";
+          document.getElementById('manual-author').value = "";
+          document.getElementById('manual-comment').value = "";
+          const today = new Date().toISOString().split('T')[0];
+          document.getElementById('manual-date').value = today;
+          renderManualStars(5);
+          
+          // 一覧へ
+          switchTab('tab-gallery');
+        } else {
+          showToast("登録にしっぱいしちゃった。");
+        }
+      }, function(err) {
+        showLoading(false);
+        console.error(err);
+        showToast("データベースとの通信に失敗しました。");
+      });
+    }
+
+    // ================= 読書実績ダッシュボード・フィルタ・ソート =================
+    // スプレッドシートからデータを取得
+    function fetchRegisteredBooks() {
+      showLoading(true);
+      dbDriver.getBooks(function(books) {
+        allRegisteredBooks = books;
+        
+        // 読書貯金カウンター更新
+        const counterEl = document.getElementById('dashboard-counter');
+        if (counterEl) {
+          counterEl.textContent = books.length;
+        }
+        
+        // ギャラリーを描画
+        renderRegisteredBooks();
+        showLoading(false);
+      }, function(err) {
+        showLoading(false);
+        console.error(err);
+        showToast("データベースからの読み込みに失敗しました。");
+      });
+    }
+
+    // フィルタ・ソートを適用して登録済み本を描画
+    function renderRegisteredBooks() {
+      const container = document.getElementById('registered-list-container');
+      if (!container) return;
+      
+      // フィルタ値の取得
+      const filterOwner = document.querySelector('[name="filter-owner"]:checked').value;
+      const filterGenre = document.getElementById('filter-genre').value;
+      const sortBy = document.getElementById('sort-by').value;
+      
+      // フィルタリング処理
+      let filtered = allRegisteredBooks.filter(book => {
+        const matchOwner = (filterOwner === 'すべて') || (book.ownerType === filterOwner);
+        const matchGenre = (filterGenre === 'すべて') || (book.genre === filterGenre);
+        return matchOwner && matchGenre;
+      });
+      
+      // ソーティング処理
+      filtered.sort((a, b) => {
+        if (sortBy === 'date-desc') {
+          // 日付の新しい順
+          return new Date(b.date.replace(/\//g, '-')) - new Date(a.date.replace(/\//g, '-'));
+        } else if (sortBy === 'date-asc') {
+          // 日付の古い順
+          return new Date(a.date.replace(/\//g, '-')) - new Date(b.date.replace(/\//g, '-'));
+        } else if (sortBy === 'rating-desc') {
+          // 評価の高い順
+          return b.rating - a.rating;
+        }
+        return 0;
+      });
+      
+      // リスト描画
+      if (filtered.length === 0) {
+        container.innerHTML = [
+          '<div class="col-span-full text-center py-16 px-4 bg-white/60 rounded-3xl border-2 border-dashed border-gray-200">',
+          '  <i class="fa-solid fa-folder-open text-5xl text-gray-300 mb-4 animate-bounce"></i>',
+          '  <p class="text-lg font-black text-gray-500">あてはまる本がないよ</p>',
+          '  <p class="text-xs text-gray-400 mt-2">ほかのしぼりこみをためすか、新しく本を登録してみてね！</p>',
+          '</div>'
+        ].join('\n');
+        return;
+      }
+      
+      let html = '';
+      filtered.forEach(book => {
+        const ownerBadgeColor = book.ownerType === '図書館で借りた本' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700';
+        const ownerLabel = book.ownerType === '図書館で借りた本' ? '図書館' : 'おうち';
+        const colors = getGenreColor(book.genre);
+        
+        // スター表示
+        let starsHTML = '';
+        for (let i = 1; i <= 5; i++) {
+          if (i <= book.rating) {
+            starsHTML += '<i class="fa-solid fa-star text-amber-400 text-sm"></i>';
+          } else {
+            starsHTML += '<i class="fa-regular fa-star text-gray-200 text-sm"></i>';
+          }
+        }
+        
+        // 感想メモ（吹き出し風）
+        const commentHTML = book.comment ? [
+          '<div class="mt-2.5 relative bg-amber-50/70 border border-amber-100 p-2.5 rounded-xl text-xs text-brand-900 leading-snug">',
+          '  <div class="absolute -top-1 w-2.5 h-2.5 bg-amber-50/70 border-t border-l border-amber-100 rotate-45 left-4"></div>',
+          '  <p class="line-clamp-3">💬 ' + book.comment + '</p>',
+          '</div>'
+        ].join('\n') : '';
+        
+        // 日付整形
+        const displayDate = book.date ? book.date.split(' ')[0] : '日付不明';
+        
+        html += [
+          '<div class="bg-white rounded-3xl p-4 shadow border border-gray-100 hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between">',
+          '  <div>',
+          '    <!-- 本のカバー -->',
+          '    <div class="w-full h-36 flex items-center justify-center mb-3">',
+          '      <div class="w-24 h-32">',
+          '        ' + getBookCoverHTML(book.coverUrl, book.title, book.genre),
+          '      </div>',
+          '    </div>',
+          '    ',
+          '    <!-- 区分・ジャンルバッジ -->',
+          '    <div class="flex gap-1.5 mb-1.5 flex-wrap">',
+          '      <span class="text-[9px] font-black px-2 py-0.5 rounded-full ' + ownerBadgeColor + '">' + ownerLabel + '</span>',
+          '      <span class="text-[9px] font-black px-2 py-0.5 rounded-full ' + colors.bg + ' ' + colors.text + '">' + book.genre + '</span>',
+          '    </div>',
+          '    ',
+          '    <!-- タイトルと作者 -->',
+          '    <h3 class="font-black text-sm text-gray-800 line-clamp-2 leading-snug" title="' + book.title + '">' + book.title + '</h3>',
+          '    <p class="text-[11px] text-gray-400 line-clamp-1 mt-0.5">' + (book.author || '（著者不明）') + '</p>',
+          '  </div>',
+          '  ',
+          '  <div class="mt-2">',
+          '    <!-- 星評価 -->',
+          '    <div class="flex items-center gap-0.5">',
+          '      ' + starsHTML,
+          '    </div>',
+          '    ',
+          '    <!-- 感想 -->',
+          '    ' + commentHTML,
+          '    ',
+          '    <!-- 日付・メタ情報 -->',
+          '    <div class="text-[9px] text-gray-300 mt-3 pt-2 border-t border-gray-100 flex justify-between items-center">',
+          '      <span class="font-bold">📅 ' + displayDate + '</span>',
+          '      ' + (book.isbn ? '<span class="font-mono text-gray-300 scale-90">ISBN</span>' : ''),
+          '    </div>',
+          '  </div>',
+          '</div>'
+        ].join('\n');
+      });
+      
+      container.innerHTML = html;
+    }
+
+    // バーコード（ISBN）の手入力検索処理
+    function submitManualIsbn() {
+      const input = document.getElementById('manual-isbn-input');
+      if (!input) return;
+      
+      const isbn = input.value.trim().replace(/[-\s]/g, '');
+      if (!/^\d{10}$|^\d{13}$/.test(isbn)) {
+        showToast("バーコードの数字は10けたか13けたで入れてね！");
+        return;
+      }
+      
+      // 入力欄をクリア
+      input.value = "";
+      
+      // 音声初期化とビープ音
+      initAudio();
+      playBeep();
+      showToast("バーコードをうけつけました。しらべています...");
+      
+      // 一時リストに追加処理を開始
+      addTempBookPlaceholder(isbn);
+    }
+  </script>
+
+  <!-- ================= 設定管理モーダル (GAS URL連携用) ================= -->
+  <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300 opacity-0 pointer-events-none">
+    <div class="bg-white p-6 md:p-8 rounded-[32px] border-4 border-brand-300 shadow-2xl w-full max-w-md mx-4">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
+          <i class="fa-solid fa-gear text-brand-500"></i>
+          システム設定
+        </h3>
+        <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="bg-brand-50 p-4 rounded-2xl border border-brand-200 text-xs text-brand-800 leading-relaxed">
+          <p class="font-bold mb-1">🔗 Google Apps Script 連携設定</p>
+          <p>Netlify等の外部サーバーからデータを保存・取得するために、公開した「GASウェブアプリのデプロイURL」を設定してください。</p>
+        </div>
+        
+        <div>
+          <label class="block text-xs font-black text-brand-700 mb-1.5">GASウェブアプリのURL</label>
+          <input type="text" id="settings-gas-url-input" class="w-full bg-slate-50 text-xs text-slate-800 p-3 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="https://script.google.com/macros/s/.../exec">
+        </div>
+        
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="saveGasUrlSettings()" class="flex-1 py-3.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-black text-sm rounded-xl shadow-md transition-all">
+            設定を保存する
+          </button>
+          <button type="button" onclick="showSettingsModal(false)" class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-sm rounded-xl transition-all">
+            とじる
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= スキャナー専用 全画面レイアウト (iOS Safari用) ================= -->
+  <div id="scanner-only-container" class="hidden min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-black text-brand-400">よむよむスキャナー 📷</h1>
+      <p class="text-xs text-slate-400 mt-1">メイン画面と連動してバーコードを読み取ります</p>
+    </div>
+    
+    <div id="scanner-reader" class="w-full max-w-md aspect-square bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-600 relative">
+      <!-- カメラ表示領域 -->
+    </div>
+    
+    <div class="mt-6 w-full max-w-md flex flex-col gap-4">
+      <button type="button" id="scanner-start-btn" onclick="startScannerModeCamera()" class="w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2">
+        <i class="fa-solid fa-camera-retro"></i> カメラをスタート！
+      </button>
+      <button type="button" onclick="window.close()" class="w-full py-3 rounded-2xl font-bold text-sm bg-slate-800 hover:bg-slate-700 text-slate-300">
+        スキャナーを閉じる
+      </button>
+    </div>
+  </div>
+</body>
+</html>
