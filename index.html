@@ -804,24 +804,18 @@
         observer.observe(readerDiv, { childList: true, subtree: true });
 
         try {
-          // iOS Safari向けに environment & HD解像度指定で起動
+          // iOS Safari向けに environment で起動
           await scannerQrCode.start(
-            { 
-              facingMode: "environment",
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            },
+            { facingMode: "environment" },
             config,
             onScannerScanSuccess,
             (errorMessage) => {}
           );
         } catch (cameraInitErr) {
           console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
+          // デバイスのデフォルトカメラ（内蔵フロントカメラなど）で起動
           await scannerQrCode.start(
-            { 
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            },
+            {},
             config,
             onScannerScanSuccess,
             (errorMessage) => {}
@@ -1018,24 +1012,18 @@
           observer.observe(readerDiv, { childList: true, subtree: true });
 
           try {
-            // iOS Safari向けに environment & HD解像度指定で起動
+            // iOS Safari向けに environment で起動
             await html5QrCode.start(
-              { 
-                facingMode: "environment",
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-              },
+              { facingMode: "environment" },
               config,
               onScanSuccess,
               (errorMessage) => {}
             );
           } catch (cameraInitErr) {
             console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
+            // デバイスのデフォルトカメラ（内蔵フロントカメラなど）で起動
             await html5QrCode.start(
-              { 
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-              },
+              {},
               config,
               onScanSuccess,
               (errorMessage) => {}
