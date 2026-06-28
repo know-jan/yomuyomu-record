@@ -25,6 +25,14 @@ function doGet(e) {
         .setMimeType(ContentService.MimeType.JSON);
   }
   
+  // API経由での書籍情報検索 (CORS回避のためのバックエンド経由フェッチ)
+  if (action === "fetchBookInfo") {
+    var isbn = e.parameter.isbn;
+    var info = fetchBookInfoBackend(isbn);
+    return ContentService.createTextOutput(JSON.stringify(info))
+        .setMimeType(ContentService.MimeType.JSON);
+  }
+  
   // 通常のウェブアプリ画面表示 (Netlifyを使わず直接GASで開く場合のフォールバック)
   var mode = e.parameter.mode || "";
   var webAppUrl = ScriptApp.getService().getUrl();
@@ -279,4 +287,9 @@ function fetchBookInfoBackend(isbn) {
     Logger.log("Google Books API error: " + e.message);
   }
   return { title: "", author: "", coverUrl: "" };
+}
+
+// GASのクライアントから直接呼び出すためのラッパー関数
+function fetchBookInfoFromBackend(isbn) {
+  return fetchBookInfoBackend(isbn);
 }
