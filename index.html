@@ -216,6 +216,15 @@
               <div id="camera-hint-text" class="hidden text-center text-xs text-brand-600 font-bold mt-2 animate-pulse">
                 💡 バーコードを少しはなして（20cmくらい）、ピントをあわせてね！
               </div>
+              <!-- デバッグパネル -->
+              <div id="camera-debug-panel" class="hidden mt-2 p-3 bg-slate-800 rounded-xl text-xs font-mono space-y-1">
+                <div class="flex items-center gap-2">
+                  <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
+                  <span id="debug-scan-status" class="text-gray-400">待機中</span>
+                </div>
+                <div class="text-gray-500">最後に検出: <span id="debug-last-detected" class="text-yellow-300">なし</span></div>
+                <div class="text-gray-500">エラー: <span id="debug-last-error" class="text-red-400">なし</span></div>
+              </div>
             </div>
             
             <!-- バーコード数字手入力エリア (iOS Safariカメラ制限対策) -->
@@ -1006,19 +1015,26 @@
           html5QrCode = new Html5Qrcode("reader");
           
           const config = {
-            fps: 15,
-            qrbox: function(width, height) {
-              const boxWidth = Math.floor(width * 0.8);
-              const boxHeight = Math.floor(height * 0.3);
-              return { width: boxWidth, height: boxHeight };
-            },
-            // HD解像度の優先指定 (EAN-13読み取り精度向上のためのライブラリ公式指定方式)
+            fps: 10,
+            // qrbox を指定しない = フルフレームでスキャン（認識率最優先）
             videoConstraints: {
               width: { ideal: 1280 },
               height: { ideal: 720 },
               facingMode: "environment"
             }
           };
+          
+          // デバッグパネルを表示してスキャン中状態にする
+          const debugPanel = document.getElementById('camera-debug-panel');
+          const debugIndicator = document.getElementById('debug-scan-indicator');
+          const debugStatus = document.getElementById('debug-scan-status');
+          const debugLastDetected = document.getElementById('debug-last-detected');
+          const debugLastError = document.getElementById('debug-last-error');
+          if (debugPanel) {
+            debugPanel.classList.remove('hidden');
+            debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
+            debugStatus.textContent = 'スキャン中...';
+          }
           
           // playsinlineの強制適用 (iOS/iPad Safari対策)
           const observer = new MutationObserver((mutations) => {
@@ -1034,22 +1050,37 @@
           });
           observer.observe(readerDiv, { childList: true, subtree: true });
 
+          // エラーコールバック: 検出失敗ごとのエラーをデバッグパネルに表示
+          const onScanError = (errorMessage) => {
+            if (debugLastError) {
+              debugLastError.textContent = errorMessage.substring(0, 60);
+            }
+          };
+
           try {
             // iOS Safari向けに environment で起動
             await html5QrCode.start(
               { facingMode: "environment" },
               config,
-              onScanSuccess,
-              (errorMessage) => {}
+              (decodedText) => {
+                // デバッグパネルに検出値を表示（978でなくても表示する）
+                if (debugLastDetected) debugLastDetected.textContent = decodedText;
+                onScanSuccess(decodedText);
+              },
+              onScanError
             );
           } catch (cameraInitErr) {
             console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
+            if (debugLastError) debugLastError.textContent = "背面カメラ起動失敗: " + String(cameraInitErr).substring(0, 40);
             // デバイスのデフォルトカメラ（内蔵フロントカメラなど）で起動
             await html5QrCode.start(
               {},
               config,
-              onScanSuccess,
-              (errorMessage) => {}
+              (decodedText) => {
+                if (debugLastDetected) debugLastDetected.textContent = decodedText;
+                onScanSuccess(decodedText);
+              },
+              onScanError
             );
           }
           
@@ -1058,6 +1089,8 @@
           showToast("カメラをスタートできませんでした。カメラへのアクセスを許可してね。");
           isCameraRunning = false;
           readerDiv.classList.add('hidden');
+          const debugPanel2 = document.getElementById('camera-debug-panel');
+          if (debugPanel2) debugPanel2.classList.add('hidden');
           cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
           cameraBtnText.textContent = "カメラをスタート！";
           cameraIcon.className = "fa-solid fa-camera-retro text-xl";
@@ -1082,6 +1115,8 @@
       const readerDiv = document.getElementById('reader');
       
       readerDiv.classList.add('hidden');
+      const debugPanel = document.getElementById('camera-debug-panel');
+      if (debugPanel) debugPanel.classList.add('hidden');
       cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
       cameraBtnText.textContent = "カメラをスタート！";
       cameraIcon.className = "fa-solid fa-camera-retro text-xl";
@@ -1814,6 +1849,15 @@
       </div>
       <div id="scanner-hint-text" class="hidden text-center text-xs text-slate-400 font-bold mt-3 animate-pulse">
         💡 バーコードを少しはなして（20cmくらい）、ピントをあわせてね！
+      </div>
+      <!-- デバッグパネル -->
+      <div id="scanner-debug-panel" class="hidden mt-2 p-3 bg-slate-700 rounded-xl text-xs font-mono space-y-1">
+        <div class="flex items-center gap-2">
+          <span id="scanner-debug-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
+          <span id="scanner-debug-status" class="text-gray-300">待機中</span>
+        </div>
+        <div class="text-gray-400">最後に検出: <span id="scanner-debug-detected" class="text-yellow-300">なし</span></div>
+        <div class="text-gray-400">エラー: <span id="scanner-debug-error" class="text-red-400">なし</span></div>
       </div>
     </div>
     
