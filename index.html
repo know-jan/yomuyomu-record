@@ -811,6 +811,10 @@
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
         startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> カメラをスタート！';
         document.getElementById('scanner-hint-text').classList.add('hidden');
+
+        // デバッグ非表示
+        const debugDiv = document.getElementById('scanner-debug-info');
+        if (debugDiv) debugDiv.classList.add('hidden');
         return;
       }
       
@@ -824,6 +828,7 @@
         const isNativeSupported = await checkBarcodeDetectorSupport();
         if (isNativeSupported) {
           console.log("Scanner mode: Using native BarcodeDetector API");
+          updateDebugStatus(true, "動作中 (ネイティブBarcodeDetector)", "なし");
           readerDiv.innerHTML = '';
           
           const constraints = {
@@ -882,6 +887,7 @@
         } else {
           // フォールバック: html5-qrcode
           console.log("Scanner mode: Using html5-qrcode fallback");
+          updateDebugStatus(true, "動作中 (html5-qrcode EAN-13制限)", "なし");
           
           scannerQrCode = new Html5Qrcode("scanner-reader", {
             formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
@@ -934,6 +940,7 @@
         
       } catch (e) {
         console.error("Scanner mode camera error:", e);
+        updateDebugStatus(true, "エラー: カメラの起動に失敗しました");
         alert("カメラをスタートできませんでした。カメラへのアクセスを許可してね。");
         isScannerCameraRunning = false;
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
@@ -943,11 +950,20 @@
 
     function onScannerScanSuccess(decodedText, decodedResult) {
       const isbn = decodedText.trim();
+      
       // 日本の書籍用：本のバーコードは978から始まる。192始まりのCコードは無視する。
-      if (!isbn.startsWith("978")) return;
+      if (!isbn.startsWith("978")) {
+        updateDebugStatus(true, null, `検出スキップ: ${isbn} (書籍以外のバーコードです)`);
+        return;
+      }
       
       const now = Date.now();
-      if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) return;
+      if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
+        updateDebugStatus(true, null, `検出スキップ: ${isbn} (5秒以内の重複スキャンです)`);
+        return;
+      }
+      
+      updateDebugStatus(true, null, `検知成功！: ${isbn}`);
       
       lastScannedIsbn = isbn;
       lastScannedTime = now;
@@ -1103,6 +1119,7 @@
           const isNativeSupported = await checkBarcodeDetectorSupport();
           if (isNativeSupported) {
             console.log("Using native BarcodeDetector API");
+            updateDebugStatus(false, "動作中 (ネイティブBarcodeDetector)", "なし");
             readerDiv.innerHTML = '';
             
             const constraints = {
@@ -1160,6 +1177,7 @@
             
           } else {
             console.log("Using html5-qrcode fallback");
+            updateDebugStatus(false, "動作中 (html5-qrcode EAN-13制限)", "なし");
             
             html5QrCode = new Html5Qrcode("reader", {
               formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
@@ -1212,6 +1230,7 @@
           
         } catch (e) {
           console.error("Camera error:", e);
+          updateDebugStatus(false, "エラー: カメラの起動に失敗しました");
           showToast("カメラをスタートできませんでした。カメラへのアクセスを許可してね。");
           isCameraRunning = false;
           readerDiv.classList.add('hidden');
@@ -1261,6 +1280,10 @@
       cameraBtnText.textContent = "カメラをスタート！";
       cameraIcon.className = "fa-solid fa-camera-retro text-xl";
       document.getElementById('camera-hint-text').classList.add('hidden');
+
+      // デバッグ非表示
+      const debugDiv = document.getElementById('camera-debug-info');
+      if (debugDiv) debugDiv.classList.add('hidden');
     }
 
     // バーコード検知時の処理
@@ -1269,14 +1292,18 @@
       
       // 日本の書籍用：本のバーコードは978から始まる。192始まりのCコードは無視する。
       if (!isbn.startsWith("978")) {
+        updateDebugStatus(false, null, `検出スキップ: ${isbn} (書籍以外のバーコードです)`);
         return;
       }
       
       const now = Date.now();
       // 同一ISBNの重複読み取り防止（5秒間スキップ）
       if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
+        updateDebugStatus(false, null, `検出スキップ: ${isbn} (5秒以内の重複スキャンです)`);
         return;
       }
+      
+      updateDebugStatus(false, null, `検知成功！: ${isbn}`);
       
       lastScannedIsbn = isbn;
       lastScannedTime = now;
@@ -1288,6 +1315,7 @@
       // 一時リストに追加 (ローディングプレースホルダー)
       addTempBookPlaceholder(isbn);
     }
+
 
     // ================= openBD + Google Books クライアント側直接検索 =================
     async function fetchBookInfo(isbn) {
