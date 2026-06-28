@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.3</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.4</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.3</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.4</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -909,6 +909,9 @@
               console.log("Scanner mode: Using html5-qrcode fallback");
               updateDebugStatus(true, "動作中 (html5-qrcode EAN-13制限)", "なし");
               
+              // コンテナを確実にクリア
+              readerDiv.innerHTML = '';
+
               scannerQrCode = new Html5Qrcode("scanner-reader", {
                 formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
               });
@@ -936,14 +939,43 @@
               observer.observe(readerDiv, { childList: true, subtree: true });
 
               try {
-                await scannerQrCode.start(
-                  { facingMode: "environment" },
-                  config,
-                  onScannerScanSuccess,
-                  (errorMessage) => {}
-                );
+                // デバイスのカメラ一覧を取得
+                const devices = await Html5Qrcode.getCameras();
+                if (devices && devices.length > 0) {
+                  // 背面カメラを探す
+                  let cameraId = devices[0].id;
+                  for (const device of devices) {
+                    const label = (device.label || '').toLowerCase();
+                    if (label.includes('back') || label.includes('rear') || label.includes('environment') || label.includes('背面') || label.includes('環境')) {
+                      cameraId = device.id;
+                      break;
+                    }
+                  }
+                  
+                  await scannerQrCode.start(
+                    cameraId,
+                    config,
+                    onScannerScanSuccess,
+                    (errorMessage) => {}
+                  );
+                } else {
+                  // カメラリストが空の場合は直接 facingMode 指定で試す
+                  await scannerQrCode.start(
+                    { facingMode: "environment" },
+                    config,
+                    onScannerScanSuccess,
+                    (errorMessage) => {}
+                  );
+                }
               } catch (cameraInitErr) {
-                console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
+                console.warn("背面カメラの指定起動に失敗しました。新しいインスタンスでフォールバックします:", cameraInitErr);
+                
+                // エラーでロックされたインスタンスを破棄して再作成
+                readerDiv.innerHTML = '';
+                scannerQrCode = new Html5Qrcode("scanner-reader", {
+                  formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
+                });
+
                 await scannerQrCode.start(
                   {},
                   config,
@@ -1203,6 +1235,9 @@
               console.log("Using html5-qrcode fallback");
               updateDebugStatus(false, "動作中 (html5-qrcode EAN-13制限)", "なし");
               
+              // コンテナを確実にクリア
+              readerDiv.innerHTML = '';
+
               html5QrCode = new Html5Qrcode("reader", {
                 formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
               });
@@ -1230,14 +1265,43 @@
               observer.observe(readerDiv, { childList: true, subtree: true });
 
               try {
-                await html5QrCode.start(
-                  { facingMode: "environment" },
-                  config,
-                  onScanSuccess,
-                  (errorMessage) => {}
-                );
+                // デバイスのカメラ一覧を取得
+                const devices = await Html5Qrcode.getCameras();
+                if (devices && devices.length > 0) {
+                  // 背面カメラ（ラベルにbackやrear, environment, 背面 等が含まれるもの）を探す
+                  let cameraId = devices[0].id;
+                  for (const device of devices) {
+                    const label = (device.label || '').toLowerCase();
+                    if (label.includes('back') || label.includes('rear') || label.includes('environment') || label.includes('背面') || label.includes('環境')) {
+                      cameraId = device.id;
+                      break;
+                    }
+                  }
+                  
+                  await html5QrCode.start(
+                    cameraId,
+                    config,
+                    onScanSuccess,
+                    (errorMessage) => {}
+                  );
+                } else {
+                  // カメラリストが空の場合は直接 facingMode 指定で試す
+                  await html5QrCode.start(
+                    { facingMode: "environment" },
+                    config,
+                    onScanSuccess,
+                    (errorMessage) => {}
+                  );
+                }
               } catch (cameraInitErr) {
-                console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
+                console.warn("カメラの指定起動に失敗しました。新しいインスタンスでフォールバックします:", cameraInitErr);
+                
+                // エラーでロックされたインスタンスを破棄して再作成
+                readerDiv.innerHTML = '';
+                html5QrCode = new Html5Qrcode("reader", {
+                  formatsToSupport: [ Html5QrcodeSupportedFormats.EAN_13 ]
+                });
+
                 await html5QrCode.start(
                   {},
                   config,
@@ -1995,7 +2059,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v1.3</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v1.4</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
