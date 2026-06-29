@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.5</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.6</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.5</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.6</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -684,6 +684,7 @@
     let audioCtx = null;         // iOS用AudioContext
     let html5QrCode = null;      // カメラオブジェクト
     let isCameraRunning = false;  // カメラ稼働中フラグ
+    let isScanningPaused = false; // 一時停止（スキャンスロットリング）中フラグ
     let lastScannedIsbn = "";    // 直前スキャンISBN (重複防止)
     let lastScannedTime = 0;     // 直前スキャン時間 (ミリ秒)
 
@@ -769,6 +770,7 @@
     // ================= スキャナー専用画面用の処理 =================
     let scannerQrCode = null;
     let isScannerCameraRunning = false;
+    let isScannerScanningPaused = false; // スキャナー専用画面の一時停止中フラグ
 
     async function startScannerModeCamera() {
       const startBtn = document.getElementById('scanner-start-btn');
@@ -782,24 +784,29 @@
           scannerQrCode = null;
         }
         isScannerCameraRunning = false;
+        isScannerScanningPaused = false;
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
         startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> カメラをスタート！';
         document.getElementById('scanner-hint-text').classList.add('hidden');
+        const sDebugPanel = document.getElementById('scanner-debug-panel');
+        if (sDebugPanel) sDebugPanel.classList.add('hidden');
         return;
       }
       
       try {
         isScannerCameraRunning = true;
+        isScannerScanningPaused = false; // 一時停止状態をクリア
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-rose-500 hover:bg-rose-600 text-white shadow-lg flex items-center justify-center gap-2";
         startBtn.innerHTML = '<i class="fa-solid fa-circle-stop"></i> カメラをとめる';
         
         scannerQrCode = new Html5Qrcode("scanner-reader");
         
         const config = {
-          fps: 15,
+          fps: 12,
           qrbox: function(width, height) {
-            const boxWidth = Math.floor(width * 0.8);
-            const boxHeight = Math.floor(height * 0.3);
+            // 2段あるバーコードのうち、上の段（ISBN）だけを狙いやすくするために縦幅を細く絞る（12%）
+            const boxWidth = Math.floor(width * 0.85);
+            const boxHeight = Math.floor(height * 0.12);
             return { width: boxWidth, height: boxHeight };
           },
           videoConstraints: {
@@ -810,6 +817,18 @@
         };
 
         document.getElementById('scanner-hint-text').classList.remove('hidden');
+
+        // スキャナーデバッグパネルを表示
+        const sDebugPanel = document.getElementById('scanner-debug-panel');
+        const sDebugIndicator = document.getElementById('scanner-debug-indicator');
+        const sDebugStatus = document.getElementById('scanner-debug-status');
+        const sDebugDetected = document.getElementById('scanner-debug-detected');
+        const sDebugError = document.getElementById('scanner-debug-error');
+        if (sDebugPanel) {
+          sDebugPanel.classList.remove('hidden');
+          sDebugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
+          sDebugStatus.textContent = 'スキャン中...';
+        }
 
         // playsinlineの強制適用 (iOS/iPad Safari対策)
         const observer = new MutationObserver((mutations) => {
@@ -825,22 +844,43 @@
         });
         observer.observe(readerDiv, { childList: true, subtree: true });
 
+        // スキャナー用のエラーコールバック
+        const onScannerError = (errorMessage) => {
+          if (isScannerScanningPaused) return; // 一時停止中なら無視
+          
+          // 通常の未検出エラーは無視して "なし" とする
+          if (errorMessage.includes("No MultiFormat Readers") || errorMessage.includes("NotFoundException") || errorMessage.includes("no barcode")) {
+            if (sDebugError) sDebugError.textContent = "なし";
+            return;
+          }
+          if (sDebugError) {
+            sDebugError.textContent = errorMessage.substring(0, 60);
+          }
+        };
+
         try {
           // iOS Safari向けに environment で起動
           await scannerQrCode.start(
             { facingMode: "environment" },
             config,
-            onScannerScanSuccess,
-            (errorMessage) => {}
+            (decodedText) => {
+              if (sDebugDetected) sDebugDetected.textContent = decodedText;
+              onScannerScanSuccess(decodedText);
+            },
+            onScannerError
           );
         } catch (cameraInitErr) {
           console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
-          // デバイスのデフォルトカメラ（内蔵フロントカメラなど）で起動
+          if (sDebugError) sDebugError.textContent = "背面カメラ起動失敗: " + String(cameraInitErr).substring(0, 40);
+          // デバイスのデフォルトカメラで起動
           await scannerQrCode.start(
             {},
             config,
-            onScannerScanSuccess,
-            (errorMessage) => {}
+            (decodedText) => {
+              if (sDebugDetected) sDebugDetected.textContent = decodedText;
+              onScannerScanSuccess(decodedText);
+            },
+            onScannerError
           );
         }
         
@@ -854,6 +894,8 @@
     }
 
     function onScannerScanSuccess(decodedText, decodedResult) {
+      if (isScannerScanningPaused) return; // すでにポーズ中なら無視
+      
       const isbn = decodedText.trim();
       
       // 日本の書籍用：本のバーコードは978から始まる
@@ -866,8 +908,35 @@
         return;
       }
       
+      // スキャン一時停止処理
+      isScannerScanningPaused = true;
       lastScannedIsbn = isbn;
       lastScannedTime = now;
+      
+      // デバッグパネルを一時停止中に変更
+      const sDebugIndicator = document.getElementById('scanner-debug-indicator');
+      const sDebugStatus = document.getElementById('scanner-debug-status');
+      const sDebugDetected = document.getElementById('scanner-debug-detected');
+      const sDebugError = document.getElementById('scanner-debug-error');
+      if (sDebugIndicator && sDebugStatus) {
+        sDebugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+        sDebugStatus.textContent = '一時停止中（親画面へ送信中...）';
+      }
+      if (sDebugDetected) {
+        sDebugDetected.textContent = isbn;
+      }
+      if (sDebugError) {
+        sDebugError.textContent = "なし";
+      }
+      
+      // html5QrCode のビデオ自体を一時停止
+      if (scannerQrCode) {
+        try {
+          scannerQrCode.pause(true); // ビデオフレームも止める
+        } catch (e) {
+          console.warn("scannerQrCode pause failed:", e);
+        }
+      }
       
       playBeep();
       
@@ -884,6 +953,30 @@
       } else {
         alert("メイン画面（親ウィンドウ）が見つかりません。連携できませんでした。");
       }
+      
+      // 1.5秒（1500ms）後にスキャン自動再開
+      setTimeout(() => {
+        if (!isScannerCameraRunning) {
+          isScannerScanningPaused = false;
+          return; // すでにカメラ自体が止められていたら何もしない
+        }
+        
+        if (scannerQrCode) {
+          try {
+            scannerQrCode.resume();
+          } catch (e) {
+            console.warn("scannerQrCode resume failed:", e);
+          }
+        }
+        
+        isScannerScanningPaused = false;
+        
+        // デバッグパネルを稼働中に戻す
+        if (sDebugIndicator && sDebugStatus) {
+          sDebugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
+          sDebugStatus.textContent = 'スキャン中...';
+        }
+      }, 1500);
     }
 
     // ================= 音声・ビープ音制御 =================
@@ -1005,6 +1098,7 @@
       } else {
         try {
           isCameraRunning = true;
+          isScanningPaused = false; // 一時停止状態をクリア
           readerDiv.classList.remove('hidden');
           document.getElementById('camera-hint-text').classList.remove('hidden');
           
@@ -1015,8 +1109,13 @@
           html5QrCode = new Html5Qrcode("reader");
           
           const config = {
-            fps: 10,
-            // qrbox を指定しない = フルフレームでスキャン（認識率最優先）
+            fps: 12,
+            qrbox: function(width, height) {
+              // 2段あるバーコードのうち、上の段（ISBN）だけを狙いやすくするために縦幅を細く絞る（12%）
+              const boxWidth = Math.floor(width * 0.85);
+              const boxHeight = Math.floor(height * 0.12);
+              return { width: boxWidth, height: boxHeight };
+            },
             videoConstraints: {
               width: { ideal: 1280 },
               height: { ideal: 720 },
@@ -1050,8 +1149,15 @@
           });
           observer.observe(readerDiv, { childList: true, subtree: true });
 
-          // エラーコールバック: 検出失敗ごとのエラーをデバッグパネルに表示
+          // エラーコールバック: 検出失敗ごとのエラーをフィルタしてデバッグパネルに表示
           const onScanError = (errorMessage) => {
+            if (isScanningPaused) return; // 一時停止中ならエラー更新も無視
+            
+            // "No MultiFormat Readers" などの日常的な未検出エラーは無視して "なし" とする
+            if (errorMessage.includes("No MultiFormat Readers") || errorMessage.includes("NotFoundException") || errorMessage.includes("no barcode")) {
+              if (debugLastError) debugLastError.textContent = "なし";
+              return;
+            }
             if (debugLastError) {
               debugLastError.textContent = errorMessage.substring(0, 60);
             }
@@ -1063,7 +1169,6 @@
               { facingMode: "environment" },
               config,
               (decodedText) => {
-                // デバッグパネルに検出値を表示（978でなくても表示する）
                 if (debugLastDetected) debugLastDetected.textContent = decodedText;
                 onScanSuccess(decodedText);
               },
@@ -1108,6 +1213,7 @@
         html5QrCode = null;
       }
       isCameraRunning = false;
+      isScanningPaused = false;
       
       const cameraBtn = document.getElementById('camera-toggle-btn');
       const cameraBtnText = document.getElementById('camera-btn-text');
@@ -1125,6 +1231,8 @@
 
     // バーコード検知時の処理
     function onScanSuccess(decodedText, decodedResult) {
+      if (isScanningPaused) return; // すでにポーズ中なら無視
+      
       const isbn = decodedText.trim();
       
       // 日本の書籍用：本のバーコードは978から始まる
@@ -1138,8 +1246,35 @@
         return;
       }
       
+      // スキャン一時停止処理
+      isScanningPaused = true;
       lastScannedIsbn = isbn;
       lastScannedTime = now;
+      
+      // デバッグパネルを一時停止中に変更
+      const debugIndicator = document.getElementById('debug-scan-indicator');
+      const debugStatus = document.getElementById('debug-scan-status');
+      const debugLastDetected = document.getElementById('debug-last-detected');
+      const debugLastError = document.getElementById('debug-last-error');
+      if (debugIndicator && debugStatus) {
+        debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+        debugStatus.textContent = '一時停止中（本の情報を取得中...）';
+      }
+      if (debugLastDetected) {
+        debugLastDetected.textContent = isbn;
+      }
+      if (debugLastError) {
+        debugLastError.textContent = "なし";
+      }
+      
+      // html5QrCode のビデオ自体を一時停止
+      if (html5QrCode) {
+        try {
+          html5QrCode.pause(true); // ビデオフレームも止める
+        } catch (e) {
+          console.warn("html5QrCode pause failed:", e);
+        }
+      }
       
       // 成功通知
       playBeep();
@@ -1147,6 +1282,30 @@
       
       // 一時リストに追加 (ローディングプレースホルダー)
       addTempBookPlaceholder(isbn);
+      
+      // 1.5秒（1500ms）後にスキャン自動再開
+      setTimeout(() => {
+        if (!isCameraRunning) {
+          isScanningPaused = false;
+          return; // すでにカメラ自体が止められていたら何もしない
+        }
+        
+        if (html5QrCode) {
+          try {
+            html5QrCode.resume();
+          } catch (e) {
+            console.warn("html5QrCode resume failed:", e);
+          }
+        }
+        
+        isScanningPaused = false;
+        
+        // デバッグパネルを稼働中に戻す
+        if (debugIndicator && debugStatus) {
+          debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
+          debugStatus.textContent = 'スキャン中...';
+        }
+      }, 1500);
     }
 
 
@@ -1808,7 +1967,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v1.5</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v1.6</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
