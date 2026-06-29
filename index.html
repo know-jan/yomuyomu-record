@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v3.0</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v3.1</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v3.0</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v3.1</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -747,7 +747,7 @@
       ctx.save();
       
       if (applyFilter) {
-        ctx.filter = "grayscale(100%) contrast(250%) brightness(95%)";
+        ctx.filter = "grayscale(100%) contrast(180%) brightness(100%)";
       } else {
         ctx.filter = "none";
       }
@@ -777,13 +777,26 @@
       updateScanStatus("", "分析中", "パシャリと撮影して解析しています...");
 
       try {
-        const tempCanvas = document.createElement('canvas');
         const vWidth = videoEl.videoWidth || videoEl.width || 640;
         const vHeight = videoEl.videoHeight || videoEl.height || 480;
-        tempCanvas.width = vWidth;
-        tempCanvas.height = vHeight;
+        
+        // クロップ位置とサイズを計算 (中央の細長いバーコード帯のみを切り出し)
+        let cropX = 0, cropY = 0, cropW = vWidth, cropH = vHeight;
+        if (vHeight > vWidth) {
+          // 縦長(720x1280等): 左右は100%保持し、高さの中央20%だけをクロップ
+          cropH = Math.floor(vHeight * 0.20);
+          cropY = Math.floor((vHeight - cropH) / 2);
+        } else {
+          // 横長(1280x720等): 左右は100%保持し、高さの中央25%だけをクロップ
+          cropH = Math.floor(vHeight * 0.25);
+          cropY = Math.floor((vHeight - cropH) / 2);
+        }
+
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = cropW;
+        tempCanvas.height = cropH;
         const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.drawImage(videoEl, 0, 0, vWidth, vHeight);
+        tempCtx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
 
         let wasCameraRunning = isCameraRunning;
         if (html5QrCode && isCameraRunning) {
@@ -2195,7 +2208,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v3.0</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v3.1</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
