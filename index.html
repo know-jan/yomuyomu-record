@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.4</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.5</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.4</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.5</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -257,7 +257,7 @@
                     <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
                     <span id="debug-scan-status" class="text-gray-300 font-bold">待機中</span>
                   </div>
-                  <span class="text-[10px] text-slate-400">v5.4 デバッグ</span>
+                  <span class="text-[10px] text-slate-400">v5.5 デバッグ</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400">
                   <div>最後に検出: <span id="debug-last-detected" class="text-yellow-300 font-bold">なし</span></div>
@@ -1786,11 +1786,20 @@
     }
 
     // バーコード検知時の処理
+    // バーコード検知時の処理
     function onScanSuccess(decodedText, decodedResult, force = false) {
       if (isScanningPaused && !force) return; // ポーズ中かつ強制でなければ無視
       
+      let isbn = "";
       try {
-        const isbn = decodedText.trim();
+        if (!decodedText) {
+          throw new Error("decodedText is empty");
+        }
+        isbn = String(decodedText).trim();
+        if (!isbn) {
+          throw new Error("ISBN is empty after trim");
+        }
+        
         const debugLastDetected = document.getElementById('debug-last-detected');
         const debugLastError = document.getElementById('debug-last-error');
         
@@ -1916,8 +1925,14 @@
         }, 1500);
       } catch (err) {
         console.error("Fatal scan error:", err);
+        const debugLastError = document.getElementById('debug-last-error');
+        if (debugLastError) {
+          debugLastError.className = "text-red-400 font-bold break-all";
+          debugLastError.textContent = String(err.message || err);
+        }
+        logToDebugConsole("Fatal scan error: " + (err.message || err), 'error');
         isScanningPaused = false; // エラー時は安全にポーズを解除
-        updateScanStatus("", "失敗", "エラーがおきたよ。もういちど試してみてね！");
+        updateScanStatus(isbn || "", "失敗", "エラーがおきたよ。もういちど試してみてね！");
       }
     }
 
@@ -1975,6 +1990,8 @@
 
     // ================= 一時リスト管理 & 編集 =================
     function addTempBookPlaceholder(isbn) {
+      if (!isbn) return;
+      
       const tempId = 'temp_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
       
       const newBook = {
@@ -1990,6 +2007,11 @@
         isLoading: true
       };
       
+      // tempBooksが安全な配列であることを担保
+      if (!Array.isArray(tempBooks)) {
+        tempBooks = [];
+      }
+      
       // 先頭に追加
       tempBooks.unshift(newBook);
       saveTempBooksToStorage();
@@ -1997,12 +2019,15 @@
       // 一時リストエリアの初期テキスト（空状態）を消去する準備として、
       // 最初の要素追加時のみ親コンテナの中身を空にする
       const container = document.getElementById('temp-list-container');
-      if (tempBooks.length === 1) {
-        container.innerHTML = '';
+      if (container) {
+        if (tempBooks.length === 1) {
+          container.innerHTML = '';
+        }
+        // DOMに新規カードを追加 (一から全部再描画せず、フォーカス維持のために個別追加)
+        container.insertAdjacentHTML('afterbegin', renderSingleTempBookHTML(newBook));
+      } else {
+        console.warn("temp-list-container element not found in DOM.");
       }
-      
-      // DOMに新規カードを追加 (一から全部再描画せず、フォーカス維持のために個別追加)
-      container.insertAdjacentHTML('afterbegin', renderSingleTempBookHTML(newBook));
       updateTempCountBadge();
       
       // 非同期で書籍情報を取得
@@ -2589,7 +2614,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v5.4</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v5.5</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
