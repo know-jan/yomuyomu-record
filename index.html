@@ -1559,10 +1559,52 @@
       if (isScanningPaused) return; // すでにポーズ中なら無視
       
       const isbn = decodedText.trim();
+      const debugLastDetected = document.getElementById('debug-last-detected');
+      const debugLastError = document.getElementById('debug-last-error');
       
-      // 日本の書籍用：本のバーコードは978から始まる
+      if (debugLastDetected) {
+        debugLastDetected.textContent = isbn;
+      }
+      
+      // 1. 対象外のコードチェック (978で始まらないものは書籍対象外)
       if (!isbn.startsWith("978")) {
+        if (debugLastError) {
+          debugLastError.className = "text-rose-400 font-bold break-all";
+          debugLastError.textContent = `対象外のコードです (${isbn})`;
+        }
+        logToDebugConsole(`Scan skipped: Non-book EAN/C-Code: ${isbn}`, 'warn');
+        showToast(`対象外のコードです: ${isbn}`);
         return;
+      }
+      
+      // 2. 読んだ本の一覧（本棚）に登録済みチェック
+      const isAlreadyRegistered = allRegisteredBooks.some(b => b.isbn === isbn);
+      if (isAlreadyRegistered) {
+        if (debugLastError) {
+          debugLastError.className = "text-amber-400 font-bold break-all";
+          debugLastError.textContent = `読んだ本の一覧に登録済みです (${isbn})`;
+        }
+        logToDebugConsole(`Scan skipped: Already registered in main collection: ${isbn}`, 'warn');
+        showToast(`読んだ本の一覧に登録済みです: ${isbn}`);
+        return;
+      }
+      
+      // 3. 一次リストに登録済みチェック
+      const isAlreadyInTemp = tempBooks.some(b => b.isbn === isbn);
+      if (isAlreadyInTemp) {
+        if (debugLastError) {
+          debugLastError.className = "text-amber-400 font-bold break-all";
+          debugLastError.textContent = `一次リストに登録済みです (${isbn})`;
+        }
+        logToDebugConsole(`Scan skipped: Already in temporary list: ${isbn}`, 'warn');
+        showToast(`一次リストに登録済みです: ${isbn}`);
+        return;
+      }
+      
+      // 正常な新規ISBNの場合はエラー表示をリセット
+      if (debugLastError) {
+        debugLastError.className = "text-red-400 break-all";
+        debugLastError.textContent = "なし";
       }
       
       const now = Date.now();
@@ -1579,18 +1621,10 @@
       // デバッグパネルを一時停止中に変更
       const debugIndicator = document.getElementById('debug-scan-indicator');
       const debugStatus = document.getElementById('debug-scan-status');
-      const debugLastDetected = document.getElementById('debug-last-detected');
-      const debugLastError = document.getElementById('debug-last-error');
       const debugPausedState = document.getElementById('debug-scan-paused-state');
       if (debugIndicator && debugStatus) {
         debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse';
         debugStatus.textContent = '一時停止中（本の情報を取得中...）';
-      }
-      if (debugLastDetected) {
-        debugLastDetected.textContent = isbn;
-      }
-      if (debugLastError) {
-        debugLastError.textContent = "なし";
       }
       if (debugPausedState) {
         debugPausedState.textContent = "はい";
