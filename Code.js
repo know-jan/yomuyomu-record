@@ -242,6 +242,8 @@ function onEdit(e) {
 
 // バックエンド用の書籍情報フェッチ関数 (openBD + Google Books API 二段構え)
 function fetchBookInfoBackend(isbn) {
+  var result = { title: "", author: "", coverUrl: "" };
+  
   // 1. まずは日本国内に強い openBD API を試す
   try {
     var openBdUrl = 'https://api.openbd.jp/v1/get?isbn=' + isbn;
@@ -250,44 +252,53 @@ function fetchBookInfoBackend(isbn) {
       var data = JSON.parse(response.getContentText());
       if (data && data[0] && data[0].summary) {
         var summary = data[0].summary;
-        return {
-          title: summary.title || "",
-          author: summary.author || "（著者不明）",
-          coverUrl: summary.cover || ""
-        };
+        result.title = summary.title || "";
+        result.author = summary.author || "（著者不明）";
+        result.coverUrl = summary.cover || "";
       }
     }
   } catch (e) {
     Logger.log("openBD fetch error: " + e.message);
   }
 
-  // 2. フォールバックとして Google Books API を試す
-  var googleUrl = 'https://www.googleapis.com/books/v1/volumes?q=isbn=' + isbn;
-  try {
-    var response = UrlFetchApp.fetch(googleUrl, { muteHttpExceptions: true });
-    if (response.getResponseCode() === 200) {
-      var data = JSON.parse(response.getContentText());
-      if (data.totalItems > 0 && data.items && data.items[0]) {
-        var volumeInfo = data.items[0].volumeInfo;
-        var coverUrl = "";
-        if (volumeInfo.imageLinks) {
-          coverUrl = volumeInfo.imageLinks.thumbnail || volumeInfo.imageLinks.smallThumbnail || "";
-          if (coverUrl.indexOf("http://") === 0) {
-            coverUrl = coverUrl.replace("http://", "https://");
+  // 2. 本が見つからなかった、または表紙画像が見つからなかった場合、Google Books APIで補完する
+  if (!result.title || !result.coverUrl) {
+    var googleUrl = 'https://www.googleapis.com/books/v1/volumes?q=isbn=' + isbn;
+    try {
+      var response = UrlFetchApp.fetch(googleUrl, { muteHttpExceptions: true });
+      if (response.getResponseCode() === 200) {
+        var data = JSON.parse(response.getContentText());
+        if (data.totalItems > 0 && data.items && data.items[0]) {
+          var volumeInfo = data.items[0].volumeInfo;
+          var googleCoverUrl = "";
+          if (volumeInfo.imageLinks) {
+            googleCoverUrl = volumeInfo.imageLinks.thumbnail || volumeInfo.imageLinks.smallThumbnail || "";
+            if (googleCoverUrl.indexOf("http://") === 0) {
+              googleCoverUrl = googleCoverUrl.replace("http://", "https://");
+            }
+          }
+          
+          // 書籍情報がまだなければGoogle Booksのもので補完
+          if (!result.title) {
+            result.title = volumeInfo.title || "";
+          }
+          if (!result.author || result.author === "（著者不明）" || result.author === "著者不明") {
+            result.author = volumeInfo.authors ? volumeInfo.authors.join(", ") : "（著者不明）";
+          }
+          // 画像があればGoogle Booksのものを採用
+          if (googleCoverUrl) {
+            result.coverUrl = googleCoverUrl;
           }
         }
-        return {
-          title: volumeInfo.title || "",
-          author: volumeInfo.authors ? volumeInfo.authors.join(", ") : "",
-          coverUrl: coverUrl
-        };
       }
+    } catch (e) {
+      Logger.log("Google Books API error: " + e.message);
     }
-  } catch (e) {
-    Logger.log("Google Books API error: " + e.message);
   }
-  return { title: "", author: "", coverUrl: "" };
+
+  return result;
 }
+
 
 // GASのクライアントから直接呼び出すためのラッパー関数
 function fetchBookInfoFromBackend(isbn) {

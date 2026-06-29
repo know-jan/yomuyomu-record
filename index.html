@@ -2268,7 +2268,7 @@
     }
 
     // 本のカバーHTMLの取得（カバーが無い場合は非同期でGoogle Booksから探して自動表示）
-    function getBookCoverHTML(coverUrl, title, genre, bookId = null, author = "") {
+    function getBookCoverHTML(coverUrl, title, genre, bookId = null, author = "", isbn = "") {
       const imgId = bookId ? `cover-img-${bookId}` : `cover-img-temp-${Math.floor(Math.random() * 100000)}`;
       
       // キャッシュキーの作成（タイトルと著者名）
@@ -2291,13 +2291,13 @@
       const targetUrl = cachedUrl || coverUrl;
       
       if (targetUrl && targetUrl.trim() !== "" && targetUrl !== "none") {
-        return '<img id="' + imgId + '" src="' + targetUrl + '" alt="' + title + '" class="w-full h-full object-cover rounded-xl shadow border border-gray-100" onerror="handleCoverError(this, \'' + cleanTitle.replace(/'/g, "\\'") + '\', \'' + genre + '\', \'' + (bookId || '') + '\', \'' + cleanAuthor.replace(/'/g, "\\'") + '\')">';
+        return '<img id="' + imgId + '" src="' + targetUrl + '" alt="' + title + '" class="w-full h-full object-cover rounded-xl shadow border border-gray-100" onerror="handleCoverError(this, \'' + cleanTitle.replace(/'/g, "\\'") + '\', \'' + genre + '\', \'' + (bookId || '') + '\', \'' + cleanAuthor.replace(/'/g, "\\'") + '\', \'' + (isbn || '') + '\')">';
       }
       
       // 画像が無い場合：非同期で検索を試みる
-      if (bookId && cleanTitle) {
+      if (bookId && (cleanTitle || isbn)) {
         setTimeout(() => {
-          fetchAndApplyBookCover(bookId, cleanTitle, cleanAuthor, genre);
+          fetchAndApplyBookCover(bookId, cleanTitle, cleanAuthor, genre, false, isbn);
         }, 50);
       }
       
@@ -2307,7 +2307,7 @@
     }
 
     // カバー画像読み込みエラー時の処理
-    function handleCoverError(imgEl, title, genre, bookId, author) {
+    function handleCoverError(imgEl, title, genre, bookId, author, isbn = "") {
       imgEl.onerror = null; // ループ防止
       
       // エラーが発生したURLのキャッシュをクリア
@@ -2327,13 +2327,13 @@
       
       // エラーが起きた場合は、強制的に再検索を試みる
       if (bookId) {
-        fetchAndApplyBookCover(bookId, title, author, genre, true);
+        fetchAndApplyBookCover(bookId, title, author, genre, true, isbn);
       }
     }
 
     // 非同期で Google Books API から画像を探して差し替える
-    function fetchAndApplyBookCover(bookId, title, author, genre, forceReload = false) {
-      if (!title) return;
+    function fetchAndApplyBookCover(bookId, title, author, genre, forceReload = false, isbn = "") {
+      if (!title && !isbn) return;
       
       const cacheKey = `cover_cache_${title}_${author}`;
       
@@ -2341,10 +2341,16 @@
       if (!forceReload && coverCache[cacheKey] === "none") return;
       
       // APIクエリ構築
-      let query = `intitle:${encodeURIComponent(title)}`;
-      if (author && author !== "（著者不明）" && author !== "著者不明") {
-        query += `+inauthor:${encodeURIComponent(author)}`;
+      let query = "";
+      if (isbn && isbn.trim() !== "") {
+        query = `isbn:${isbn.trim()}`;
+      } else {
+        query = `intitle:${encodeURIComponent(title)}`;
+        if (author && author !== "（著者不明）" && author !== "著者不明") {
+          query += `+inauthor:${encodeURIComponent(author)}`;
+        }
       }
+      
       const url = `https://www.googleapis.com/books/v1/volumes?q=${urlQueryHelper(query)}&maxResults=3`;
       
       fetch(url)
@@ -2395,6 +2401,7 @@
           console.warn("Async cover search error for:", title, err);
         });
     }
+
 
     // Google Books クエリ用の補助エンコード
     function urlQueryHelper(query) {
@@ -2456,7 +2463,7 @@
         '',
         '  <!-- 本のカバー -->',
         '  <div class="cover-container w-24 h-32 mx-auto md:mx-0 flex-shrink-0">',
-        '    ' + getBookCoverHTML(book.coverUrl, book.title, book.genre, book.tempId, book.author),
+        '    ' + getBookCoverHTML(book.coverUrl, book.title, book.genre, book.tempId, book.author, book.isbn),
         '  </div>',
         '',
         '  <!-- 入力項目フォーム -->',
@@ -2516,7 +2523,7 @@
       // カバーの更新
       const coverContainer = cardEl.querySelector('.cover-container');
       if (coverContainer) {
-        coverContainer.innerHTML = getBookCoverHTML(book.coverUrl, book.title, book.genre);
+        coverContainer.innerHTML = getBookCoverHTML(book.coverUrl, book.title, book.genre, book.tempId, book.author, book.isbn);
       }
       
       // 入力値の更新
@@ -2581,7 +2588,7 @@
           if (cardEl) {
             const coverContainer = cardEl.querySelector('.cover-container');
             if (coverContainer) {
-              coverContainer.innerHTML = getBookCoverHTML(book.coverUrl, book.title, book.genre);
+              coverContainer.innerHTML = getBookCoverHTML(book.coverUrl, book.title, book.genre, book.tempId, book.author, book.isbn);
             }
           }
         }
@@ -3082,7 +3089,7 @@
         '    <!-- 本のカバー -->',
         '    <div class="w-full h-36 flex items-center justify-center mb-3">',
         '      <div class="w-24 h-32">',
-        '        ' + getBookCoverHTML(book.coverUrl, book.title, book.genre, book.id, book.author),
+        '        ' + getBookCoverHTML(book.coverUrl, book.title, book.genre, book.id, book.author, book.isbn),
         '      </div>',
         '    </div>',
         '    ',
