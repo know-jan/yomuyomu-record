@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.6</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.7</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.6</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.7</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -257,7 +257,7 @@
                     <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
                     <span id="debug-scan-status" class="text-gray-300 font-bold">待機中</span>
                   </div>
-                  <span class="text-[10px] text-slate-400">v5.6 デバッグ</span>
+                  <span class="text-[10px] text-slate-400">v5.7 デバッグ</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400">
                   <div>最後に検出: <span id="debug-last-detected" class="text-yellow-300 font-bold">なし</span></div>
@@ -754,6 +754,8 @@
     let isScanningPaused = false; // 一時停止（スキャンスロットリング）中フラグ
     let lastScannedTime = 0;     // 直前スキャン時間 (ミリ秒)
     let lastScannedIsbn = "";    // 直前スキャンISBN
+    let barcodeDetector = null;  // OSネイティブ検出エンジン
+    let autoScanInterval = null; // 自動スキャンループタイマー
 
     // おとな用デバッグパネルのトグル表示
     function toggleDebugPanel() {
@@ -1296,6 +1298,16 @@
           updateScanStatus(isbn, '成功', '本の情報をしらべて一時リストに追加したよ！');
         }
       });
+
+      // Native BarcodeDetector の初期化
+      if (typeof window.BarcodeDetector !== 'undefined') {
+        try {
+          barcodeDetector = new window.BarcodeDetector({ formats: ['ean_13'] });
+          console.log("OS Native BarcodeDetector initialized successfully.");
+        } catch (e) {
+          console.warn("OS Native BarcodeDetector initialization failed:", e);
+        }
+      }
     });
 
     // ================= 別ウィンドウカメラ起動 (iOS/iPadOS対策) =================
@@ -1622,6 +1634,68 @@
       }
     }
 
+    // ================= Native BarcodeDetector 自動スキャンループ =================
+    function startAutoScanLoop(videoEl) {
+      if (autoScanInterval) clearInterval(autoScanInterval);
+      if (!barcodeDetector) return; // ネイティブ非対応の場合はループ起動しない
+      
+      logToDebugConsole("Starting native BarcodeDetector scan loop...", "info");
+      
+      autoScanInterval = setInterval(async () => {
+        // カメラ停止中、またはスロットリング一時停止中ならスキップ
+        if (!isCameraRunning || isScanningPaused) return;
+        
+        const vWidth = videoEl.videoWidth || videoEl.width || 0;
+        const vHeight = videoEl.videoHeight || videoEl.height || 0;
+        if (vWidth === 0 || vHeight === 0) return;
+        
+        // 中央のスリット領域（赤いターゲット枠。高さ約 28%）のみを切り出す
+        let cropX = 0, cropY = 0, cropW = vWidth, cropH = vHeight;
+        if (vHeight > vWidth) {
+          // 縦長の場合: 高さの中央 22% を切り抜く
+          cropH = Math.floor(vHeight * 0.22);
+          cropY = Math.floor((vHeight - cropH) / 2);
+        } else {
+          // 横長の場合: 高さの中央 28% を切り抜く
+          cropH = Math.floor(vHeight * 0.28);
+          cropY = Math.floor((vHeight - cropH) / 2);
+        }
+        
+        const cropCanvas = document.createElement('canvas');
+        cropCanvas.width = cropW;
+        cropCanvas.height = cropH;
+        const cropCtx = cropCanvas.getContext('2d');
+        
+        try {
+          cropCtx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+          
+          const barcodes = await barcodeDetector.detect(cropCanvas);
+          if (barcodes.length > 0) {
+            const isbn = barcodes[0].rawValue.trim();
+            if (isbn && isbn.startsWith("978")) {
+              logToDebugConsole(`Native Detector success: ${isbn}`, 'info');
+              
+              // 子ども用スキャンモニターのISBNを「即座に」更新
+              const isbnEl = document.getElementById('scan-status-isbn');
+              if (isbnEl) isbnEl.textContent = isbn;
+              
+              onScanSuccess(isbn);
+            }
+          }
+        } catch (err) {
+          // 検出失敗時はスルー
+        }
+      }, 120); // 120ms間隔（毎秒約8回解析）
+    }
+    
+    function stopAutoScanLoop() {
+      if (autoScanInterval) {
+        clearInterval(autoScanInterval);
+        autoScanInterval = null;
+        logToDebugConsole("Stopped native BarcodeDetector scan loop.", "info");
+      }
+    }
+
     // ================= カメラ・バーコード連続スキャン =================
     async function toggleCamera() {
       initAudio(); // ユーザー操作契機でオーディオ有効化
@@ -1679,8 +1753,11 @@
               videoEl.setAttribute('autoplay', 'true');
               videoEl.setAttribute('muted', 'true');
               videoEl.play().catch(err => console.log("Video play intercept failed:", err));
-              // カメラ解像度とステータス表示を更新
-              setTimeout(() => updateDebugDimensions(videoEl), 500);
+              // カメラ解像度とステータス表示を更新、自作の超高速スキャンループを開始
+              setTimeout(() => {
+                updateDebugDimensions(videoEl);
+                startAutoScanLoop(videoEl);
+              }, 500);
               observer.disconnect();
             }
           });
@@ -1759,6 +1836,7 @@
     }
 
     async function stopCamera() {
+      stopAutoScanLoop();
       if (html5QrCode && isCameraRunning) {
         try {
           await html5QrCode.stop();
@@ -2615,7 +2693,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v5.6</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v5.7</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
