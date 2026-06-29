@@ -820,10 +820,10 @@
       }
     }
 
-    function drawRotated(videoEl, canvas, degrees) {
+    function drawRotatedSource(sourceEl, canvas, degrees) {
       const ctx = canvas.getContext('2d');
-      const width = videoEl.videoWidth || 640;
-      const height = videoEl.videoHeight || 480;
+      const width = sourceEl.videoWidth || sourceEl.width || 640;
+      const height = sourceEl.videoHeight || sourceEl.height || 480;
 
       if (degrees === 90 || degrees === 270) {
         canvas.width = height;
@@ -837,7 +837,7 @@
       ctx.save();
       ctx.translate(canvas.width / 2, canvas.height / 2);
       ctx.rotate((degrees * Math.PI) / 180);
-      ctx.drawImage(videoEl, -width / 2, -height / 2, width, height);
+      ctx.drawImage(sourceEl, -width / 2, -height / 2, width, height);
       ctx.restore();
     }
 
@@ -873,6 +873,15 @@
         resultDiv.className = "text-yellow-300 font-bold";
         resultDiv.textContent = "Analyzing (camera paused)...";
 
+        // [CRITICAL FIX] Capture the video frame *before* stopping the camera stream
+        const tempCanvas = document.createElement('canvas');
+        const vWidth = videoEl.videoWidth || videoEl.width || 640;
+        const vHeight = videoEl.videoHeight || videoEl.height || 480;
+        tempCanvas.width = vWidth;
+        tempCanvas.height = vHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(videoEl, 0, 0, vWidth, vHeight);
+
         let wasCameraRunning = isCameraRunning;
         if (html5QrCode && isCameraRunning) {
           logToDebugConsole('Stopping active scan stream to avoid conflict...', 'info');
@@ -890,7 +899,7 @@
 
         logToDebugConsole('Running rotation decode checks (0, 90, 180, 270)...', 'info');
         for (const angle of angles) {
-          drawRotated(videoEl, canvas, angle);
+          drawRotatedSource(tempCanvas, canvas, angle);
           const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
           if (!blob) continue;
           
@@ -909,14 +918,14 @@
         if (decodedText) {
           resultDiv.className = "text-green-400 font-bold";
           resultDiv.textContent = `Success (${successAngle} deg): ${decodedText}`;
-          drawRotated(videoEl, canvas, successAngle);
+          drawRotatedSource(tempCanvas, canvas, successAngle);
           
           playBeep();
           onScanSuccess(decodedText);
         } else {
           resultDiv.className = "text-red-400 font-bold";
           resultDiv.textContent = "Not detected in all angles";
-          drawRotated(videoEl, canvas, 0);
+          drawRotatedSource(tempCanvas, canvas, 0);
         }
 
         if (wasCameraRunning && html5QrCode) {
