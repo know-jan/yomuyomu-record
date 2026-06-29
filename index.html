@@ -252,6 +252,49 @@
                   本を <b>20cm〜30cmほど少しはなして</b>、ピントを合わせると一瞬で読み取れるよ。
                 </div>
               </div>
+              
+              <!-- デバッグパネル -->
+              <div id="camera-debug-panel" class="mt-3 p-4 bg-slate-800 rounded-2xl text-xs font-mono space-y-2 border border-slate-700 shadow-inner">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
+                    <span id="debug-scan-status" class="text-gray-300 font-bold">待機中</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400">v4.1 デバッグ</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400">
+                  <div>最後に検出: <span id="debug-last-detected" class="text-yellow-300 font-bold">なし</span></div>
+                  <div>解像度: <span id="debug-video-resolution" class="text-blue-300">取得中</span></div>
+                  <div>スキャン数: <span id="debug-scan-attempts" class="text-green-300">0</span> 回</div>
+                  <div>ポーズ中: <span id="debug-scan-paused-state" class="text-red-300">いいえ</span></div>
+                </div>
+                <div class="text-[11px] text-slate-400 border-t border-slate-700 pt-1.5">
+                  エラー: <span id="debug-last-error" class="text-red-400 break-all">なし</span>
+                </div>
+                <div class="border-t border-slate-700 pt-2 flex flex-col gap-2">
+                  <div class="flex gap-2">
+                    <button type="button" id="debug-capture-btn" onclick="captureAndTestDecode()" class="flex-grow py-2 px-3 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold rounded-lg transition-all text-xs flex items-center justify-center gap-1.5">
+                      <i class="fa-solid fa-camera"></i> 今の映像をパシャリと解析テストする
+                    </button>
+                    <button type="button" onclick="clearDebugLogs()" class="py-2 px-3 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-lg text-xs">
+                      クリア
+                    </button>
+                  </div>
+                  <div id="debug-capture-preview-container" class="hidden flex items-center gap-3 bg-slate-900 p-2 rounded-xl border border-slate-700">
+                    <canvas id="debug-canvas" class="w-24 h-auto bg-black rounded-lg border border-slate-600"></canvas>
+                    <div class="flex-grow text-[10px] space-y-1">
+                      <div class="text-slate-400 font-bold">解析結果:</div>
+                      <div id="debug-capture-result" class="text-yellow-300 font-bold">未解析</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="border-t border-slate-700 pt-2">
+                  <div class="text-[10px] text-slate-400 mb-1 font-bold">ログコンソール:</div>
+                  <div id="debug-log-console" class="p-2.5 bg-slate-950 text-[10px] text-green-400 h-32 overflow-y-auto rounded-xl border border-slate-900 font-mono leading-relaxed space-y-0.5 select-text">
+                    <div>[SYS] Debug console initialized.</div>
+                  </div>
+                </div>
+              </div>
             </div>
             
             <!-- バーコード数字手入力エリア (iOS Safariカメラ制限対策) -->
@@ -807,9 +850,79 @@
       return [ 10 ];
     }
 
-    // ================= DEBUG DUMMIES =================
-    function incrementScanAttempts() {}
-    function updateDebugDimensions(videoEl) {}
+    // ================= DEBUG TOOL LOGIC =================
+    const nativeLog = console.log;
+    const nativeWarn = console.warn;
+    const nativeError = console.error;
+
+    function logToDebugConsole(message, type = 'info') {
+      const consoleDiv = document.getElementById('debug-log-console');
+      if (!consoleDiv) return;
+
+      const logRow = document.createElement('div');
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      
+      let typeColor = 'text-green-400';
+      let typeLabel = '[INFO]';
+      if (type === 'warn') {
+        typeColor = 'text-yellow-400';
+        typeLabel = '[WARN]';
+      } else if (type === 'error') {
+        typeColor = 'text-red-400';
+        typeLabel = '[ERR]';
+      }
+
+      logRow.className = `py-0.5 border-b border-slate-900/30 ${typeColor}`;
+      logRow.textContent = `${timeStr} ${typeLabel} ${message}`;
+      consoleDiv.appendChild(logRow);
+
+      while (consoleDiv.children.length > 80) {
+        consoleDiv.removeChild(consoleDiv.firstChild);
+      }
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+
+    console.log = function(...args) {
+      nativeLog.apply(console, args);
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      if (msg.includes('Html5Qrcode') || msg.includes('camera') || msg.includes('video') || msg.includes('scan') || msg.includes('decod') || msg.includes('Stream') || msg.includes('Format')) {
+        logToDebugConsole(msg, 'info');
+      }
+    };
+    console.warn = function(...args) {
+      nativeWarn.apply(console, args);
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      logToDebugConsole(msg, 'warn');
+    };
+    console.error = function(...args) {
+      nativeError.apply(console, args);
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      logToDebugConsole(msg, 'error');
+    };
+
+    function clearDebugLogs() {
+      const consoleDiv = document.getElementById('debug-log-console');
+      if (consoleDiv) consoleDiv.innerHTML = '<div>[SYS] Logs cleared.</div>';
+    }
+
+    let scanAttemptCount = 0;
+
+    function incrementScanAttempts() {
+      scanAttemptCount++;
+      const attemptBadge = document.getElementById('debug-scan-attempts');
+      if (attemptBadge) attemptBadge.textContent = scanAttemptCount;
+    }
+
+    function updateDebugDimensions(videoEl) {
+      if (!videoEl) return;
+      const resLabel = document.getElementById('debug-video-resolution');
+      if (resLabel) {
+        const w = videoEl.videoWidth || videoEl.width || 0;
+        const h = videoEl.videoHeight || videoEl.height || 480;
+        resLabel.textContent = `${w}x${h} px`;
+        logToDebugConsole(`Camera connected. Resolution: ${w}x${h}`, 'info');
+      }
+    }
 
     function drawRotatedSource(sourceEl, canvas, degrees, applyFilter = false) {
       const ctx = canvas.getContext('2d');
@@ -840,13 +953,29 @@
     }
 
     async function captureAndTestDecode() {
+      logToDebugConsole('Starting manual frame capture analysis...', 'info');
+      
       const readerDiv = document.getElementById('reader');
-      if (!readerDiv) return;
+      if (!readerDiv) {
+        logToDebugConsole('Error: reader container not found.', 'error');
+        return;
+      }
       
       const videoEl = readerDiv.querySelector('video');
       if (!videoEl) {
+        logToDebugConsole('Error: active video stream not found.', 'error');
         showToast("カメラが起動していません。");
         return;
+      }
+
+      const canvas = document.getElementById('debug-canvas');
+      const resultDiv = document.getElementById('debug-capture-result');
+      const previewContainer = document.getElementById('debug-capture-preview-container');
+      
+      if (canvas && resultDiv && previewContainer) {
+        previewContainer.classList.remove('hidden');
+        resultDiv.className = "text-yellow-300 font-bold";
+        resultDiv.textContent = "Analyzing (camera paused)...";
       }
 
       const captureBtn = document.getElementById('scan-capture-btn');
@@ -957,6 +1086,13 @@
         }
 
         if (decodedText) {
+          if (resultDiv) {
+            resultDiv.className = "text-green-400 font-bold";
+            resultDiv.textContent = `Success (${successAngle} deg, Filter:${successFilter}): ${decodedText}`;
+          }
+          if (canvas) {
+            drawRotatedSource(tempCanvas, canvas, successAngle, successFilter);
+          }
           const isbn = decodedText.trim();
           if (!isbn.startsWith("978")) {
             updateScanStatus(isbn, '対象外', '本の「上の段」のバーコード（978始まり）をうつしてね！');
@@ -977,6 +1113,13 @@
             }
           }
         } else {
+          if (resultDiv) {
+            resultDiv.className = "text-red-400 font-bold";
+            resultDiv.textContent = "Not detected in all angles/filters";
+          }
+          if (canvas) {
+            drawRotatedSource(tempCanvas, canvas, 0, false);
+          }
           updateScanStatus("", "失敗", "バーコードを読めなかったよ。本を少し離してみてね！");
           showToast("バーコードを検出できませんでした。ピントをあわせてね。");
         }
