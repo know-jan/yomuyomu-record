@@ -1132,6 +1132,80 @@
         // メインアプリ画面を非表示にして、スキャナー画面を表示
         document.getElementById('main-app-container').classList.add('hidden');
         document.getElementById('scanner-only-container').classList.remove('hidden');
+        
+        // 親ウィンドウからのスキャン判定結果受信リスナー
+        window.addEventListener('message', (event) => {
+          if (event.data && event.data.type === 'scan_result') {
+            const { isbn, status, message } = event.data;
+            
+            // 子ども用スキャンモニターを更新
+            updateScannerScanStatus(isbn, status, message);
+            
+            const sDebugError = document.getElementById('scanner-debug-error');
+            if (sDebugError) {
+              if (status === '成功') {
+                sDebugError.className = "text-red-400 break-all";
+                sDebugError.textContent = "なし";
+              } else {
+                sDebugError.className = (status === '対象外') ? "text-rose-400 font-bold break-all" : "text-amber-400 font-bold break-all";
+                sDebugError.textContent = `${message} (${isbn})`;
+              }
+            }
+
+            if (status === '成功') {
+              // 成功時はビデオを停止して1.5秒ポーズ
+              if (scannerQrCode) {
+                try {
+                  scannerQrCode.pause(true);
+                } catch (e) {
+                  console.warn("scannerQrCode pause failed:", e);
+                }
+              }
+              playBeep();
+              
+              // 1.5秒後にスキャン自動再開
+              setTimeout(() => {
+                if (!isScannerCameraRunning) {
+                  isScannerScanningPaused = false;
+                  return;
+                }
+                if (scannerQrCode) {
+                  try {
+                    scannerQrCode.resume();
+                  } catch (e) {
+                    console.warn("scannerQrCode resume failed:", e);
+                  }
+                }
+                isScannerScanningPaused = false;
+                updateScannerScanStatus("", "待機中", "バーコードをカメラにうつしてね！");
+                
+                const sDebugIndicator = document.getElementById('scanner-debug-indicator');
+                const sDebugStatus = document.getElementById('scanner-debug-status');
+                if (sDebugIndicator && sDebugStatus) {
+                  sDebugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
+                  sDebugStatus.textContent = 'スキャン中...';
+                }
+              }, 1500);
+            } else {
+              // 重複や対象外時は、一時停止を即座に解除してそのままスキャン継続
+              isScannerScanningPaused = false;
+              
+              const sDebugIndicator = document.getElementById('scanner-debug-indicator');
+              const sDebugStatus = document.getElementById('scanner-debug-status');
+              if (sDebugIndicator && sDebugStatus) {
+                sDebugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
+                sDebugStatus.textContent = 'スキャン中...';
+              }
+              
+              // モニターを待機中にリセット（重複表示が見えるよう少し遅らせる）
+              setTimeout(() => {
+                if (isScannerScanningPaused) return; // 新たにスキャンが走っていたら上書きしない
+                updateScannerScanStatus("", "待機中", "バーコードをカメラにうつしてね！");
+              }, 2500);
+            }
+          }
+        });
+        
         return; // メインアプリのロードはスキップ
       }
 
@@ -1171,25 +1245,47 @@
       window.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'isbn_scanned') {
           const isbn = event.data.isbn.trim();
+          const senderWindow = event.source;
           
-          // 重複 & 対象外チェック
+          // 1. 対象外チェック
           if (!isbn.startsWith("978")) {
             showToast(`対象外のコードです: ${isbn}`);
-            return;
-          }
-          const isAlreadyRegistered = allRegisteredBooks.some(b => b.isbn === isbn);
-          if (isAlreadyRegistered) {
-            showToast(`読んだ本の一覧に登録済みです: ${isbn}`);
-            return;
-          }
-          const isAlreadyInTemp = tempBooks.some(b => b.isbn === isbn);
-          if (isAlreadyInTemp) {
-            showToast(`一次リストに登録済みです: ${isbn}`);
+            if (senderWindow) {
+              senderWindow.postMessage({ type: 'scan_result', isbn: isbn, status: '対象外', message: '対象外のコードです' }, '*');
+            }
+            updateScanStatus(isbn, '対象外', '対象外のコードです');
             return;
           }
           
+          // 2. 本棚重複チェック
+          const isAlreadyRegistered = Array.isArray(allRegisteredBooks) && allRegisteredBooks.some(b => b && b.isbn === isbn);
+          if (isAlreadyRegistered) {
+            showToast(`読んだ本の一覧に登録済みです: ${isbn}`);
+            if (senderWindow) {
+              senderWindow.postMessage({ type: 'scan_result', isbn: isbn, status: '重複', message: '読んだ本の一覧に登録済みです' }, '*');
+            }
+            updateScanStatus(isbn, '重複', '読んだ本の一覧に登録済みです');
+            return;
+          }
+          
+          // 3. 一時リスト重複チェック
+          const isAlreadyInTemp = Array.isArray(tempBooks) && tempBooks.some(b => b && b.isbn === isbn);
+          if (isAlreadyInTemp) {
+            showToast(`一次リストに登録済みです: ${isbn}`);
+            if (senderWindow) {
+              senderWindow.postMessage({ type: 'scan_result', isbn: isbn, status: '重複', message: '一次リストに登録済みです' }, '*');
+            }
+            updateScanStatus(isbn, '重複', '一次リストに登録済みです');
+            return;
+          }
+          
+          // 正常追加
           addTempBookPlaceholder(isbn);
           showToast("別画面でバーコードを検知したよ！");
+          if (senderWindow) {
+            senderWindow.postMessage({ type: 'scan_result', isbn: isbn, status: '成功', message: '本の情報をしらべて一時リストに追加したよ！' }, '*');
+          }
+          updateScanStatus(isbn, '成功', '本の情報をしらべて一時リストに追加したよ！');
         }
       });
     });
@@ -1374,63 +1470,15 @@
       
       const isbn = decodedText.trim();
       const sDebugDetected = document.getElementById('scanner-debug-detected');
-      const sDebugError = document.getElementById('scanner-debug-error');
       
       if (sDebugDetected) {
         sDebugDetected.textContent = isbn;
       }
       
-      // 1. 対象外のコードチェック (978で始まらないものは書籍対象外)
-      if (!isbn.startsWith("978")) {
-        if (sDebugError) {
-          sDebugError.className = "text-rose-400 font-bold break-all";
-          sDebugError.textContent = `対象外のコードです (${isbn})`;
-        }
-        updateScannerScanStatus(isbn, '対象外', '対象外のコードです');
-        return;
-      }
-      
-      // 親ウィンドウ（opener）からデータを安全に取得して重複チェック
-      const parentRegistered = window.opener ? window.opener.allRegisteredBooks : [];
-      const parentTemp = window.opener ? window.opener.tempBooks : [];
-      
-      // 2. 読んだ本の一覧（本棚）に登録済みチェック
-      const isAlreadyRegistered = Array.isArray(parentRegistered) && parentRegistered.some(b => b && b.isbn === isbn);
-      if (isAlreadyRegistered) {
-        if (sDebugError) {
-          sDebugError.className = "text-amber-400 font-bold break-all";
-          sDebugError.textContent = `読んだ本の一覧に登録済みです (${isbn})`;
-        }
-        updateScannerScanStatus(isbn, '重複', '読んだ本の一覧に登録済みです');
-        return;
-      }
-      
-      // 3. 一次リストに登録済みチェック
-      const isAlreadyInTemp = Array.isArray(parentTemp) && parentTemp.some(b => b && b.isbn === isbn);
-      if (isAlreadyInTemp) {
-        if (sDebugError) {
-          sDebugError.className = "text-amber-400 font-bold break-all";
-          sDebugError.textContent = `一次リストに登録済みです (${isbn})`;
-        }
-        updateScannerScanStatus(isbn, '重複', '一次リストに登録済みです');
-        return;
-      }
-      
-      // 正常な新規ISBNの場合はエラー表示をリセット
-      if (sDebugError) {
-        sDebugError.className = "text-red-400 break-all";
-        sDebugError.textContent = "なし";
-      }
-      
-      const now = Date.now();
-      if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
-        return;
-      }
-      
-      // スキャン一時停止処理
+      // 最初期の一時停止（親ウィンドウからの結果を待つ間の一時停止）
       isScannerScanningPaused = true;
       lastScannedIsbn = isbn;
-      lastScannedTime = now;
+      lastScannedTime = Date.now();
       
       // デバッグパネルを一時停止中に変更
       const sDebugIndicator = document.getElementById('scanner-debug-indicator');
@@ -1440,21 +1488,9 @@
         sDebugStatus.textContent = '一時停止中（親画面へ送信中...）';
       }
       
-      // 子ども用スキャンモニターを成功表示にする
-      updateScannerScanStatus(isbn, '成功', '本の情報をしらべて一時リストに追加したよ！');
+      updateScannerScanStatus(isbn, '分析中', 'バーコードを解析しています...');
       
-      // html5QrCode のビデオ自体を一時停止
-      if (scannerQrCode) {
-        try {
-          scannerQrCode.pause(true); // ビデオフレームも止める
-        } catch (e) {
-          console.warn("scannerQrCode pause failed:", e);
-        }
-      }
-      
-      playBeep();
-      
-      // 親ウィンドウに結果を送信
+      // 親ウィンドウに結果を送信して判定を仰ぐ
       if (window.opener) {
         window.opener.postMessage({ type: 'isbn_scanned', isbn: isbn }, '*');
         
@@ -1468,34 +1504,9 @@
         }
       } else {
         alert("メイン画面（親ウィンドウ）が見つかりません。連携できませんでした。");
-      }
-      
-      // 1.5秒（1500ms）後にスキャン自動再開
-      setTimeout(() => {
-        if (!isScannerCameraRunning) {
-          isScannerScanningPaused = false;
-          return;
-        }
-        
-        if (scannerQrCode) {
-          try {
-            scannerQrCode.resume();
-          } catch (e) {
-            console.warn("scannerQrCode resume failed:", e);
-          }
-        }
-        
         isScannerScanningPaused = false;
-        
-        // モニターを待機中にリセット
         updateScannerScanStatus("", "待機中", "バーコードをカメラにうつしてね！");
-        
-        // デバッグパネルを稼働中に戻す
-        if (sDebugIndicator && sDebugStatus) {
-          sDebugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
-          sDebugStatus.textContent = 'スキャン中...';
-        }
-      }, 1500);
+      }
     }
 
     // ================= 音声・ビープ音制御 =================
@@ -1640,14 +1651,13 @@
             }
           };
           
-          // デバッグパネルを表示してスキャン中状態にする
+          // デバッグパネルの設定（パネル本体の非表示状態は維持）
           const debugPanel = document.getElementById('camera-debug-panel');
           const debugIndicator = document.getElementById('debug-scan-indicator');
           const debugStatus = document.getElementById('debug-scan-status');
           const debugLastDetected = document.getElementById('debug-last-detected');
           const debugLastError = document.getElementById('debug-last-error');
-          if (debugPanel) {
-            debugPanel.classList.remove('hidden');
+          if (debugIndicator && debugStatus) {
             debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
             debugStatus.textContent = 'スキャン中...';
           }
