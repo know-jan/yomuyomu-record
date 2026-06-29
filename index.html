@@ -230,6 +230,26 @@
               <div id="camera-hint-text" class="hidden text-center text-xs text-brand-600 font-bold mt-2 animate-pulse">
                 💡 バーコードを少しはなして（20cmくらい）、ピントをあわせてね！
               </div>
+              
+              <!-- 子ども用スキャンモニター -->
+              <div id="scan-status-monitor" class="mt-3 p-4 bg-brand-50 rounded-2xl border-2 border-brand-200/80 shadow-sm flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-[10px] font-black text-brand-600 tracking-wider">スキャンのじょうきょう</span>
+                  <span id="scan-status-badge" class="px-2 py-0.5 rounded-full text-[9px] font-black leading-none bg-slate-200 text-slate-700 transition-colors duration-300">待機中</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-xs font-black text-slate-800 tracking-wider leading-none" id="scan-status-isbn">----</span>
+                  <span class="text-[11px] text-brand-700 font-bold leading-none" id="scan-status-message">バーコードをカメラにうつしてね！</span>
+                </div>
+              </div>
+
+              <!-- おとな用デバッグ開閉ボタン -->
+              <div class="flex justify-center mt-3">
+                <button type="button" onclick="toggleDebugPanel()" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-500 font-bold text-[10px] rounded-full border border-slate-200 transition-all flex items-center gap-1">
+                  <i class="fa-solid fa-code text-[9px]"></i> ⚙️ おとな用のデバッグ情報をひらく
+                </button>
+              </div>
+
               <!-- デバッグパネル -->
               <div id="camera-debug-panel" class="hidden mt-2 p-4 bg-slate-800 rounded-2xl text-xs font-mono space-y-2 border border-slate-700 shadow-inner">
                 <div class="flex justify-between items-center border-b border-slate-700 pb-1.5">
@@ -734,6 +754,59 @@
     let isScanningPaused = false; // 一時停止（スキャンスロットリング）中フラグ
     let lastScannedTime = 0;     // 直前スキャン時間 (ミリ秒)
 
+    // おとな用デバッグパネルのトグル表示
+    function toggleDebugPanel() {
+      const panel = document.getElementById('camera-debug-panel');
+      const btn = window.event ? window.event.currentTarget : null;
+      if (panel) {
+        panel.classList.toggle('hidden');
+        if (btn) {
+          if (panel.classList.contains('hidden')) {
+            btn.innerHTML = '<i class="fa-solid fa-code text-[9px]"></i> ⚙️ おとな用のデバッグ情報をひらく';
+          } else {
+            btn.innerHTML = '<i class="fa-solid fa-code text-[9px]"></i> ⚙️ デバッグ情報をとじる';
+          }
+        }
+      }
+    }
+
+    // 子ども用スキャンモニターの更新
+    function updateScanStatus(isbn, status, message) {
+      const isbnEl = document.getElementById('scan-status-isbn');
+      const badgeEl = document.getElementById('scan-status-badge');
+      const msgEl = document.getElementById('scan-status-message');
+      
+      if (isbnEl) isbnEl.textContent = isbn || "----";
+      if (msgEl) msgEl.textContent = message || "";
+      
+      if (badgeEl) {
+        badgeEl.textContent = status || "待機中";
+        badgeEl.className = "px-2 py-0.5 rounded-full text-[9px] font-black leading-none transition-colors duration-300";
+        if (status === '成功') {
+          badgeEl.classList.add('bg-emerald-100', 'text-emerald-700');
+        } else if (status === '重複') {
+          badgeEl.classList.add('bg-amber-100', 'text-amber-700');
+        } else if (status === '対象外') {
+          badgeEl.classList.add('bg-rose-100', 'text-rose-700');
+        } else if (status === '分析中') {
+          badgeEl.classList.add('bg-blue-100', 'text-blue-700');
+        } else if (status === '失敗') {
+          badgeEl.classList.add('bg-rose-100', 'text-rose-700');
+        } else {
+          badgeEl.classList.add('bg-slate-200', 'text-slate-700');
+        }
+      }
+    }
+
+    // 一時リストのローカルストレージへの保存
+    function saveTempBooksToStorage() {
+      try {
+        localStorage.setItem('yomuyomu_temp_books', JSON.stringify(tempBooks));
+      } catch (e) {
+        console.warn("Failed to save tempBooks to LocalStorage:", e);
+      }
+    }
+
     // html5-qrcodeでデコード対象をEAN_13のみに限定し、スキャン処理を劇的に軽量・高速化する安全な指定ヘルパー
     function getSupportedFormats() {
       if (typeof window.Html5Qrcode !== 'undefined' && window.Html5Qrcode.SupportedFormats) {
@@ -877,6 +950,7 @@
       if (captureBtn) captureBtn.disabled = true;
 
       try {
+        updateScanStatus("", "分析中", "パシャリと撮影して解析しています...");
         previewContainer.classList.remove('hidden');
         resultDiv.className = "text-yellow-300 font-bold";
         resultDiv.textContent = "Analyzing (camera paused)...";
@@ -959,6 +1033,7 @@
           resultDiv.className = "text-red-400 font-bold";
           resultDiv.textContent = "Not detected in all angles/filters";
           drawRotatedSource(tempCanvas, canvas, 0, false);
+          updateScanStatus("", "失敗", "バーコードを読めなかったよ。本を少し離してみてね！");
         }
 
         if (wasCameraRunning && html5QrCode) {
@@ -1026,10 +1101,49 @@
       // 登録された本をロード
       fetchRegisteredBooks();
 
+      // 一時リストのローカルストレージからの復元
+      try {
+        const stored = localStorage.getItem('yomuyomu_temp_books');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            tempBooks = parsed;
+            const container = document.getElementById('temp-list-container');
+            if (container) {
+              container.innerHTML = '';
+              // 先頭に追加するために逆順で rendering
+              for (let i = tempBooks.length - 1; i >= 0; i--) {
+                container.insertAdjacentHTML('afterbegin', renderSingleTempBookHTML(tempBooks[i]));
+              }
+              updateTempCountBadge();
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to load tempBooks from LocalStorage:", e);
+      }
+
       // 別ウィンドウのカメラからのデータ受信リスナー
       window.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'isbn_scanned') {
-          const isbn = event.data.isbn;
+          const isbn = event.data.isbn.trim();
+          
+          // 重複 & 対象外チェック
+          if (!isbn.startsWith("978")) {
+            showToast(`対象外のコードです: ${isbn}`);
+            return;
+          }
+          const isAlreadyRegistered = allRegisteredBooks.some(b => b.isbn === isbn);
+          if (isAlreadyRegistered) {
+            showToast(`読んだ本の一覧に登録済みです: ${isbn}`);
+            return;
+          }
+          const isAlreadyInTemp = tempBooks.some(b => b.isbn === isbn);
+          if (isAlreadyInTemp) {
+            showToast(`一次リストに登録済みです: ${isbn}`);
+            return;
+          }
+          
           addTempBookPlaceholder(isbn);
           showToast("別画面でバーコードを検知したよ！");
         }
@@ -1573,6 +1687,7 @@
           debugLastError.textContent = `対象外のコードです (${isbn})`;
         }
         logToDebugConsole(`Scan skipped: Non-book EAN/C-Code: ${isbn}`, 'warn');
+        updateScanStatus(isbn, '対象外', '対象外のコードです');
         showToast(`対象外のコードです: ${isbn}`);
         return;
       }
@@ -1585,6 +1700,7 @@
           debugLastError.textContent = `読んだ本の一覧に登録済みです (${isbn})`;
         }
         logToDebugConsole(`Scan skipped: Already registered in main collection: ${isbn}`, 'warn');
+        updateScanStatus(isbn, '重複', '読んだ本の一覧に登録済みです');
         showToast(`読んだ本の一覧に登録済みです: ${isbn}`);
         return;
       }
@@ -1597,6 +1713,7 @@
           debugLastError.textContent = `一次リストに登録済みです (${isbn})`;
         }
         logToDebugConsole(`Scan skipped: Already in temporary list: ${isbn}`, 'warn');
+        updateScanStatus(isbn, '重複', '一次リストに登録済みです');
         showToast(`一次リストに登録済みです: ${isbn}`);
         return;
       }
@@ -1630,6 +1747,9 @@
         debugPausedState.textContent = "はい";
       }
       
+      // 子ども用スキャンモニターを成功表示にする
+      updateScanStatus(isbn, '成功', '本の情報をしらべて一時リストに追加したよ！');
+      
       // html5QrCode のビデオ自体を一時停止
       if (html5QrCode) {
         try {
@@ -1662,6 +1782,9 @@
         }
         
         isScanningPaused = false;
+        
+        // 子ども用スキャンモニターを待機中にリセット
+        updateScanStatus("", "待機中", "バーコードをカメラにうつしてね！");
         
         // デバッグパネルを稼働中に戻す
         const debugPausedState2 = document.getElementById('debug-scan-paused-state');
@@ -1746,6 +1869,7 @@
       
       // 先頭に追加
       tempBooks.unshift(newBook);
+      saveTempBooksToStorage();
       
       // 一時リストエリアの初期テキスト（空状態）を消去する準備として、
       // 最初の要素追加時のみ親コンテナの中身を空にする
@@ -1769,6 +1893,7 @@
           
           // 該当カードのDOMのみ書き換える
           updateTempBookCardDOM(book);
+          saveTempBooksToStorage();
         }
       });
     }
@@ -1934,6 +2059,7 @@
       const book = tempBooks.find(b => b.tempId === tempId);
       if (book) {
         book[field] = value;
+        saveTempBooksToStorage();
       }
     }
 
@@ -1942,6 +2068,7 @@
       const book = tempBooks.find(b => b.tempId === tempId);
       if (book) {
         book.ownerType = ownerType;
+        saveTempBooksToStorage();
         
         const libBtn = document.getElementById('owner-lib-' + tempId);
         const homeBtn = document.getElementById('owner-home-' + tempId);
@@ -1963,6 +2090,7 @@
       const book = tempBooks.find(b => b.tempId === tempId);
       if (book) {
         book.genre = genre;
+        saveTempBooksToStorage();
         if (!book.coverUrl) {
           const cardEl = document.getElementById('temp-card-' + tempId);
           if (cardEl) {
@@ -1980,6 +2108,7 @@
       const book = tempBooks.find(b => b.tempId === tempId);
       if (book) {
         book.rating = rating;
+        saveTempBooksToStorage();
         const cardEl = document.getElementById('temp-card-' + tempId);
         if (cardEl) {
           const starsContainer = cardEl.querySelector('.stars-container');
@@ -1993,6 +2122,7 @@
     // リストの個別削除
     function deleteTempBook(tempId) {
       tempBooks = tempBooks.filter(b => b.tempId !== tempId);
+      saveTempBooksToStorage();
       const cardEl = document.getElementById('temp-card-' + tempId);
       if (cardEl) {
         cardEl.remove();
@@ -2022,6 +2152,7 @@
       if (tempBooks.length === 0) return;
       if (confirm("一時リストをからにしますか？")) {
         tempBooks = [];
+        saveTempBooksToStorage();
         renderTempListEmpty();
         updateTempCountBadge();
       }
@@ -2076,6 +2207,7 @@
           
           // 一時リストクリア
           tempBooks = [];
+          saveTempBooksToStorage();
           renderTempListEmpty();
           updateTempCountBadge();
           
