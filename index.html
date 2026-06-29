@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.8</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.9</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.8</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.9</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -257,7 +257,7 @@
                     <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
                     <span id="debug-scan-status" class="text-gray-300 font-bold">待機中</span>
                   </div>
-                  <span class="text-[10px] text-slate-400">v5.8 デバッグ</span>
+                  <span class="text-[10px] text-slate-400">v5.9 デバッグ</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400">
                   <div>最後に検出: <span id="debug-last-detected" class="text-yellow-300 font-bold">なし</span></div>
@@ -267,6 +267,17 @@
                 </div>
                 <div class="text-[11px] text-slate-400 border-t border-slate-700 pt-1.5">
                   エラー: <span id="debug-last-error" class="text-red-400 break-all">なし</span>
+                </div>
+                <div class="border-t border-slate-700 pt-2 pb-1">
+                  <div class="flex items-center justify-between text-[11px] text-slate-300 mb-1">
+                    <span class="font-bold"><i class="fa-solid fa-arrows-up-down"></i> スキャン位置の上下ズレ微調整:</span>
+                    <span id="debug-crop-offset-val" class="text-yellow-400 font-bold">0%</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="text-[10px] text-slate-500">上</span>
+                    <input type="range" id="debug-crop-offset-slider" min="-30" max="30" value="0" oninput="updateCropOffsetFromSlider(this.value)" class="flex-grow h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-brand-500">
+                    <span class="text-[10px] text-slate-500">下</span>
+                  </div>
                 </div>
                 <div class="border-t border-slate-700 pt-2 flex flex-col gap-2">
                   <div class="flex gap-2">
@@ -756,6 +767,7 @@
     let lastScannedIsbn = "";    // 直前スキャンISBN
     let barcodeDetector = null;  // OSネイティブ検出エンジン
     let autoScanInterval = null; // 自動スキャンループタイマー
+    let cropYOffsetPercent = 0;  // スキャン切り抜き位置の上下オフセット(%)
 
     // おとな用デバッグパネルのトグル表示
     function toggleDebugPanel() {
@@ -921,6 +933,20 @@
       if (consoleDiv) consoleDiv.innerHTML = '<div>[SYS] Logs cleared.</div>';
     }
 
+    function updateCropOffsetFromSlider(val) {
+      cropYOffsetPercent = parseInt(val, 10) || 0;
+      const valEl = document.getElementById('debug-crop-offset-val');
+      if (valEl) {
+        valEl.textContent = (cropYOffsetPercent > 0 ? '+' : '') + cropYOffsetPercent + '%';
+      }
+      try {
+        localStorage.setItem('yomuyomu_crop_y_offset', cropYOffsetPercent);
+      } catch (e) {
+        console.warn("Failed to save cropOffset to LocalStorage:", e);
+      }
+      logToDebugConsole(`Crop Y-Offset updated to: ${cropYOffsetPercent}%`, 'info');
+    }
+
     let scanAttemptCount = 0;
 
     function incrementScanAttempts() {
@@ -1009,15 +1035,17 @@
         const vHeight = videoEl.videoHeight || videoEl.height || 480;
         
         let cropX = 0, cropY = 0, cropW = vWidth, cropH = vHeight;
+        const offsetPx = Math.floor(vHeight * (cropYOffsetPercent / 100));
         if (vHeight > vWidth) {
           // 縦長の場合: 高さの中央 22% を切り抜く
           cropH = Math.floor(vHeight * 0.22);
-          cropY = Math.floor((vHeight - cropH) / 2);
+          cropY = Math.floor((vHeight - cropH) / 2) + offsetPx;
         } else {
           // 横長の場合: 高さの中央 28% を切り抜く
           cropH = Math.floor(vHeight * 0.28);
-          cropY = Math.floor((vHeight - cropH) / 2);
+          cropY = Math.floor((vHeight - cropH) / 2) + offsetPx;
         }
+        cropY = Math.max(0, Math.min(vHeight - cropH, cropY)); // 範囲外クランプ
         
         tempCanvas.width = cropW;
         tempCanvas.height = cropH;
@@ -1320,6 +1348,20 @@
         } catch (e) {
           console.warn("OS Native BarcodeDetector initialization failed:", e);
         }
+      }
+
+      // クロップ位置オフセットの復元
+      try {
+        const storedOffset = localStorage.getItem('yomuyomu_crop_y_offset');
+        if (storedOffset !== null) {
+          cropYOffsetPercent = parseInt(storedOffset, 10) || 0;
+          const slider = document.getElementById('debug-crop-offset-slider');
+          const valEl = document.getElementById('debug-crop-offset-val');
+          if (slider) slider.value = cropYOffsetPercent;
+          if (valEl) valEl.textContent = (cropYOffsetPercent > 0 ? '+' : '') + cropYOffsetPercent + '%';
+        }
+      } catch (e) {
+        console.warn("Failed to load cropOffset from LocalStorage:", e);
       }
     });
 
@@ -1663,16 +1705,18 @@
         if (vWidth === 0 || vHeight === 0) return;
         
         // 中央のスリット領域（赤いターゲット枠。高さ約 28%）のみを切り出す
+        const offsetPx = Math.floor(vHeight * (cropYOffsetPercent / 100));
         let cropX = 0, cropY = 0, cropW = vWidth, cropH = vHeight;
         if (vHeight > vWidth) {
           // 縦長の場合: 高さの中央 22% を切り抜く
           cropH = Math.floor(vHeight * 0.22);
-          cropY = Math.floor((vHeight - cropH) / 2);
+          cropY = Math.floor((vHeight - cropH) / 2) + offsetPx;
         } else {
           // 横長の場合: 高さの中央 28% を切り抜く
           cropH = Math.floor(vHeight * 0.28);
-          cropY = Math.floor((vHeight - cropH) / 2);
+          cropY = Math.floor((vHeight - cropH) / 2) + offsetPx;
         }
+        cropY = Math.max(0, Math.min(vHeight - cropH, cropY)); // 範囲外クランプ
         
         const cropCanvas = document.createElement('canvas');
         cropCanvas.width = cropW;
@@ -2712,7 +2756,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v5.8</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v5.9</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
