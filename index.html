@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.7</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.8</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.7</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.8</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -216,7 +216,7 @@
                 <div id="reader" class="hidden w-full h-full bg-black border-4 border-brand-300 shadow-md"></div>
                 <!-- スキャンターゲット枠（カメラ稼働中のみ表示、外側を半透明マスクし中央をくり抜く） -->
                 <div id="scan-area-overlay" class="hidden absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-                  <div class="w-[85%] h-[12%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
+                  <div class="w-[80%] h-[28%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
                     <!-- 照準赤線 -->
                     <div class="absolute inset-x-0 top-1/2 h-[1px] bg-rose-500/80 -translate-y-1/2 animate-pulse"></div>
                     <!-- 角のブラケット装飾 -->
@@ -834,12 +834,6 @@
         
         const config = {
           fps: 12,
-          qrbox: function(width, height) {
-            // 2段あるバーコードのうち、上の段（ISBN）だけを狙いやすくするために縦幅を細く絞る（12%）
-            const boxWidth = Math.floor(width * 0.85);
-            const boxHeight = Math.floor(height * 0.12);
-            return { width: boxWidth, height: boxHeight };
-          },
           videoConstraints: {
             width: { ideal: 1280 },
             height: { ideal: 720 },
@@ -1145,12 +1139,6 @@
           
           const config = {
             fps: 12,
-            qrbox: function(width, height) {
-              // 2段あるバーコードのうち、上の段（ISBN）だけを狙いやすくするために縦幅を細く絞る（12%）
-              const boxWidth = Math.floor(width * 0.85);
-              const boxHeight = Math.floor(height * 0.12);
-              return { width: boxWidth, height: boxHeight };
-            },
             videoConstraints: {
               width: { ideal: 1280 },
               height: { ideal: 720 },
@@ -2006,7 +1994,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v1.7</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v1.8</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
@@ -2046,7 +2034,7 @@
         <!-- カメラ表示領域 -->
         <!-- スキャンターゲット枠（カメラ稼働中のみ表示、外側を半透明マスクし中央をくり抜く） -->
         <div id="scanner-scan-area-overlay" class="hidden absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-          <div class="w-[85%] h-[12%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
+          <div class="w-[80%] h-[28%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
             <!-- 照準赤線 -->
             <div class="absolute inset-x-0 top-1/2 h-[1px] bg-rose-500/80 -translate-y-1/2 animate-pulse"></div>
             <!-- 角のブラケット装飾 -->
