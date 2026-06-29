@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.8</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.9</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.8</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.9</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -231,13 +231,51 @@
                 💡 バーコードを少しはなして（20cmくらい）、ピントをあわせてね！
               </div>
               <!-- デバッグパネル -->
-              <div id="camera-debug-panel" class="hidden mt-2 p-3 bg-slate-800 rounded-xl text-xs font-mono space-y-1">
-                <div class="flex items-center gap-2">
-                  <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
-                  <span id="debug-scan-status" class="text-gray-400">待機中</span>
+              <div id="camera-debug-panel" class="hidden mt-2 p-4 bg-slate-800 rounded-2xl text-xs font-mono space-y-2 border border-slate-700 shadow-inner">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-1.5">
+                  <div class="flex items-center gap-2">
+                    <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
+                    <span id="debug-scan-status" class="text-gray-300 font-bold">待機中</span>
+                  </div>
+                  <span class="text-[10px] text-slate-400">v1.9 デバッグツール</span>
                 </div>
-                <div class="text-gray-500">最後に検出: <span id="debug-last-detected" class="text-yellow-300">なし</span></div>
-                <div class="text-gray-500">エラー: <span id="debug-last-error" class="text-red-400">なし</span></div>
+                <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400">
+                  <div>最後に検出: <span id="debug-last-detected" class="text-yellow-300 font-bold">なし</span></div>
+                  <div>カメラ解像度: <span id="debug-video-resolution" class="text-blue-300">取得中</span></div>
+                  <div>スキャン回数: <span id="debug-scan-attempts" class="text-green-300">0</span> 回</div>
+                  <div>一時停止: <span id="debug-scan-paused-state" class="text-red-300">いいえ</span></div>
+                </div>
+                <div class="text-[11px] text-slate-400 border-t border-slate-700 pt-1.5">
+                  エラー: <span id="debug-last-error" class="text-red-400 break-all">なし</span>
+                </div>
+                
+                <!-- 手動キャプチャテスト機能 -->
+                <div class="border-t border-slate-700 pt-2 flex flex-col gap-2">
+                  <div class="flex gap-2">
+                    <button type="button" id="debug-capture-btn" onclick="captureAndTestDecode()" class="flex-grow py-2 px-3 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold rounded-lg transition-all text-xs flex items-center justify-center gap-1.5">
+                      <i class="fa-solid fa-camera"></i> 今の映像をパシャリと解析テストする
+                    </button>
+                    <button type="button" onclick="clearDebugLogs()" class="py-2 px-3 bg-slate-700 hover:bg-slate-605 text-slate-300 font-bold rounded-lg text-xs">
+                      ログクリア
+                    </button>
+                  </div>
+                  <!-- キャプチャ結果画像表示 -->
+                  <div id="debug-capture-preview-container" class="hidden flex items-center gap-3 bg-slate-900 p-2 rounded-xl border border-slate-700">
+                    <canvas id="debug-canvas" class="w-24 aspect-[4/3] bg-black rounded-lg border border-slate-600"></canvas>
+                    <div class="flex-grow text-[10px] space-y-1">
+                      <div class="text-slate-400 font-bold">キャプチャ解析結果:</div>
+                      <div id="debug-capture-result" class="text-yellow-300 font-bold">未解析</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- 簡易ログモニター -->
+                <div class="border-t border-slate-700 pt-2">
+                  <div class="text-[10px] text-slate-400 mb-1 font-bold">📊 デバッグログコンソール:</div>
+                  <div id="debug-log-console" class="p-2.5 bg-slate-950 text-[10px] text-green-400 h-32 overflow-y-auto rounded-xl border border-slate-900 font-mono leading-relaxed space-y-0.5 select-text">
+                    <div>[システム] デバッグログ準備完了。</div>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -713,6 +751,174 @@
       return [ 10 ];
     }
 
+    // ================= 画面内デバッグツール用のJavaScript制御 =================
+    const nativeLog = console.log;
+    const nativeWarn = console.warn;
+    const nativeError = console.error;
+
+    function logToDebugConsole(message, type = 'info') {
+      const consoleDiv = document.getElementById('debug-log-console');
+      if (!consoleDiv) return;
+
+      const logRow = document.createElement('div');
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      
+      let typeColor = 'text-green-400';
+      let typeLabel = '[情報]';
+      if (type === 'warn') {
+        typeColor = 'text-yellow-400';
+        typeLabel = '[警告]';
+      } else if (type === 'error') {
+        typeColor = 'text-red-400';
+        typeLabel = '[エラー]';
+      }
+
+      logRow.className = `py-0.5 border-b border-slate-900/30 ${typeColor}`;
+      logRow.textContent = `${timeStr} ${typeLabel} ${message}`;
+      consoleDiv.appendChild(logRow);
+
+      // 行数制限（最大80行）
+      while (consoleDiv.children.length > 80) {
+        consoleDiv.removeChild(consoleDiv.firstChild);
+      }
+
+      // 最下部まで自動スクロール
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+
+    // consoleのオーバーライド
+    console.log = function(...args) {
+      nativeLog.apply(console, args);
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      // html5-qrcodeやカメラ関係のメッセージはコンソールに流す
+      if (msg.includes('Html5Qrcode') || msg.includes('camera') || msg.includes('video') || msg.includes('scan') || msg.includes('decod') || msg.includes('Stream') || msg.includes('Format')) {
+        logToDebugConsole(msg, 'info');
+      }
+    };
+    console.warn = function(...args) {
+      nativeWarn.apply(console, args);
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      logToDebugConsole(msg, 'warn');
+    };
+    console.error = function(...args) {
+      nativeError.apply(console, args);
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+      logToDebugConsole(msg, 'error');
+    };
+
+    function clearDebugLogs() {
+      const consoleDiv = document.getElementById('debug-log-console');
+      if (consoleDiv) consoleDiv.innerHTML = '<div>[システム] ログをクリアしました。</div>';
+    }
+
+    // スキャン試行カウンタと状態管理変数
+    let scanAttemptCount = 0;
+
+    function incrementScanAttempts() {
+      scanAttemptCount++;
+      const attemptBadge = document.getElementById('debug-scan-attempts');
+      if (attemptBadge) attemptBadge.textContent = scanAttemptCount;
+    }
+
+    // カメラ解像度と状態の動的チェック
+    function updateDebugDimensions(videoEl) {
+      if (!videoEl) return;
+      const resLabel = document.getElementById('debug-video-resolution');
+      if (resLabel) {
+        const w = videoEl.videoWidth || videoEl.width || 0;
+        const h = videoEl.videoHeight || videoEl.height || 0;
+        resLabel.textContent = `${w}x${h} px`;
+        logToDebugConsole(`カメラ接続確立: 実解像度 ${w}x${h}`, 'info');
+      }
+    }
+
+    // 手動映像キャプチャ & スナップショットデコード解析
+    async function captureAndTestDecode() {
+      logToDebugConsole('手動キャプチャ解析を開始します...', 'info');
+      
+      const readerDiv = document.getElementById('reader');
+      if (!readerDiv) {
+        logToDebugConsole('エラー: readerコンテナが見つかりません。', 'error');
+        return;
+      }
+      
+      const videoEl = readerDiv.querySelector('video');
+      if (!videoEl) {
+        logToDebugConsole('エラー: アクティブなビデオストリーム(カメラ)が見つかりません。', 'error');
+        return;
+      }
+
+      const canvas = document.getElementById('debug-canvas');
+      const resultDiv = document.getElementById('debug-capture-result');
+      const previewContainer = document.getElementById('debug-capture-preview-container');
+      
+      if (!canvas || !resultDiv || !previewContainer) {
+        logToDebugConsole('エラー: デバッグキャプチャ用DOM要素が不足しています。', 'error');
+        return;
+      }
+
+      try {
+        const width = videoEl.videoWidth || videoEl.width || 640;
+        const height = videoEl.videoHeight || videoEl.height || 480;
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        // 現在のビデオフレームをキャンバスに転写
+        ctx.drawImage(videoEl, 0, 0, width, height);
+        
+        // プレビュー表示
+        previewContainer.classList.remove('hidden');
+        resultDiv.className = "text-yellow-300 font-bold";
+        resultDiv.textContent = "解析中...";
+
+        logToDebugConsole(`キャプチャ成功: 静止画 ${width}x${height} を生成しました。`, 'info');
+        
+        if (!html5QrCode) {
+          logToDebugConsole('エラー: html5QrCode インスタンスが初期化されていません。', 'error');
+          resultDiv.className = "text-red-400 font-bold";
+          resultDiv.textContent = "インスタンス未初期化";
+          return;
+        }
+
+        // キャンバスの画像データをBlobに変換
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            logToDebugConsole('エラー: Blobデータの生成に失敗しました。', 'error');
+            resultDiv.className = "text-red-400 font-bold";
+            resultDiv.textContent = "画像生成失敗";
+            return;
+          }
+          
+          // BlobをFileオブジェクトに変換 (html5-qrcodeのscanFileはFileオブジェクトを要求するため)
+          const file = new File([blob], "captured-frame.png", { type: "image/png" });
+          
+          logToDebugConsole('静止画デコード処理を呼び出します...', 'info');
+          try {
+            // html5QrCode.scanFile を呼び出してデコード
+            const decodedText = await html5QrCode.scanFile(file, true);
+            logToDebugConsole(`【デコード成功!】 検出したISBN: ${decodedText}`, 'info');
+            resultDiv.className = "text-green-400 font-bold";
+            resultDiv.textContent = `成功: ${decodedText}`;
+            
+            // 音を鳴らして親処理を呼び出す
+            playBeep();
+            onScanSuccess(decodedText);
+          } catch (err) {
+            logToDebugConsole(`【デコード失敗】 バーコードが見つかりません。理由: ${err}`, 'warn');
+            resultDiv.className = "text-red-400 font-bold";
+            resultDiv.textContent = "検出できず (ピンボケや位置ずれ)";
+          }
+        }, 'image/png');
+        
+      } catch (ex) {
+        logToDebugConsole(`キャプチャ処理中に致命的例外: ${ex}`, 'error');
+        resultDiv.className = "text-red-400 font-bold";
+        resultDiv.textContent = "例外発生";
+      }
+    }
+
     // ================= アプリ初期化 =================
     window.addEventListener('DOMContentLoaded', () => {
       if (isScannerMode) {
@@ -1167,6 +1373,8 @@
               videoEl.setAttribute('autoplay', 'true');
               videoEl.setAttribute('muted', 'true');
               videoEl.play().catch(err => console.log("Video play intercept failed:", err));
+              // カメラ解像度とステータス表示を更新
+              setTimeout(() => updateDebugDimensions(videoEl), 500);
               observer.disconnect();
             }
           });
@@ -1174,6 +1382,8 @@
 
           // エラーコールバック: 検出失敗ごとのエラーをフィルタしてデバッグパネルに表示
           const onScanError = (errorMessage) => {
+            incrementScanAttempts(); // スキャン試行カウンタを更新
+            
             if (isScanningPaused) return; // 一時停止中ならエラー更新も無視
             
             // "No MultiFormat Readers" などの日常的な未検出エラーは無視して "なし" とする
@@ -1283,6 +1493,7 @@
       const debugStatus = document.getElementById('debug-scan-status');
       const debugLastDetected = document.getElementById('debug-last-detected');
       const debugLastError = document.getElementById('debug-last-error');
+      const debugPausedState = document.getElementById('debug-scan-paused-state');
       if (debugIndicator && debugStatus) {
         debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse';
         debugStatus.textContent = '一時停止中（本の情報を取得中...）';
@@ -1292,6 +1503,9 @@
       }
       if (debugLastError) {
         debugLastError.textContent = "なし";
+      }
+      if (debugPausedState) {
+        debugPausedState.textContent = "はい";
       }
       
       // html5QrCode のビデオ自体を一時停止
@@ -1328,6 +1542,10 @@
         isScanningPaused = false;
         
         // デバッグパネルを稼働中に戻す
+        const debugPausedState2 = document.getElementById('debug-scan-paused-state');
+        if (debugPausedState2) {
+          debugPausedState2.textContent = "いいえ";
+        }
         if (debugIndicator && debugStatus) {
           debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
           debugStatus.textContent = 'スキャン中...';
@@ -1994,7 +2212,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v1.8</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v1.9</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
