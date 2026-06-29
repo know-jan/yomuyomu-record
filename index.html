@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v2.6</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v3.0</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v2.6</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v3.0</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -233,14 +233,23 @@
               </div>
               
               <!-- スキャン状況モニター -->
-              <div id="scan-status-monitor" class="mt-3 px-4 py-3 bg-brand-50/80 backdrop-blur-sm rounded-2xl border-2 border-brand-200 text-xs font-bold text-brand-800 flex flex-col gap-1.5 shadow-sm">
+              <div id="scan-status-monitor" class="mt-3 px-4 py-3.5 bg-brand-50/90 backdrop-blur-sm rounded-2xl border-2 border-brand-200 text-xs font-bold text-brand-800 flex flex-col gap-3 shadow-sm select-none">
                 <div class="flex justify-between items-center">
                   <span class="text-[9px] text-brand-500 uppercase tracking-widest leading-none">LATEST SCAN STATUS</span>
                   <span id="scan-status-badge" class="px-2 py-0.5 rounded-full text-[9px] font-black bg-slate-200 text-slate-700 leading-none">待機中</span>
                 </div>
-                <div class="flex justify-between items-center mt-0.5">
+                <div class="flex justify-between items-center">
                   <span class="text-sm font-black text-slate-800 tracking-wider leading-none" id="scan-status-isbn">----</span>
                   <span class="text-[11px] text-brand-700 font-bold leading-none" id="scan-status-message">バーコードをカメラにうつしてね！</span>
+                </div>
+                <div class="flex gap-2 mt-1">
+                  <button type="button" id="scan-capture-btn" onclick="captureAndTestDecode()" class="flex-grow py-3 px-4 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-black text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-camera"></i> 📸 パシャッとスキャン！
+                  </button>
+                </div>
+                <div class="text-[9.5px] text-brand-600 font-medium border-t border-brand-200/50 pt-2 leading-relaxed">
+                  💡 <b>よむためのコツ:</b> バーコードをカメラに近づけすぎるとピンぼけしちゃうよ！<br>
+                  本を <b>20cm〜30cmほど少しはなして</b>、ピントが合ったらボタンを押してみてね。
                 </div>
               </div>
             </div>
@@ -720,6 +729,169 @@
     // ================= DEBUG DUMMIES =================
     function incrementScanAttempts() {}
     function updateDebugDimensions(videoEl) {}
+
+    function drawRotatedSource(sourceEl, canvas, degrees, applyFilter = false) {
+      const ctx = canvas.getContext('2d');
+      const width = sourceEl.videoWidth || sourceEl.width || 640;
+      const height = sourceEl.videoHeight || sourceEl.height || 480;
+
+      if (degrees === 90 || degrees === 270) {
+        canvas.width = height;
+        canvas.height = width;
+      } else {
+        canvas.width = width;
+        canvas.height = height;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      
+      if (applyFilter) {
+        ctx.filter = "grayscale(100%) contrast(250%) brightness(95%)";
+      } else {
+        ctx.filter = "none";
+      }
+
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((degrees * Math.PI) / 180);
+      ctx.drawImage(sourceEl, -width / 2, -height / 2, width, height);
+      ctx.restore();
+    }
+
+    async function captureAndTestDecode() {
+      const readerDiv = document.getElementById('reader');
+      if (!readerDiv) return;
+      
+      const videoEl = readerDiv.querySelector('video');
+      if (!videoEl) {
+        showToast("カメラが起動していません。");
+        return;
+      }
+
+      const captureBtn = document.getElementById('scan-capture-btn');
+      if (captureBtn) {
+        captureBtn.disabled = true;
+        captureBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> スキャン中...';
+      }
+
+      updateScanStatus("", "分析中", "パシャリと撮影して解析しています...");
+
+      try {
+        const tempCanvas = document.createElement('canvas');
+        const vWidth = videoEl.videoWidth || videoEl.width || 640;
+        const vHeight = videoEl.videoHeight || videoEl.height || 480;
+        tempCanvas.width = vWidth;
+        tempCanvas.height = vHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(videoEl, 0, 0, vWidth, vHeight);
+
+        let wasCameraRunning = isCameraRunning;
+        if (html5QrCode && isCameraRunning) {
+          try {
+            await html5QrCode.stop();
+            isCameraRunning = false;
+          } catch (stopErr) {
+            console.warn("Capture stop camera failed:", stopErr);
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        const angles = [0, 90, 180, 270];
+        let decodedText = null;
+        let successAngle = 0;
+        let successFilter = false;
+
+        for (const angle of angles) {
+          drawRotatedSource(tempCanvas, canvas, angle, false);
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+          if (!blob) continue;
+          const file = new File([blob], `captured-${angle}.png`, { type: "image/png" });
+          
+          try {
+            decodedText = await html5QrCode.scanFile(file, true);
+            successAngle = angle;
+            successFilter = false;
+            break;
+          } catch (e) {}
+        }
+
+        if (!decodedText) {
+          for (const angle of angles) {
+            drawRotatedSource(tempCanvas, canvas, angle, true);
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) continue;
+            const file = new File([blob], `captured-${angle}-filtered.png`, { type: "image/png" });
+            
+            try {
+              decodedText = await html5QrCode.scanFile(file, true);
+              successAngle = angle;
+              successFilter = true;
+              break;
+            } catch (e) {}
+          }
+        }
+
+        if (decodedText) {
+          const isbn = decodedText.trim();
+          if (!isbn.startsWith("978")) {
+            updateScanStatus(isbn, '対象外', '本の「上の段」のバーコード（978始まり）をうつしてね！');
+          } else {
+            const isAlreadyRegistered = allRegisteredBooks.some(b => b.isbn === isbn);
+            if (isAlreadyRegistered) {
+              updateScanStatus(isbn, '重複', 'よんだ本の一覧に登録済みです');
+            } else {
+              const isAlreadyInTemp = tempBooks.some(b => b.isbn === isbn);
+              if (isAlreadyInTemp) {
+                updateScanStatus(isbn, '重複', '一時リストに登録済みです');
+              } else {
+                updateScanStatus(isbn, '成功', '本の情報をしらべて一時リストに追加したよ！');
+                playBeep();
+                showToast("バーコードを読み取りました！");
+                addTempBookPlaceholder(isbn);
+              }
+            }
+          }
+        } else {
+          updateScanStatus("", "失敗", "バーコードを読めなかったよ。本を少し離してみてね！");
+          showToast("バーコードを検出できませんでした。ピントをあわせてね。");
+        }
+
+        if (wasCameraRunning && html5QrCode) {
+          const config = {
+            fps: 12,
+            videoConstraints: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: "environment"
+            }
+          };
+
+          try {
+            await html5QrCode.start(
+              { facingMode: "environment" },
+              config,
+              (decodedText) => {
+                onScanSuccess(decodedText);
+              },
+              (errorMessage) => {
+                if (isScanningPaused) return;
+              }
+            );
+            isCameraRunning = true;
+          } catch (startErr) {
+            console.error("Camera restart failed:", startErr);
+          }
+        }
+
+      } catch (ex) {
+        console.error("Capture exception:", ex);
+      } finally {
+        if (captureBtn) {
+          captureBtn.disabled = false;
+          captureBtn.innerHTML = '<i class="fa-solid fa-camera"></i> 📸 パシャッとスキャン！';
+        }
+      }
+    }
 
     // ================= アプリ初期化 =================
     window.addEventListener('DOMContentLoaded', () => {
@@ -2023,7 +2195,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v2.6</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v3.0</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
