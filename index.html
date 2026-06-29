@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v6.0</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v6.1</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v6.0</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v6.1</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -257,7 +257,7 @@
                     <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
                     <span id="debug-scan-status" class="text-gray-300 font-bold">待機中</span>
                   </div>
-                  <span class="text-[10px] text-slate-400">v6.0 デバッグ</span>
+                  <span class="text-[10px] text-slate-400">v6.1 デバッグ</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400">
                   <div>最後に検出: <span id="debug-last-detected" class="text-yellow-300 font-bold">なし</span></div>
@@ -375,6 +375,45 @@
             <label class="block text-sm font-bold text-brand-700 mb-1">かいた人（著者）</label>
             <input type="text" id="manual-author" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="作者のなまえ">
           </div>
+
+          <!-- 表紙画像のプレビュー・検索エリア -->
+          <div class="bg-white p-4 rounded-[20px] border-2 border-brand-200 space-y-3">
+            <label class="block text-sm font-bold text-brand-700">本のひょうし（表紙画像）</label>
+            <div class="flex items-center gap-4">
+              <!-- 画像プレビュー -->
+              <div id="manual-cover-preview" class="w-20 h-28 bg-slate-50 rounded-xl border-2 border-dashed border-brand-200 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
+                <i id="manual-cover-preview-placeholder" class="fa-solid fa-image text-3xl text-brand-200"></i>
+                <img id="manual-cover-preview-img" class="w-full h-full object-cover hidden" src="" alt="表紙プレビュー">
+              </div>
+              <!-- 検索状況・コントロール -->
+              <div class="flex-grow space-y-2">
+                <div id="manual-cover-status" class="text-[11px] text-slate-500 font-bold leading-normal">
+                  本のなまえを入力すると、自動で表紙をさがすよ！
+                </div>
+                <div class="flex gap-2">
+                  <button type="button" id="btn-manual-cover-search" onclick="searchManualCoverImage()" class="px-3 py-2 bg-brand-100 hover:bg-brand-200 active:scale-95 text-brand-700 font-black text-xs rounded-xl transition-all flex items-center gap-1">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    表紙をさがす
+                  </button>
+                  <button type="button" id="btn-manual-cover-clear" onclick="clearManualCoverImage()" class="hidden px-3 py-2 bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-600 font-black text-xs rounded-xl transition-all flex items-center gap-1">
+                    <i class="fa-solid fa-trash"></i>
+                    けす
+                  </button>
+                </div>
+                <input type="hidden" id="manual-cover-url" value="">
+              </div>
+            </div>
+            <!-- 複数候補がある場合の切り替えコントロール -->
+            <div id="manual-cover-candidates-container" class="hidden border-t border-brand-100 pt-2 flex items-center justify-between">
+              <button type="button" onclick="prevCoverCandidate()" class="p-1.5 text-brand-500 hover:text-brand-700 active:scale-90 text-xs font-bold flex items-center gap-1">
+                <i class="fa-solid fa-chevron-left"></i> 前の画像
+              </button>
+              <span id="manual-cover-candidate-info" class="text-[10px] text-slate-400 font-bold">候補 1 / 3</span>
+              <button type="button" onclick="nextCoverCandidate()" class="p-1.5 text-brand-500 hover:text-brand-700 active:scale-90 text-xs font-bold flex items-center gap-1">
+                次の画像 <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
           
           <!-- ジャンルと所有区分 (グリッド) -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -483,6 +522,16 @@
                 <option value="date-desc" selected>📅 読んだ日 (新しいじゅん)</option>
                 <option value="date-asc">📅 読んだ日 (古いじゅん)</option>
                 <option value="rating-desc">🏆 お気に入り度 (高いじゅん)</option>
+              </select>
+            </div>
+            
+            <!-- まとめかた：シリーズ、著者、なし -->
+            <div class="space-y-1.5 flex-grow max-w-xs">
+              <span class="block text-xs font-bold text-brand-700">まとめかた</span>
+              <select id="group-by" onchange="renderRegisteredBooks()" class="w-full bg-white text-xs font-bold p-2.5 rounded-xl border border-brand-200 focus:outline-none">
+                <option value="none" selected>📱 すべてならべる</option>
+                <option value="series">📚 シリーズでまとめる</option>
+                <option value="author">✍️ 作者（著者）でまとめる</option>
               </select>
             </div>
             
@@ -759,6 +808,10 @@
     // グローバル状態
     let tempBooks = [];          // スキャン済み一時リスト
     let allRegisteredBooks = []; // DBから読み込んだ登録済みの本
+    let manualCoverCandidates = []; // 手動登録用表紙画像候補URLの配列
+    let currentCoverCandidateIndex = 0; // 現在選択中の表紙画像候補インデックス
+    let coverCache = {}; // 動的カバー画像のメモリキャッシュ
+
     let audioCtx = null;         // iOS用AudioContext
     let html5QrCode = null;      // カメラオブジェクト
     let isCameraRunning = false;  // カメラ稼働中フラグ
@@ -1269,6 +1322,21 @@
       
       // 登録された本をロード
       fetchRegisteredBooks();
+
+      // 手動登録のタイトル・著者入力による表紙自動検索の登録
+      const manualTitleInput = document.getElementById('manual-title');
+      const manualAuthorInput = document.getElementById('manual-author');
+      if (manualTitleInput) {
+        manualTitleInput.addEventListener('blur', () => {
+          searchManualCoverImage(true); // 自動（サイレント）検索
+        });
+      }
+      if (manualAuthorInput) {
+        manualAuthorInput.addEventListener('blur', () => {
+          searchManualCoverImage(true); // 自動（サイレント）検索
+        });
+      }
+
 
       // 一時リストのローカルストレージからの復元
       try {
@@ -2199,12 +2267,138 @@
       }
     }
 
-    // 本のカバーHTMLの取得
-    function getBookCoverHTML(coverUrl, title, genre) {
-      if (coverUrl && coverUrl.trim() !== "") {
-        return '<img src="' + coverUrl + '" alt="' + title + '" class="w-full h-full object-cover rounded-xl shadow border border-gray-100" onerror="this.src=\'\'; this.onerror=null; this.parentNode.innerHTML=getFallbackCoverHTML(\'' + (title || '無題').replace(/'/g, "\\'") + '\', \'' + genre + '\')">';
+    // 本のカバーHTMLの取得（カバーが無い場合は非同期でGoogle Booksから探して自動表示）
+    function getBookCoverHTML(coverUrl, title, genre, bookId = null, author = "") {
+      const imgId = bookId ? `cover-img-${bookId}` : `cover-img-temp-${Math.floor(Math.random() * 100000)}`;
+      
+      // キャッシュキーの作成（タイトルと著者名）
+      const cleanTitle = (title || '').trim();
+      const cleanAuthor = (author || '').trim();
+      const cacheKey = `cover_cache_${cleanTitle}_${cleanAuthor}`;
+      
+      let cachedUrl = coverCache[cacheKey];
+      if (!cachedUrl && window.localStorage) {
+        try {
+          cachedUrl = window.localStorage.getItem(cacheKey);
+          if (cachedUrl) {
+            coverCache[cacheKey] = cachedUrl;
+          }
+        } catch (e) {
+          console.warn("localStorage read failed in getBookCoverHTML:", e);
+        }
       }
-      return getFallbackCoverHTML(title, genre);
+      
+      const targetUrl = cachedUrl || coverUrl;
+      
+      if (targetUrl && targetUrl.trim() !== "" && targetUrl !== "none") {
+        return '<img id="' + imgId + '" src="' + targetUrl + '" alt="' + title + '" class="w-full h-full object-cover rounded-xl shadow border border-gray-100" onerror="handleCoverError(this, \'' + cleanTitle.replace(/'/g, "\\'") + '\', \'' + genre + '\', \'' + (bookId || '') + '\', \'' + cleanAuthor.replace(/'/g, "\\'") + '\')">';
+      }
+      
+      // 画像が無い場合：非同期で検索を試みる
+      if (bookId && cleanTitle) {
+        setTimeout(() => {
+          fetchAndApplyBookCover(bookId, cleanTitle, cleanAuthor, genre);
+        }, 50);
+      }
+      
+      // 検索中のプレースホルダー（差し替え可能にするため親またはプレースホルダー自体に id を付与）
+      const containerId = bookId ? `cover-placeholder-${bookId}` : `cover-placeholder-temp-${Math.floor(Math.random() * 100000)}`;
+      return '<div id="' + containerId + '" class="w-full h-full">' + getFallbackCoverHTML(title, genre) + '</div>';
+    }
+
+    // カバー画像読み込みエラー時の処理
+    function handleCoverError(imgEl, title, genre, bookId, author) {
+      imgEl.onerror = null; // ループ防止
+      
+      // エラーが発生したURLのキャッシュをクリア
+      const cacheKey = `cover_cache_${title}_${author}`;
+      if (window.localStorage) {
+        try {
+          window.localStorage.removeItem(cacheKey);
+        } catch (e) {}
+      }
+      delete coverCache[cacheKey];
+      
+      // ジャンル別フォールバック表示に置換
+      const parent = imgEl.parentNode;
+      if (parent) {
+        parent.innerHTML = getFallbackCoverHTML(title, genre);
+      }
+      
+      // エラーが起きた場合は、強制的に再検索を試みる
+      if (bookId) {
+        fetchAndApplyBookCover(bookId, title, author, genre, true);
+      }
+    }
+
+    // 非同期で Google Books API から画像を探して差し替える
+    function fetchAndApplyBookCover(bookId, title, author, genre, forceReload = false) {
+      if (!title) return;
+      
+      const cacheKey = `cover_cache_${title}_${author}`;
+      
+      // すでに検索済みで「画像なし(none)」と判定されている場合は再検索しない（forceReloadを除く）
+      if (!forceReload && coverCache[cacheKey] === "none") return;
+      
+      // APIクエリ構築
+      let query = `intitle:${encodeURIComponent(title)}`;
+      if (author && author !== "（著者不明）" && author !== "著者不明") {
+        query += `+inauthor:${encodeURIComponent(author)}`;
+      }
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${urlQueryHelper(query)}&maxResults=3`;
+      
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          let foundUrl = "";
+          if (data && data.items && data.items.length > 0) {
+            for (let i = 0; i < data.items.length; i++) {
+              const item = data.items[i];
+              if (item.volumeInfo && item.volumeInfo.imageLinks) {
+                let thumb = item.volumeInfo.imageLinks.thumbnail || item.volumeInfo.imageLinks.smallThumbnail;
+                if (thumb) {
+                  if (thumb.startsWith("http://")) {
+                    thumb = thumb.replace("http://", "https://");
+                  }
+                  foundUrl = thumb;
+                  break;
+                }
+              }
+            }
+          }
+          
+          if (foundUrl) {
+            // キャッシュ保存
+            coverCache[cacheKey] = foundUrl;
+            if (window.localStorage) {
+              try {
+                window.localStorage.setItem(cacheKey, foundUrl);
+              } catch (e) {}
+            }
+            
+            // DOM更新
+            const placeholderEl = document.getElementById(`cover-placeholder-${bookId}`);
+            if (placeholderEl) {
+              placeholderEl.innerHTML = '<img src="' + foundUrl + '" alt="' + title + '" class="w-full h-full object-cover rounded-xl shadow border border-gray-100" onerror="this.onerror=null; this.parentNode.innerHTML=getFallbackCoverHTML(\'' + title.replace(/'/g, "\\'") + '\', \'' + genre + '\')">';
+            }
+          } else {
+            // 見つからなかったら none を保存して再検索を防ぐ
+            coverCache[cacheKey] = "none";
+            if (window.localStorage) {
+              try {
+                window.localStorage.setItem(cacheKey, "none");
+              } catch (e) {}
+            }
+          }
+        })
+        .catch(err => {
+          console.warn("Async cover search error for:", title, err);
+        });
+    }
+
+    // Google Books クエリ用の補助エンコード
+    function urlQueryHelper(query) {
+      return query;
     }
 
     // カバー画像が無い場合のフォールバックデザイン (ジャンル別色分け)
@@ -2227,6 +2421,7 @@
         '</div>'
       ].join('\n');
     }
+
 
     // スターのHTMLレンダリング
     function renderStarsHTML(tempId, rating) {
@@ -2261,7 +2456,7 @@
         '',
         '  <!-- 本のカバー -->',
         '  <div class="cover-container w-24 h-32 mx-auto md:mx-0 flex-shrink-0">',
-        '    ' + getBookCoverHTML(book.coverUrl, book.title, book.genre),
+        '    ' + getBookCoverHTML(book.coverUrl, book.title, book.genre, book.tempId, book.author),
         '  </div>',
         '',
         '  <!-- 入力項目フォーム -->',
@@ -2533,6 +2728,148 @@
       renderManualStars(rating);
     }
 
+    // Google Books APIによる表紙画像検索処理
+    function searchManualCoverImage(isSilent = false) {
+      const title = document.getElementById('manual-title').value.trim();
+      const author = document.getElementById('manual-author').value.trim();
+      const statusEl = document.getElementById('manual-cover-status');
+      
+      if (!title) {
+        if (!isSilent) {
+          showToast("本の名前を書いてからさがしてね！");
+        }
+        return;
+      }
+      
+      if (statusEl && !isSilent) {
+        statusEl.textContent = "インターネットで表紙をさがしています...";
+      }
+      
+      // Google Books APIクエリの構築
+      let query = `intitle:${encodeURIComponent(title)}`;
+      if (author) {
+        query += `+inauthor:${encodeURIComponent(author)}`;
+      }
+      
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5`;
+      
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          manualCoverCandidates = [];
+          currentCoverCandidateIndex = 0;
+          
+          if (data && data.items && data.items.length > 0) {
+            data.items.forEach(item => {
+              if (item.volumeInfo && item.volumeInfo.imageLinks) {
+                let thumbnail = item.volumeInfo.imageLinks.thumbnail || item.volumeInfo.imageLinks.smallThumbnail;
+                if (thumbnail) {
+                  if (thumbnail.startsWith("http://")) {
+                    thumbnail = thumbnail.replace("http://", "https://");
+                  }
+                  manualCoverCandidates.push(thumbnail);
+                }
+              }
+            });
+          }
+          
+          if (manualCoverCandidates.length > 0) {
+            updateCoverPreview();
+            if (statusEl) {
+              statusEl.textContent = `表紙画像が ${manualCoverCandidates.length}件 みつかったよ！`;
+            }
+            if (!isSilent) {
+              showToast("表紙の候補がみつかりました！");
+            }
+          } else {
+            if (statusEl) {
+              statusEl.textContent = "画像がみつかりませんでした。別の名前で試してね。";
+            }
+            if (!isSilent) {
+              showToast("表紙の画像がみつかりませんでした。");
+            }
+            clearManualCoverImage();
+          }
+        })
+        .catch(err => {
+          console.error("Cover search error:", err);
+          if (statusEl) {
+            statusEl.textContent = "エラーが発生しました。接続を確認してください。";
+          }
+          if (!isSilent) {
+            showToast("画像検索中にエラーが発生しました。");
+          }
+        });
+    }
+
+    // プレビュー表示の更新
+    function updateCoverPreview() {
+      const previewImg = document.getElementById('manual-cover-preview-img');
+      const placeholder = document.getElementById('manual-cover-preview-placeholder');
+      const hiddenUrlInput = document.getElementById('manual-cover-url');
+      const candidatesContainer = document.getElementById('manual-cover-candidates-container');
+      const infoEl = document.getElementById('manual-cover-candidate-info');
+      const btnClear = document.getElementById('btn-manual-cover-clear');
+      
+      if (manualCoverCandidates.length > 0 && currentCoverCandidateIndex < manualCoverCandidates.length) {
+        const url = manualCoverCandidates[currentCoverCandidateIndex];
+        
+        if (previewImg) {
+          previewImg.src = url;
+          previewImg.classList.remove('hidden');
+        }
+        if (placeholder) placeholder.classList.add('hidden');
+        if (hiddenUrlInput) hiddenUrlInput.value = url;
+        
+        if (btnClear) btnClear.classList.remove('hidden');
+        
+        if (manualCoverCandidates.length > 1) {
+          if (candidatesContainer) candidatesContainer.classList.remove('hidden');
+          if (infoEl) infoEl.textContent = `候補 ${currentCoverCandidateIndex + 1} / ${manualCoverCandidates.length}`;
+        } else {
+          if (candidatesContainer) candidatesContainer.classList.add('hidden');
+        }
+      } else {
+        clearManualCoverImage();
+      }
+    }
+
+    // プレビューの消去
+    function clearManualCoverImage() {
+      const previewImg = document.getElementById('manual-cover-preview-img');
+      const placeholder = document.getElementById('manual-cover-preview-placeholder');
+      const hiddenUrlInput = document.getElementById('manual-cover-url');
+      const candidatesContainer = document.getElementById('manual-cover-candidates-container');
+      const btnClear = document.getElementById('btn-manual-cover-clear');
+      const statusEl = document.getElementById('manual-cover-status');
+      
+      if (previewImg) {
+        previewImg.src = "";
+        previewImg.classList.add('hidden');
+      }
+      if (placeholder) placeholder.classList.remove('hidden');
+      if (hiddenUrlInput) hiddenUrlInput.value = "";
+      if (candidatesContainer) candidatesContainer.classList.add('hidden');
+      if (btnClear) btnClear.classList.add('hidden');
+      if (statusEl) statusEl.textContent = "本のなまえを入力すると、自動で表紙をさがすよ！";
+      
+      manualCoverCandidates = [];
+      currentCoverCandidateIndex = 0;
+    }
+
+    // カルーセル切り替え
+    function prevCoverCandidate() {
+      if (manualCoverCandidates.length <= 1) return;
+      currentCoverCandidateIndex = (currentCoverCandidateIndex - 1 + manualCoverCandidates.length) % manualCoverCandidates.length;
+      updateCoverPreview();
+    }
+
+    function nextCoverCandidate() {
+      if (manualCoverCandidates.length <= 1) return;
+      currentCoverCandidateIndex = (currentCoverCandidateIndex + 1) % manualCoverCandidates.length;
+      updateCoverPreview();
+    }
+
     // 手動フォーム送信処理
     function submitManualForm(event) {
       event.preventDefault();
@@ -2544,6 +2881,7 @@
       const dateVal = document.getElementById('manual-date').value;
       const rating = Number(document.getElementById('manual-rating').value);
       const comment = document.getElementById('manual-comment').value.trim();
+      const coverUrl = document.getElementById('manual-cover-url').value;
       
       if (!title) {
         showToast("本の名前を書いてね！");
@@ -2556,7 +2894,7 @@
         isbn: "",
         title: title,
         author: author,
-        coverUrl: "", // 手動は表紙無し
+        coverUrl: coverUrl || "", // 検索した表紙画像URL（または空）
         ownerType: ownerType,
         genre: genre,
         date: dateVal, // カスタム登録日
@@ -2576,6 +2914,7 @@
           const today = new Date().toISOString().split('T')[0];
           document.getElementById('manual-date').value = today;
           renderManualStars(5);
+          clearManualCoverImage(); // 画像プレビューと候補もリセット
           
           // 一覧へ
           switchTab('tab-gallery');
@@ -2588,6 +2927,7 @@
         showToast("データベースとの通信に失敗しました。");
       });
     }
+
 
     // ================= 読書実績ダッシュボード・フィルタ・ソート =================
     // スプレッドシートからデータを取得
@@ -2621,6 +2961,7 @@
       const filterOwner = document.querySelector('[name="filter-owner"]:checked').value;
       const filterGenre = document.getElementById('filter-genre').value;
       const sortBy = document.getElementById('sort-by').value;
+      const groupBy = document.getElementById('group-by').value;
       
       // フィルタリング処理
       let filtered = allRegisteredBooks.filter(book => {
@@ -2646,6 +2987,7 @@
       
       // リスト描画
       if (filtered.length === 0) {
+        container.className = "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5";
         container.innerHTML = [
           '<div class="col-span-full text-center py-16 px-4 bg-white/60 rounded-3xl border-2 border-dashed border-gray-200">',
           '  <i class="fa-solid fa-folder-open text-5xl text-gray-300 mb-4 animate-bounce"></i>',
@@ -2656,75 +2998,303 @@
         return;
       }
       
-      let html = '';
-      filtered.forEach(book => {
-        const ownerBadgeColor = book.ownerType === '図書館で借りた本' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700';
-        const ownerLabel = book.ownerType === '図書館で借りた本' ? '図書館' : 'おうち';
-        const colors = getGenreColor(book.genre);
+      // グループ化の判定
+      if (groupBy === 'none') {
+        // 通常のカード並列表示
+        container.className = "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5";
+        let html = '';
+        filtered.forEach(book => {
+          html += renderSingleBookCardHTML(book);
+        });
+        container.innerHTML = html;
+      } else {
+        // グループごとにアコーディオン表示にするため、外枠コンテナの grid レイアウトをリセットして1カラムにする
+        container.className = "space-y-4 w-full col-span-full";
         
-        // スター表示
-        let starsHTML = '';
-        for (let i = 1; i <= 5; i++) {
-          if (i <= book.rating) {
-            starsHTML += '<i class="fa-solid fa-star text-amber-400 text-sm"></i>';
-          } else {
-            starsHTML += '<i class="fa-regular fa-star text-gray-200 text-sm"></i>';
-          }
+        let groups = {};
+        let standaloneBooks = [];
+        
+        if (groupBy === 'author') {
+          // 著者でグループ化
+          filtered.forEach(book => {
+            const author = (book.author || '').trim() || '著者不明';
+            if (!groups[author]) {
+              groups[author] = [];
+            }
+            groups[author].push(book);
+          });
+        } else if (groupBy === 'series') {
+          // シリーズでグループ化
+          const res = extractSeriesGroups(filtered);
+          groups = res.seriesGroups;
+          standaloneBooks = res.standaloneBooks;
         }
         
-        // 感想メモ（吹き出し風）
-        const commentHTML = book.comment ? [
-          '<div class="mt-2.5 relative bg-amber-50/70 border border-amber-100 p-2.5 rounded-xl text-xs text-brand-900 leading-snug">',
-          '  <div class="absolute -top-1 w-2.5 h-2.5 bg-amber-50/70 border-t border-l border-amber-100 rotate-45 left-4"></div>',
-          '  <p class="line-clamp-3">💬 ' + book.comment + '</p>',
-          '</div>'
-        ].join('\n') : '';
+        let html = '';
+        let groupIdx = 0;
         
-        // 日付整形
-        const displayDate = book.date ? book.date.split(' ')[0] : '日付不明';
+        // 各グループを描画
+        for (const groupName in groups) {
+          const groupBooks = groups[groupName];
+          html += renderGroupAccordionHTML(groupName, groupBooks, groupIdx++);
+        }
         
-        html += [
-          '<div class="bg-white rounded-3xl p-4 shadow border border-gray-100 hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between">',
-          '  <div>',
-          '    <!-- 本のカバー -->',
-          '    <div class="w-full h-36 flex items-center justify-center mb-3">',
-          '      <div class="w-24 h-32">',
-          '        ' + getBookCoverHTML(book.coverUrl, book.title, book.genre),
-          '      </div>',
-          '    </div>',
-          '    ',
-          '    <!-- 区分・ジャンルバッジ -->',
-          '    <div class="flex gap-1.5 mb-1.5 flex-wrap">',
-          '      <span class="text-[9px] font-black px-2 py-0.5 rounded-full ' + ownerBadgeColor + '">' + ownerLabel + '</span>',
-          '      <span class="text-[9px] font-black px-2 py-0.5 rounded-full ' + colors.bg + ' ' + colors.text + '">' + book.genre + '</span>',
-          '    </div>',
-          '    ',
-          '    <!-- タイトルと作者 -->',
-          '    <h3 class="font-black text-sm text-gray-800 line-clamp-2 leading-snug" title="' + book.title + '">' + book.title + '</h3>',
-          '    <p class="text-[11px] text-gray-400 line-clamp-1 mt-0.5">' + (book.author || '（著者不明）') + '</p>',
-          '  </div>',
-          '  ',
-          '  <div class="mt-2">',
-          '    <!-- 星評価 -->',
-          '    <div class="flex items-center gap-0.5">',
-          '      ' + starsHTML,
-          '    </div>',
-          '    ',
-          '    <!-- 感想 -->',
-          '    ' + commentHTML,
-          '    ',
-          '    <!-- 日付・メタ情報 -->',
-          '    <div class="text-[9px] text-gray-300 mt-3 pt-2 border-t border-gray-100 flex justify-between items-center">',
-          '      <span class="font-bold">📅 ' + displayDate + '</span>',
-          '      ' + (book.isbn ? '<span class="font-mono text-gray-300 scale-90">ISBN</span>' : ''),
-          '    </div>',
-          '  </div>',
-          '</div>'
-        ].join('\n');
+        // グループに入らなかった単体の本
+        if (standaloneBooks.length > 0) {
+          const title = groupBy === 'series' ? 'そのほかの本（単行本）' : '作者がわからない本';
+          html += renderGroupAccordionHTML(title, standaloneBooks, groupIdx++);
+        }
+        
+        container.innerHTML = html;
+      }
+    }
+
+    // 本単体のカードHTML
+    function renderSingleBookCardHTML(book) {
+      const ownerBadgeColor = book.ownerType === '図書館で借りた本' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700';
+      const ownerLabel = book.ownerType === '図書館で借りた本' ? '図書館' : 'おうち';
+      const colors = getGenreColor(book.genre);
+      
+      // スター表示
+      let starsHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        if (i <= book.rating) {
+          starsHTML += '<i class="fa-solid fa-star text-amber-400 text-sm"></i>';
+        } else {
+          starsHTML += '<i class="fa-regular fa-star text-gray-200 text-sm"></i>';
+        }
+      }
+      
+      // 感想メモ（吹き出し風）
+      const commentHTML = book.comment ? [
+        '<div class="mt-2.5 relative bg-amber-50/70 border border-amber-100 p-2.5 rounded-xl text-xs text-brand-900 leading-snug">',
+        '  <div class="absolute -top-1 w-2.5 h-2.5 bg-amber-50/70 border-t border-l border-amber-100 rotate-45 left-4"></div>',
+        '  <p class="line-clamp-3">💬 ' + book.comment + '</p>',
+        '</div>'
+      ].join('\n') : '';
+      
+      // 日付整形
+      const displayDate = book.date ? book.date.split(' ')[0] : '日付不明';
+      
+      return [
+        '<div class="bg-white rounded-3xl p-4 shadow border border-gray-100 hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between">',
+        '  <div>',
+        '    <!-- 本のカバー -->',
+        '    <div class="w-full h-36 flex items-center justify-center mb-3">',
+        '      <div class="w-24 h-32">',
+        '        ' + getBookCoverHTML(book.coverUrl, book.title, book.genre, book.id, book.author),
+        '      </div>',
+        '    </div>',
+        '    ',
+        '    <!-- 区分・ジャンルバッジ -->',
+        '    <div class="flex gap-1.5 mb-1.5 flex-wrap">',
+        '      <span class="text-[9px] font-black px-2 py-0.5 rounded-full ' + ownerBadgeColor + '">' + ownerLabel + '</span>',
+        '      <span class="text-[9px] font-black px-2 py-0.5 rounded-full ' + colors.bg + ' ' + colors.text + '">' + book.genre + '</span>',
+        '    </div>',
+        '    ',
+        '    <!-- タイトルと作者 -->',
+        '    <h3 class="font-black text-sm text-gray-800 line-clamp-2 leading-snug" title="' + book.title + '">' + book.title + '</h3>',
+        '    <p class="text-[11px] text-gray-400 line-clamp-1 mt-0.5">' + (book.author || '（著者不明）') + '</p>',
+        '  </div>',
+        '  ',
+        '  <div class="mt-2">',
+        '    <!-- 星評価 -->',
+        '    <div class="flex items-center gap-0.5">',
+        '      ' + starsHTML,
+        '    </div>',
+        '    ',
+        '    <!-- 感想 -->',
+        '    ' + commentHTML,
+        '    ',
+        '    <!-- 日付・メタ情報 -->',
+        '    <div class="text-[9px] text-gray-300 mt-3 pt-2 border-t border-gray-100 flex justify-between items-center">',
+        '      <span class="font-bold">📅 ' + displayDate + '</span>',
+        '      ' + (book.isbn ? '<span class="font-mono text-gray-300 scale-90">ISBN</span>' : ''),
+        '    </div>',
+        '  </div>',
+        '</div>'
+      ].join('\n');
+    }
+
+    // アコーディオン形式のグループHTML
+    function renderGroupAccordionHTML(groupName, booksList, index) {
+      const count = booksList.length;
+      const ratingSum = booksList.reduce((acc, b) => acc + (b.rating || 0), 0);
+      const ratingAvg = (ratingSum / count).toFixed(1);
+      
+      // グループ内のジャンルをカウントして、最も多いジャンルの色をヘッダーのテーマにする
+      const genreCounts = {};
+      booksList.forEach(b => {
+        genreCounts[b.genre] = (genreCounts[b.genre] || 0) + 1;
+      });
+      let topGenre = "その他";
+      let maxCount = 0;
+      for (const g in genreCounts) {
+        if (genreCounts[g] > maxCount) {
+          maxCount = genreCounts[g];
+          topGenre = g;
+        }
+      }
+      const colors = getGenreColor(topGenre);
+      
+      // アコーディオンの中身（本カードのグリッド）
+      let booksCardsHTML = '';
+      booksList.forEach(book => {
+        booksCardsHTML += renderSingleBookCardHTML(book);
       });
       
-      container.innerHTML = html;
+      const accordionId = `group-accordion-${index}`;
+      
+      return [
+        '<div class="bg-white rounded-[28px] border-2 border-slate-100 shadow overflow-hidden transition-all duration-200">',
+        '  <!-- ヘッダー -->',
+        '  <button type="button" onclick="toggleGroupAccordion(\'' + accordionId + '\')" class="w-full text-left p-4 md:p-5 flex items-center justify-between transition-colors hover:bg-brand-50/10 focus:outline-none select-none">',
+        '    <div class="flex items-center gap-3">',
+        '      <span class="w-10 h-10 rounded-full flex items-center justify-center ' + colors.bg + ' ' + colors.text + ' font-black text-lg border border-current flex-shrink-0">' + count + '</span>',
+        '      <div>',
+        '        <h4 class="font-black text-sm md:text-base text-gray-800 line-clamp-1">' + groupName + '</h4>',
+        '        <div class="flex items-center gap-3 mt-1 flex-wrap">',
+        '          <span class="text-[10px] text-gray-400 font-bold flex items-center gap-1"><i class="fa-solid fa-star text-amber-400"></i> へいきん: ' + ratingAvg + '</span>',
+        '          <span class="text-[10px] text-gray-400 font-bold">ジャンル: ' + topGenre + '</span>',
+        '        </div>',
+        '      </div>',
+        '    </div>',
+        '    <div class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-500 transition-transform duration-300 flex-shrink-0" id="accordion-arrow-' + accordionId + '">',
+        '      <i class="fa-solid fa-chevron-down"></i>',
+        '    </div>',
+        '  </button>',
+        '  ',
+        '  <!-- コンテンツ領域 -->',
+        '  <div id="' + accordionId + '" class="hidden p-4 md:p-5 bg-slate-50/50 border-t border-slate-100">',
+        '    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">',
+        '      ' + booksCardsHTML,
+        '    </div>',
+        '  </div>',
+        '</div>'
+      ].join('\n');
     }
+
+    // アコーディオンの開閉処理
+    function toggleGroupAccordion(accordionId) {
+      const contentEl = document.getElementById(accordionId);
+      const arrowEl = document.getElementById(`accordion-arrow-${accordionId}`);
+      if (!contentEl) return;
+      
+      const isHidden = contentEl.classList.contains('hidden');
+      if (isHidden) {
+        contentEl.classList.remove('hidden');
+        if (arrowEl) arrowEl.classList.add('rotate-180');
+      } else {
+        contentEl.classList.add('hidden');
+        if (arrowEl) arrowEl.classList.remove('rotate-180');
+      }
+    }
+
+    // シリーズ抽出ロジック (最長共通接頭辞 LCP)
+    function extractSeriesGroups(books) {
+      const authorMap = {};
+      books.forEach(book => {
+        const author = (book.author || '').trim() || '著者不明';
+        if (!authorMap[author]) {
+          authorMap[author] = [];
+        }
+        authorMap[author].push(book);
+      });
+
+      const seriesGroups = {};
+      const standaloneBooks = [];
+
+      for (const author in authorMap) {
+        const authorBooks = authorMap[author];
+        if (authorBooks.length < 2 || author === '著者不明') {
+          standaloneBooks.push(...authorBooks);
+          continue;
+        }
+
+        const handledIds = new Set();
+
+        for (let i = 0; i < authorBooks.length; i++) {
+          const bookA = authorBooks[i];
+          if (handledIds.has(bookA.id)) continue;
+
+          let bestPrefix = "";
+          let bestMatches = [];
+
+          for (let j = 0; j < authorBooks.length; j++) {
+            if (i === j) continue;
+            const bookB = authorBooks[j];
+            
+            const prefix = getSharedPrefix(bookA.title, bookB.title);
+            const cleanPrefix = cleanSeriesName(prefix);
+            if (cleanPrefix.length >= 2) {
+              if (cleanPrefix.length > bestPrefix.length) {
+                bestPrefix = cleanPrefix;
+                bestMatches = [bookB];
+              } else if (cleanPrefix === bestPrefix) {
+                bestMatches.push(bookB);
+              }
+            }
+          }
+
+          if (bestPrefix && bestMatches.length > 0) {
+            const seriesName = bestPrefix + " シリーズ";
+            if (!seriesGroups[seriesName]) {
+              seriesGroups[seriesName] = [];
+            }
+            if (!handledIds.has(bookA.id)) {
+              seriesGroups[seriesName].push(bookA);
+              handledIds.add(bookA.id);
+            }
+            bestMatches.forEach(b => {
+              if (!handledIds.has(b.id)) {
+                seriesGroups[seriesName].push(b);
+                handledIds.add(b.id);
+              }
+            });
+          } else {
+            standaloneBooks.push(bookA);
+            handledIds.add(bookA.id);
+          }
+        }
+      }
+
+      return { seriesGroups, standaloneBooks };
+    }
+
+    // 最長共通接頭辞を取得
+    function getSharedPrefix(str1, str2) {
+      let i = 0;
+      const minLen = Math.min(str1.length, str2.length);
+      while (i < minLen && str1[i] === str2[i]) {
+        i++;
+      }
+      return str1.substring(0, i);
+    }
+
+    // シリーズ名のクレンジング処理
+    function cleanSeriesName(prefix) {
+      if (!prefix) return "";
+      let clean = prefix.trim();
+      
+      // 末尾のスペース、全角・半角数字、丸数字、ローマ数字、記号（! ? : - 〜等）、カッコ、巻などを取り除く
+      const regex = /[\s\d０-９①-⑳㈠-㈩Ⅰ-Ⅻ#＃\-:：〜~_&＆\(\)（）!！?？巻第]+/g;
+      
+      // ループさせて末尾のクレンジングを繰り返す
+      let prevLen;
+      do {
+        prevLen = clean.length;
+        clean = clean.replace(regex, " ").trim();
+      } while (clean.length !== prevLen);
+      
+      // 末尾の「の」「と」「が」「を」などを取り除く（例：「だるまさんの」→「だるまさん」）
+      const particles = /[のとがを]$/;
+      if (particles.test(clean) && clean.length > 2) {
+        clean = clean.replace(particles, "").trim();
+      }
+      
+      return clean;
+    }
+
 
     // バーコード（ISBN）の手入力検索処理
     function submitManualIsbn() {
@@ -2756,7 +3326,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v6.0</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v6.1</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
