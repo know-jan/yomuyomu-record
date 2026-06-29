@@ -820,7 +820,7 @@
       }
     }
 
-    function drawRotatedSource(sourceEl, canvas, degrees) {
+    function drawRotatedSource(sourceEl, canvas, degrees, applyFilter = false) {
       const ctx = canvas.getContext('2d');
       const width = sourceEl.videoWidth || sourceEl.width || 640;
       const height = sourceEl.videoHeight || sourceEl.height || 480;
@@ -835,6 +835,14 @@
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
+      
+      if (applyFilter) {
+        // 白と黒の比率をはっきり浮き立たせて二値化に近づける超強力フィルター
+        ctx.filter = "grayscale(100%) contrast(250%) brightness(95%)";
+      } else {
+        ctx.filter = "none";
+      }
+
       ctx.translate(canvas.width / 2, canvas.height / 2);
       ctx.rotate((degrees * Math.PI) / 180);
       ctx.drawImage(sourceEl, -width / 2, -height / 2, width, height);
@@ -896,10 +904,12 @@
         const angles = [0, 90, 180, 270];
         let decodedText = null;
         let successAngle = 0;
+        let successFilter = false;
 
+        // 1st pass: Plain rotation checks
         logToDebugConsole('Running rotation decode checks (0, 90, 180, 270)...', 'info');
         for (const angle of angles) {
-          drawRotatedSource(tempCanvas, canvas, angle);
+          drawRotatedSource(tempCanvas, canvas, angle, false);
           const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
           if (!blob) continue;
           
@@ -908,24 +918,47 @@
           try {
             decodedText = await html5QrCode.scanFile(file, true);
             successAngle = angle;
-            logToDebugConsole(`[Success at angle ${angle}]`, 'info');
+            successFilter = false;
+            logToDebugConsole(`[Success at angle ${angle} (Plain)]`, 'info');
             break;
           } catch (scanErr) {
-            logToDebugConsole(`Angle ${angle} fail: ${String(scanErr).substring(0, 30)}`, 'warn');
+            // Check next angle
+          }
+        }
+
+        // 2nd pass: High-contrast filter rotation checks if plain checks failed
+        if (!decodedText) {
+          logToDebugConsole('Plain scan failed. Retrying with high-contrast filter...', 'info');
+          for (const angle of angles) {
+            drawRotatedSource(tempCanvas, canvas, angle, true);
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) continue;
+            
+            const file = new File([blob], `captured-${angle}-filtered.png`, { type: "image/png" });
+            
+            try {
+              decodedText = await html5QrCode.scanFile(file, true);
+              successAngle = angle;
+              successFilter = true;
+              logToDebugConsole(`[Success at angle ${angle} (Filtered)]`, 'info');
+              break;
+            } catch (scanErr) {
+              logToDebugConsole(`Angle ${angle} + filter fail: ${String(scanErr).substring(0, 30)}`, 'warn');
+            }
           }
         }
 
         if (decodedText) {
           resultDiv.className = "text-green-400 font-bold";
-          resultDiv.textContent = `Success (${successAngle} deg): ${decodedText}`;
-          drawRotatedSource(tempCanvas, canvas, successAngle);
+          resultDiv.textContent = `Success (${successAngle} deg, Filter:${successFilter}): ${decodedText}`;
+          drawRotatedSource(tempCanvas, canvas, successAngle, successFilter);
           
           playBeep();
           onScanSuccess(decodedText);
         } else {
           resultDiv.className = "text-red-400 font-bold";
-          resultDiv.textContent = "Not detected in all angles";
-          drawRotatedSource(tempCanvas, canvas, 0);
+          resultDiv.textContent = "Not detected in all angles/filters";
+          drawRotatedSource(tempCanvas, canvas, 0, false);
         }
 
         if (wasCameraRunning && html5QrCode) {
