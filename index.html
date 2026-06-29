@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.6</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.7</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.6</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.7</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -212,7 +212,21 @@
             
             <!-- カメラプレビュー表示領域 -->
             <div class="relative">
-              <div id="reader" class="hidden w-full overflow-hidden rounded-2xl aspect-[4/3] bg-black relative border-4 border-brand-300 shadow-md"></div>
+              <div class="relative w-full aspect-[4/3] overflow-hidden rounded-2xl">
+                <div id="reader" class="hidden w-full h-full bg-black border-4 border-brand-300 shadow-md"></div>
+                <!-- スキャンターゲット枠（カメラ稼働中のみ表示、外側を半透明マスクし中央をくり抜く） -->
+                <div id="scan-area-overlay" class="hidden absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+                  <div class="w-[85%] h-[12%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
+                    <!-- 照準赤線 -->
+                    <div class="absolute inset-x-0 top-1/2 h-[1px] bg-rose-500/80 -translate-y-1/2 animate-pulse"></div>
+                    <!-- 角のブラケット装飾 -->
+                    <div class="absolute -top-[2px] -left-[2px] w-3 h-3 border-t-4 border-l-4 border-rose-500 rounded-tl-sm"></div>
+                    <div class="absolute -top-[2px] -right-[2px] w-3 h-3 border-t-4 border-r-4 border-rose-500 rounded-tr-sm"></div>
+                    <div class="absolute -bottom-[2px] -left-[2px] w-3 h-3 border-b-4 border-l-4 border-rose-500 rounded-bl-sm"></div>
+                    <div class="absolute -bottom-[2px] -right-[2px] w-3 h-3 border-b-4 border-r-4 border-rose-500 rounded-br-sm"></div>
+                  </div>
+                </div>
+              </div>
               <div id="camera-hint-text" class="hidden text-center text-xs text-brand-600 font-bold mt-2 animate-pulse">
                 💡 バーコードを少しはなして（20cmくらい）、ピントをあわせてね！
               </div>
@@ -685,8 +699,19 @@
     let html5QrCode = null;      // カメラオブジェクト
     let isCameraRunning = false;  // カメラ稼働中フラグ
     let isScanningPaused = false; // 一時停止（スキャンスロットリング）中フラグ
-    let lastScannedIsbn = "";    // 直前スキャンISBN (重複防止)
     let lastScannedTime = 0;     // 直前スキャン時間 (ミリ秒)
+
+    // html5-qrcodeでデコード対象をEAN_13のみに限定し、スキャン処理を劇的に軽量・高速化する安全な指定ヘルパー
+    function getSupportedFormats() {
+      if (typeof window.Html5Qrcode !== 'undefined' && window.Html5Qrcode.SupportedFormats) {
+        return [ window.Html5Qrcode.SupportedFormats.EAN_13 ];
+      }
+      if (typeof window.Html5QrcodeSupportedFormats !== 'undefined') {
+        return [ window.Html5QrcodeSupportedFormats.EAN_13 ];
+      }
+      // フォールバック: html5-qrcode内部のenumインデックスは EAN_13 = 10
+      return [ 10 ];
+    }
 
     // ================= アプリ初期化 =================
     window.addEventListener('DOMContentLoaded', () => {
@@ -788,6 +813,8 @@
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
         startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> カメラをスタート！';
         document.getElementById('scanner-hint-text').classList.add('hidden');
+        const overlayStop = document.getElementById('scanner-scan-area-overlay');
+        if (overlayStop) overlayStop.classList.add('hidden');
         const sDebugPanel = document.getElementById('scanner-debug-panel');
         if (sDebugPanel) sDebugPanel.classList.add('hidden');
         return;
@@ -796,10 +823,14 @@
       try {
         isScannerCameraRunning = true;
         isScannerScanningPaused = false; // 一時停止状態をクリア
+        const overlayStart = document.getElementById('scanner-scan-area-overlay');
+        if (overlayStart) overlayStart.classList.remove('hidden');
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-rose-500 hover:bg-rose-600 text-white shadow-lg flex items-center justify-center gap-2";
         startBtn.innerHTML = '<i class="fa-solid fa-circle-stop"></i> カメラをとめる';
         
-        scannerQrCode = new Html5Qrcode("scanner-reader");
+        scannerQrCode = new Html5Qrcode("scanner-reader", {
+          formatsToSupport: getSupportedFormats()
+        });
         
         const config = {
           fps: 12,
@@ -1100,13 +1131,17 @@
           isCameraRunning = true;
           isScanningPaused = false; // 一時停止状態をクリア
           readerDiv.classList.remove('hidden');
+          const overlay = document.getElementById('scan-area-overlay');
+          if (overlay) overlay.classList.remove('hidden');
           document.getElementById('camera-hint-text').classList.remove('hidden');
           
           cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-rose-500 hover:bg-rose-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
           cameraBtnText.textContent = "カメラをとめる";
           cameraIcon.className = "fa-solid fa-circle-stop text-xl animate-pulse";
           
-          html5QrCode = new Html5Qrcode("reader");
+          html5QrCode = new Html5Qrcode("reader", {
+            formatsToSupport: getSupportedFormats()
+          });
           
           const config = {
             fps: 12,
@@ -1194,6 +1229,8 @@
           showToast("カメラをスタートできませんでした。カメラへのアクセスを許可してね。");
           isCameraRunning = false;
           readerDiv.classList.add('hidden');
+          const overlay = document.getElementById('scan-area-overlay');
+          if (overlay) overlay.classList.add('hidden');
           const debugPanel2 = document.getElementById('camera-debug-panel');
           if (debugPanel2) debugPanel2.classList.add('hidden');
           cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
@@ -1221,6 +1258,8 @@
       const readerDiv = document.getElementById('reader');
       
       readerDiv.classList.add('hidden');
+      const overlay = document.getElementById('scan-area-overlay');
+      if (overlay) overlay.classList.add('hidden');
       const debugPanel = document.getElementById('camera-debug-panel');
       if (debugPanel) debugPanel.classList.add('hidden');
       cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
@@ -1967,7 +2006,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v1.6</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v1.7</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
@@ -2005,6 +2044,18 @@
     <div class="relative w-full max-w-md aspect-square mb-2">
       <div id="scanner-reader" class="w-full h-full bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-600 relative">
         <!-- カメラ表示領域 -->
+        <!-- スキャンターゲット枠（カメラ稼働中のみ表示、外側を半透明マスクし中央をくり抜く） -->
+        <div id="scanner-scan-area-overlay" class="hidden absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+          <div class="w-[85%] h-[12%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
+            <!-- 照準赤線 -->
+            <div class="absolute inset-x-0 top-1/2 h-[1px] bg-rose-500/80 -translate-y-1/2 animate-pulse"></div>
+            <!-- 角のブラケット装飾 -->
+            <div class="absolute -top-[2px] -left-[2px] w-3 h-3 border-t-4 border-l-4 border-rose-500 rounded-tl-sm"></div>
+            <div class="absolute -top-[2px] -right-[2px] w-3 h-3 border-t-4 border-r-4 border-rose-500 rounded-tr-sm"></div>
+            <div class="absolute -bottom-[2px] -left-[2px] w-3 h-3 border-b-4 border-l-4 border-rose-500 rounded-bl-sm"></div>
+            <div class="absolute -bottom-[2px] -right-[2px] w-3 h-3 border-b-4 border-r-4 border-rose-500 rounded-br-sm"></div>
+          </div>
+        </div>
       </div>
       <div id="scanner-hint-text" class="hidden text-center text-xs text-slate-400 font-bold mt-3 animate-pulse">
         💡 バーコードを少しはなして（20cmくらい）、ピントをあわせてね！
