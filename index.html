@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.0</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.1</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.0</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.1</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -257,7 +257,7 @@
                     <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
                     <span id="debug-scan-status" class="text-gray-300 font-bold">待機中</span>
                   </div>
-                  <span class="text-[10px] text-slate-400">v5.0 デバッグ</span>
+                  <span class="text-[10px] text-slate-400">v5.1 デバッグ</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400">
                   <div>最後に検出: <span id="debug-last-detected" class="text-yellow-300 font-bold">なし</span></div>
@@ -1768,130 +1768,135 @@
     function onScanSuccess(decodedText, decodedResult) {
       if (isScanningPaused) return; // すでにポーズ中なら無視
       
-      const isbn = decodedText.trim();
-      const debugLastDetected = document.getElementById('debug-last-detected');
-      const debugLastError = document.getElementById('debug-last-error');
-      
-      if (debugLastDetected) {
-        debugLastDetected.textContent = isbn;
-      }
-      
-      // 1. 対象外のコードチェック (978で始まらないものは書籍対象外)
-      if (!isbn.startsWith("978")) {
-        if (debugLastError) {
-          debugLastError.className = "text-rose-400 font-bold break-all";
-          debugLastError.textContent = `対象外のコードです (${isbn})`;
-        }
-        logToDebugConsole(`Scan skipped: Non-book EAN/C-Code: ${isbn}`, 'warn');
-        updateScanStatus(isbn, '対象外', '対象外のコードです');
-        showToast(`対象外のコードです: ${isbn}`);
-        return;
-      }
-      
-      // 2. 読んだ本の一覧（本棚）に登録済みチェック
-      const isAlreadyRegistered = allRegisteredBooks.some(b => b.isbn === isbn);
-      if (isAlreadyRegistered) {
-        if (debugLastError) {
-          debugLastError.className = "text-amber-400 font-bold break-all";
-          debugLastError.textContent = `読んだ本の一覧に登録済みです (${isbn})`;
-        }
-        logToDebugConsole(`Scan skipped: Already registered in main collection: ${isbn}`, 'warn');
-        updateScanStatus(isbn, '重複', '読んだ本の一覧に登録済みです');
-        showToast(`読んだ本の一覧に登録済みです: ${isbn}`);
-        return;
-      }
-      
-      // 3. 一次リストに登録済みチェック
-      const isAlreadyInTemp = tempBooks.some(b => b.isbn === isbn);
-      if (isAlreadyInTemp) {
-        if (debugLastError) {
-          debugLastError.className = "text-amber-400 font-bold break-all";
-          debugLastError.textContent = `一次リストに登録済みです (${isbn})`;
-        }
-        logToDebugConsole(`Scan skipped: Already in temporary list: ${isbn}`, 'warn');
-        updateScanStatus(isbn, '重複', '一次リストに登録済みです');
-        showToast(`一次リストに登録済みです: ${isbn}`);
-        return;
-      }
-      
-      // 正常な新規ISBNの場合はエラー表示をリセット
-      if (debugLastError) {
-        debugLastError.className = "text-red-400 break-all";
-        debugLastError.textContent = "なし";
-      }
-      
-      const now = Date.now();
-      // 同一ISBNの重複読み取り防止（5秒間スキップ）
-      if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
-        return;
-      }
-      
-      // スキャン一時停止処理
-      isScanningPaused = true;
-      lastScannedIsbn = isbn;
-      lastScannedTime = now;
-      
-      // デバッグパネルを一時停止中に変更
-      const debugIndicator = document.getElementById('debug-scan-indicator');
-      const debugStatus = document.getElementById('debug-scan-status');
-      const debugPausedState = document.getElementById('debug-scan-paused-state');
-      if (debugIndicator && debugStatus) {
-        debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse';
-        debugStatus.textContent = '一時停止中（本の情報を取得中...）';
-      }
-      if (debugPausedState) {
-        debugPausedState.textContent = "はい";
-      }
-      
-      // 子ども用スキャンモニターを成功表示にする
-      updateScanStatus(isbn, '成功', '本の情報をしらべて一時リストに追加したよ！');
-      
-      // html5QrCode のビデオ自体を一時停止
-      if (html5QrCode) {
-        try {
-          html5QrCode.pause(true); // ビデオフレームも止める
-        } catch (e) {
-          console.warn("html5QrCode pause failed:", e);
-        }
-      }
-      
-      // 成功通知
-      playBeep();
-      showToast("バーコードをみつけたよ！本の名前を調べています...");
-      
-      // 一時リストに追加 (ローディングプレースホルダー)
-      addTempBookPlaceholder(isbn);
-      
-      // 1.5秒（1500ms）後にスキャン自動再開
-      setTimeout(() => {
-        if (!isCameraRunning) {
-          isScanningPaused = false;
-          return; // すでにカメラ自体が止められていたら何もしない
+      try {
+        const isbn = decodedText.trim();
+        const debugLastDetected = document.getElementById('debug-last-detected');
+        const debugLastError = document.getElementById('debug-last-error');
+        
+        if (debugLastDetected) {
+          debugLastDetected.textContent = isbn;
         }
         
+        // 1. 対象外のコードチェック (978で始まらないものは書籍対象外)
+        if (!isbn.startsWith("978")) {
+          if (debugLastError) {
+            debugLastError.className = "text-rose-400 font-bold break-all";
+            debugLastError.textContent = `対象外のコードです (${isbn})`;
+          }
+          logToDebugConsole(`Scan skipped: Non-book EAN/C-Code: ${isbn}`, 'warn');
+          updateScanStatus(isbn, '対象外', '対象外のコードです');
+          showToast(`対象外のコードです: ${isbn}`);
+          return;
+        }
+        
+        // 2. 読んだ本の一覧（本棚）に登録済みチェック
+        const isAlreadyRegistered = Array.isArray(allRegisteredBooks) && allRegisteredBooks.some(b => b && b.isbn === isbn);
+        if (isAlreadyRegistered) {
+          if (debugLastError) {
+            debugLastError.className = "text-amber-400 font-bold break-all";
+            debugLastError.textContent = `読んだ本の一覧に登録済みです (${isbn})`;
+          }
+          logToDebugConsole(`Scan skipped: Already registered in main collection: ${isbn}`, 'warn');
+          updateScanStatus(isbn, '重複', '読んだ本の一覧に登録済みです');
+          showToast(`読んだ本の一覧に登録済みです: ${isbn}`);
+          return;
+        }
+        
+        // 3. 一次リストに登録済みチェック
+        const isAlreadyInTemp = Array.isArray(tempBooks) && tempBooks.some(b => b && b.isbn === isbn);
+        if (isAlreadyInTemp) {
+          if (debugLastError) {
+            debugLastError.className = "text-amber-400 font-bold break-all";
+            debugLastError.textContent = `一次リストに登録済みです (${isbn})`;
+          }
+          logToDebugConsole(`Scan skipped: Already in temporary list: ${isbn}`, 'warn');
+          updateScanStatus(isbn, '重複', '一次リストに登録済みです');
+          showToast(`一次リストに登録済みです: ${isbn}`);
+          return;
+        }
+        
+        // 正常な新規ISBNの場合はエラー表示をリセット
+        if (debugLastError) {
+          debugLastError.className = "text-red-400 break-all";
+          debugLastError.textContent = "なし";
+        }
+        
+        const now = Date.now();
+        // 同一ISBNの重複読み取り防止（5秒間スキップ）
+        if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
+          return;
+        }
+        
+        // スキャン一時停止処理
+        isScanningPaused = true;
+        lastScannedIsbn = isbn;
+        lastScannedTime = now;
+        
+        // デバッグパネルを一時停止中に変更
+        const debugIndicator = document.getElementById('debug-scan-indicator');
+        const debugStatus = document.getElementById('debug-scan-status');
+        const debugPausedState = document.getElementById('debug-scan-paused-state');
+        if (debugIndicator && debugStatus) {
+          debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+          debugStatus.textContent = '一時停止中（本の情報を取得中...）';
+        }
+        if (debugPausedState) {
+          debugPausedState.textContent = "はい";
+        }
+        
+        // 子ども用スキャンモニターを成功表示にする
+        updateScanStatus(isbn, '成功', '本の情報をしらべて一時リストに追加したよ！');
+        
+        // html5QrCode のビデオ自体を一時停止
         if (html5QrCode) {
           try {
-            html5QrCode.resume();
+            html5QrCode.pause(true); // ビデオフレームも止める
           } catch (e) {
-            console.warn("html5QrCode resume failed:", e);
+            console.warn("html5QrCode pause failed:", e);
           }
         }
         
-        isScanningPaused = false;
+        // 成功通知
+        playBeep();
+        showToast("バーコードをみつけたよ！本の名前を調べています...");
         
-        // 子ども用スキャンモニターを待機中にリセット
-        updateScanStatus("", "待機中", "バーコードをカメラにうつしてね！");
+        // 一時リストに追加 (ローディングプレースホルダー)
+        addTempBookPlaceholder(isbn);
         
-        // デバッグパネルを稼働中に戻す
-        const debugPausedState2 = document.getElementById('debug-scan-paused-state');
-        if (debugPausedState2) {
-          debugPausedState2.textContent = "いいえ";
-        }
-        if (debugIndicator && debugStatus) {
-          debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
-          debugStatus.textContent = 'スキャン中...';
-        }
-      }, 1500);
+        // 1.5秒（1500ms）後にスキャン自動再開
+        setTimeout(() => {
+          if (!isCameraRunning) {
+            isScanningPaused = false;
+            return; // すでにカメラ自体が止められていたら何もしない
+          }
+          
+          if (html5QrCode) {
+            try {
+              html5QrCode.resume();
+            } catch (e) {
+              console.warn("html5QrCode resume failed:", e);
+            }
+          }
+          
+          isScanningPaused = false;
+          
+          // 子ども用スキャンモニターを待機中にリセット
+          updateScanStatus("", "待機中", "バーコードをカメラにうつしてね！");
+          
+          // デバッグパネルを稼働中に戻す
+          const debugPausedState2 = document.getElementById('debug-scan-paused-state');
+          if (debugPausedState2) {
+            debugPausedState2.textContent = "いいえ";
+          }
+          if (debugIndicator && debugStatus) {
+            debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
+            debugStatus.textContent = 'スキャン中...';
+          }
+        }, 1500);
+      } catch (err) {
+        console.error("Fatal scan error:", err);
+        isScanningPaused = false; // エラー時は安全にポーズを解除
+      }
     }
 
 
@@ -2562,7 +2567,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v5.0</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v5.1</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
