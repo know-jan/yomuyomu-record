@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <!-- エラー検知デバッグスクリプト -->
+  <!-- 繧ｨ繝ｩ繝ｼ讀懃衍繝�ヰ繝�げ繧ｹ繧ｯ繝ｪ繝励ヨ -->
   <script>
     window.onerror = function(message, source, lineno, colno, error) {
       const errorDiv = document.createElement('div');
@@ -19,7 +19,7 @@
       errorDiv.style.whiteSpace = 'pre-wrap';
       errorDiv.style.userSelect = 'text';
       errorDiv.style.webkitUserSelect = 'text';
-      errorDiv.innerHTML = '<strong>[JS Error]</strong> ' + message + '<br>場所: ' + source + ':' + lineno + ':' + colno;
+      errorDiv.innerHTML = '<strong>[JS Error]</strong> ' + message + '<br>蝣ｴ謇: ' + source + ':' + lineno + ':' + colno;
       
       if (document.body) {
         document.body.appendChild(errorDiv);
@@ -32,9 +32,9 @@
     };
   </script>
   <meta charset="UTF-8">
-  <title>よむよむレコード 📚</title>
+  <title>繧医�繧医�繝ｬ繧ｳ繝ｼ繝� �答</title>
   
-  <!-- Apple Safari PWA (ホーム画面に追加) 用のメタ設定 -->
+  <!-- Apple Safari PWA (繝帙�繝�逕ｻ髱｢縺ｫ霑ｽ蜉�) 逕ｨ縺ｮ繝｡繧ｿ險ｭ螳� -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -56,7 +56,7 @@
               200: '#fde68a',
               300: '#fcd34d',
               400: '#fbbf24',
-              500: '#f59e0b', /* あたたかみのあるオレンジイエロー */
+              500: '#f59e0b', /* 縺ゅ◆縺溘°縺ｿ縺ｮ縺ゅｋ繧ｪ繝ｬ繝ｳ繧ｸ繧､繧ｨ繝ｭ繝ｼ */
               600: '#d97706',
               700: '#b45309',
             },
@@ -66,7 +66,7 @@
               200: '#a7f3d0',
               300: '#6ee7b7',
               400: '#34d399',
-              500: '#10b981', /* たのしいエメラルドグリーン */
+              500: '#10b981', /* 縺溘�縺励＞繧ｨ繝｡繝ｩ繝ｫ繝峨げ繝ｪ繝ｼ繝ｳ */
               600: '#059669',
             },
             sky: {
@@ -75,7 +75,7 @@
               200: '#bae6fd',
               300: '#7dd3fc',
               400: '#38bdf8',
-              500: '#0ea5e9', /* さわやかなスカイブルー */
+              500: '#0ea5e9', /* 縺輔ｏ繧�°縺ｪ繧ｹ繧ｫ繧､繝悶Ν繝ｼ */
               600: '#0284c7',
             }
           },
@@ -88,7 +88,7 @@
   </script>
   
   <style>
-    /* iOS Safariでのタップ時のグレーのハイライトを無効化 */
+    /* iOS Safari縺ｧ縺ｮ繧ｿ繝��譎ゅ�繧ｰ繝ｬ繝ｼ縺ｮ繝上う繝ｩ繧､繝医ｒ辟｡蜉ｹ蛹� */
     * {
       -webkit-tap-highlight-color: transparent;
       user-select: none;
@@ -99,13 +99,13 @@
       -webkit-user-select: text !important;
     }
     
-    /* スムーズなスクロール */
+    /* 繧ｹ繝�繝ｼ繧ｺ縺ｪ繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ */
     body {
       font-family: 'Outfit', 'Noto Sans JP', sans-serif;
-      overscroll-behavior-y: contain; /* PWAでの引っ張りリフレッシュを防止 */
+      overscroll-behavior-y: contain; /* PWA縺ｧ縺ｮ蠑輔▲蠑ｵ繧翫Μ繝輔Ξ繝�す繝･繧帝亟豁｢ */
     }
     
-    /* html5-qrcode内のレイアウト微調整 */
+    /* html5-qrcode蜀��繝ｬ繧､繧｢繧ｦ繝亥ｾｮ隱ｿ謨ｴ */
     #reader {
       border: none !important;
     }
@@ -125,101 +125,101 @@
 </head>
 <body class="min-h-screen bg-gradient-to-br from-brand-50 via-orange-50/20 to-brand-100/40 p-4 pb-24 md:p-8 md:pb-28">
 
-  <!-- メインコンテナ -->
+  <!-- 繝｡繧､繝ｳ繧ｳ繝ｳ繝リ -->
   <div id="main-app-container" class="max-w-5xl mx-auto bg-white/90 backdrop-blur-md rounded-[32px] shadow-xl border-4 border-brand-200 overflow-hidden flex flex-col min-h-[85vh]">
     
-    <!-- ヘッダーエリア -->
+    <!-- 繝倥ャ繝€繝ｼ繧ｨ繝ｪ繧｢ -->
     <header class="p-6 md:p-8 border-b-4 border-brand-100 bg-brand-50/50 flex flex-col md:flex-row justify-between items-center gap-4 relative">
       <div class="w-full md:w-auto flex justify-between items-start md:block">
         <div>
           <h1 class="text-3xl md:text-4xl font-black bg-gradient-to-r from-brand-600 to-orange-500 bg-clip-text text-transparent flex items-center gap-2">
-            <span>📚 よむよむレコード</span>
+            <span>答 繧医繧医繝ｬ繧ｳ繝ｼ繝</span>
           </h1>
-          <p class="text-xs md:text-sm font-bold text-brand-700 mt-1">バーコードをピッとスキャンして、きみの読書貯金をつくろう！</p>
+          <p class="text-xs md:text-sm font-bold text-brand-700 mt-1">繝舌繧ｳ繝ｼ繝峨ｒ繝斐ャ縺ｨ繧ｹ繧ｭ繝｣繝ｳ縺励※縲√″縺ｿ縺ｮ隱ｭ譖ｸ雋ｯ驥代ｒ縺､縺上ｍ縺ｼ</p>
         </div>
-        <!-- スマホ/タブレット用 設定ギアボタン -->
+        <!-- 繧ｹ繝槭/繧ｿ繝悶Ξ繝ヨ逕ｨ 險ｭ螳壹ぐ繧｢繝懊ち繝ｳ -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.9</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v2.0</span>
         </button>
       </div>
       
       <div class="flex items-center gap-3">
-        <!-- PC用 設定ギアボタン -->
+        <!-- PC逕ｨ 險ｭ螳壹ぐ繧｢繝懊ち繝ｳ -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
           <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v1.9</span>
         </button>
         
-        <!-- 読書貯金カウンター (コイン風UI) -->
+        <!-- 隱ｭ譖ｸ雋ｯ驥代き繧ｦ繝ｳ繧ｿ繝ｼ (繧ｳ繧､繝ｳ鬚ｨUI) -->
         <div class="flex items-center gap-3 bg-amber-100/90 px-6 py-3 rounded-full border-2 border-brand-300 shadow-inner select-none active:scale-98 transition-transform cursor-pointer" onclick="switchTab('tab-gallery')">
-          <span class="text-3xl animate-bounce">🪙</span>
+          <span class="text-3xl animate-bounce">�ｪ�</span>
           <div>
-            <div class="text-[10px] font-black text-brand-700 uppercase tracking-widest leading-none">よんだ本</div>
+            <div class="text-[10px] font-black text-brand-700 uppercase tracking-widest leading-none">繧医ｓ縺�譛ｬ</div>
             <div class="text-2xl font-black text-brand-600 leading-none mt-1">
-              <span id="dashboard-counter" class="text-3xl">0</span> 冊
+              <span id="dashboard-counter" class="text-3xl">0</span> 蜀�
             </div>
           </div>
         </div>
       </div>
     </header>
 
-    <!-- ナビゲーションタブ (iPad対応・大型タップ領域) -->
+    <!-- 繝翫ン繧ｲ繝ｼ繧ｷ繝ｧ繝ｳ繧ｿ繝� (iPad蟇ｾ蠢懊�螟ｧ蝙九ち繝��鬆伜沺) -->
     <nav class="flex p-3 bg-brand-50/30 gap-2 border-b-2 border-brand-100/60">
       <button type="button" id="nav-btn-scan" onclick="switchTab('tab-scan')" class="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-black text-lg transition-all transform scale-102 bg-brand-400 text-white shadow-lg border border-brand-300">
         <i class="fa-solid fa-camera-retro text-xl"></i>
-        <span>バーコードでスキャン</span>
+        <span>繝舌�繧ｳ繝ｼ繝峨〒繧ｹ繧ｭ繝｣繝ｳ</span>
       </button>
       <button type="button" id="nav-btn-manual" onclick="switchTab('tab-manual')" class="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-bold text-lg transition-all text-brand-700 bg-brand-50/50 hover:bg-brand-100/50 border border-brand-200/60">
         <i class="fa-solid fa-pen-to-square text-xl"></i>
-        <span>手動で登録する</span>
+        <span>謇句虚縺ｧ逋ｻ骭ｲ縺吶ｋ</span>
       </button>
       <button type="button" id="nav-btn-gallery" onclick="switchTab('tab-gallery')" class="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-bold text-lg transition-all text-brand-700 bg-brand-50/50 hover:bg-brand-100/50 border border-brand-200/60">
         <i class="fa-solid fa-images text-xl"></i>
-        <span>よんだ本の一覧</span>
+        <span>繧医ｓ縺�譛ｬ縺ｮ荳隕ｧ</span>
       </button>
     </nav>
 
-    <!-- メインコンテンツ -->
+    <!-- 繝｡繧､繝ｳ繧ｳ繝ｳ繝�Φ繝� -->
     <main class="flex-grow p-6 md:p-8">
       
-      <!-- ================= 1. バーコードスキャンタブ ================= -->
+      <!-- ================= 1. 繝舌�繧ｳ繝ｼ繝峨せ繧ｭ繝｣繝ｳ繧ｿ繝� ================= -->
       <section id="tab-scan" class="space-y-6">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          <!-- スキャン操作エリア (左側) -->
+          <!-- 繧ｹ繧ｭ繝｣繝ｳ謫堺ｽ懊お繝ｪ繧｢ (蟾ｦ蛛ｴ) -->
           <div class="lg:col-span-5 bg-brand-50/30 p-5 rounded-[24px] border-2 border-brand-200/60 space-y-4">
             <h2 class="text-xl font-black text-brand-800 flex items-center gap-2">
               <i class="fa-solid fa-barcode text-brand-500"></i>
-              カメラでスキャンする
+              繧ｫ繝｡繝ｩ縺ｧ繧ｹ繧ｭ繝｣繝ｳ縺吶ｋ
             </h2>
             <p class="text-xs text-brand-600 leading-relaxed">
-              本のうしろにある「バーコード」をカメラにうつすと、本のなまえを自動でさがします。連続でどんどんスキャンできるよ！
+              譛ｬ縺ｮ縺�＠繧阪↓縺ゅｋ縲後ヰ繝ｼ繧ｳ繝ｼ繝峨阪ｒ繧ｫ繝｡繝ｩ縺ｫ縺�▽縺吶→縲∵悽縺ｮ縺ｪ縺ｾ縺医ｒ閾ｪ蜍輔〒縺輔′縺励∪縺吶る｣邯壹〒縺ｩ繧薙←繧薙せ繧ｭ繝｣繝ｳ縺ｧ縺阪ｋ繧茨ｼ�
             </p>
             
-            <!-- カメラ起動/終了ボタン -->
+            <!-- 繧ｫ繝｡繝ｩ襍ｷ蜍�/邨ゆｺ��繧ｿ繝ｳ -->
             <div class="space-y-2">
               <button type="button" id="camera-toggle-btn" onclick="toggleCamera()" class="w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all">
                 <i id="camera-btn-icon" class="fa-solid fa-camera-retro text-xl"></i>
-                <span id="camera-btn-text">カメラをスタート！</span>
+                <span id="camera-btn-text">繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ�</span>
               </button>
               
               <button type="button" onclick="openScannerWindow()" class="w-full py-3.5 rounded-2xl font-bold text-xs bg-slate-800 hover:bg-slate-700 active:scale-98 text-brand-300 shadow-md flex items-center justify-center gap-2 transition-all">
                 <i class="fa-solid fa-up-right-from-square"></i>
-                iPadで動かない時はこちら（別ウィンドウで開く）
+                iPad縺ｧ蜍輔°縺ｪ縺�凾縺ｯ縺薙■繧会ｼ亥挨繧ｦ繧｣繝ｳ繝峨え縺ｧ髢九￥��
               </button>
             </div>
             
-            <!-- カメラプレビュー表示領域 -->
+            <!-- 繧ｫ繝｡繝ｩ繝励Ξ繝薙Η繝ｼ陦ｨ遉ｺ鬆伜沺 -->
             <div class="relative">
               <div class="relative w-full aspect-[4/3] overflow-hidden rounded-2xl">
                 <div id="reader" class="hidden w-full h-full bg-black border-4 border-brand-300 shadow-md"></div>
-                <!-- スキャンターゲット枠（カメラ稼働中のみ表示、外側を半透明マスクし中央をくり抜く） -->
+                <!-- 繧ｹ繧ｭ繝｣繝ｳ繧ｿ繝ｼ繧ｲ繝�ヨ譫��医き繝｡繝ｩ遞ｼ蜒堺ｸｭ縺ｮ縺ｿ陦ｨ遉ｺ縲∝､門�繧貞濠騾乗�繝槭せ繧ｯ縺嶺ｸｭ螟ｮ繧偵￥繧頑栢縺擾ｼ� -->
                 <div id="scan-area-overlay" class="hidden absolute inset-0 pointer-events-none flex items-center justify-center z-10">
                   <div class="w-[80%] h-[28%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
-                    <!-- 照準赤線 -->
+                    <!-- 辣ｧ貅冶ｵ､邱� -->
                     <div class="absolute inset-x-0 top-1/2 h-[1px] bg-rose-500/80 -translate-y-1/2 animate-pulse"></div>
-                    <!-- 角のブラケット装飾 -->
+                    <!-- 隗偵�繝悶Λ繧ｱ繝�ヨ陬�｣ｾ -->
                     <div class="absolute -top-[2px] -left-[2px] w-3 h-3 border-t-4 border-l-4 border-rose-500 rounded-tl-sm"></div>
                     <div class="absolute -top-[2px] -right-[2px] w-3 h-3 border-t-4 border-r-4 border-rose-500 rounded-tr-sm"></div>
                     <div class="absolute -bottom-[2px] -left-[2px] w-3 h-3 border-b-4 border-l-4 border-rose-500 rounded-bl-sm"></div>
@@ -228,283 +228,282 @@
                 </div>
               </div>
               <div id="camera-hint-text" class="hidden text-center text-xs text-brand-600 font-bold mt-2 animate-pulse">
-                💡 バーコードを少しはなして（20cmくらい）、ピントをあわせてね！
+                �庁 繝舌�繧ｳ繝ｼ繝峨ｒ蟆代＠縺ｯ縺ｪ縺励※��20cm縺上ｉ縺�ｼ峨√ヴ繝ｳ繝医ｒ縺ゅｏ縺帙※縺ｭ��
               </div>
-              <!-- デバッグパネル -->
+              <!-- 繝�ヰ繝�げ繝代ロ繝ｫ -->
               <div id="camera-debug-panel" class="hidden mt-2 p-4 bg-slate-800 rounded-2xl text-xs font-mono space-y-2 border border-slate-700 shadow-inner">
                 <div class="flex justify-between items-center border-b border-slate-700 pb-1.5">
                   <div class="flex items-center gap-2">
                     <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
-                    <span id="debug-scan-status" class="text-gray-300 font-bold">待機中</span>
+                    <span id="debug-scan-status" class="text-gray-300 font-bold">蠕ｩ滉ｸｭ</span>
                   </div>
-                  <span class="text-[10px] text-slate-400">v1.9 デバッグツール</span>
+                  <span class="text-[10px] text-slate-400">v2.0 デバッグツール</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400">
-                  <div>最後に検出: <span id="debug-last-detected" class="text-yellow-300 font-bold">なし</span></div>
-                  <div>カメラ解像度: <span id="debug-video-resolution" class="text-blue-300">取得中</span></div>
-                  <div>スキャン回数: <span id="debug-scan-attempts" class="text-green-300">0</span> 回</div>
-                  <div>一時停止: <span id="debug-scan-paused-state" class="text-red-300">いいえ</span></div>
+                  <div>譛€蠕後↓讀懷: <span id="debug-last-detected" class="text-yellow-300 font-bold">縺ｪ縺</span></div>
+                  <div>繧ｫ繝｡繝ｩ隗｣蜒丞ｺｦ: <span id="debug-video-resolution" class="text-blue-300">蜿門ｾ嶺ｸｭ</span></div>
+                  <div>荳譎ょ●豁｢: <span id="debug-scan-paused-state" class="text-red-300">縺�＞縺�</span></div>
                 </div>
                 <div class="text-[11px] text-slate-400 border-t border-slate-700 pt-1.5">
-                  エラー: <span id="debug-last-error" class="text-red-400 break-all">なし</span>
+                  繧ｨ繝ｩ繝ｼ: <span id="debug-last-error" class="text-red-400 break-all">縺ｪ縺�</span>
                 </div>
                 
-                <!-- 手動キャプチャテスト機能 -->
+                <!-- 謇句虚繧ｭ繝｣繝励メ繝｣繝�せ繝域ｩ溯� -->
                 <div class="border-t border-slate-700 pt-2 flex flex-col gap-2">
                   <div class="flex gap-2">
                     <button type="button" id="debug-capture-btn" onclick="captureAndTestDecode()" class="flex-grow py-2 px-3 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold rounded-lg transition-all text-xs flex items-center justify-center gap-1.5">
-                      <i class="fa-solid fa-camera"></i> 今の映像をパシャリと解析テストする
+                      <i class="fa-solid fa-camera"></i> 莉翫�譏�蜒上ｒ繝代す繝｣繝ｪ縺ｨ隗｣譫舌ユ繧ｹ繝医☆繧�
                     </button>
                     <button type="button" onclick="clearDebugLogs()" class="py-2 px-3 bg-slate-700 hover:bg-slate-605 text-slate-300 font-bold rounded-lg text-xs">
-                      ログクリア
+                      繝ｭ繧ｰ繧ｯ繝ｪ繧｢
                     </button>
                   </div>
-                  <!-- キャプチャ結果画像表示 -->
+                  <!-- 繧ｭ繝｣繝励メ繝｣邨先棡逕ｻ蜒剰｡ｨ遉ｺ -->
                   <div id="debug-capture-preview-container" class="hidden flex items-center gap-3 bg-slate-900 p-2 rounded-xl border border-slate-700">
-                    <canvas id="debug-canvas" class="w-24 aspect-[4/3] bg-black rounded-lg border border-slate-600"></canvas>
+                    <canvas id="debug-canvas" class="w-24 h-auto bg-black rounded-lg border border-slate-600"></canvas>
                     <div class="flex-grow text-[10px] space-y-1">
-                      <div class="text-slate-400 font-bold">キャプチャ解析結果:</div>
-                      <div id="debug-capture-result" class="text-yellow-300 font-bold">未解析</div>
+                      <div class="text-slate-400 font-bold">繧ｭ繝｣繝励メ繝｣隗｣譫千ｵ先棡:</div>
+                      <div id="debug-capture-result" class="text-yellow-300 font-bold">譛ｪ隗｣譫�</div>
                     </div>
                   </div>
                 </div>
                 
-                <!-- 簡易ログモニター -->
+                <!-- 邁｡譏薙Ο繧ｰ繝｢繝九ち繝ｼ -->
                 <div class="border-t border-slate-700 pt-2">
-                  <div class="text-[10px] text-slate-400 mb-1 font-bold">📊 デバッグログコンソール:</div>
+                  <div class="text-[10px] text-slate-400 mb-1 font-bold">�投 繝�ヰ繝�げ繝ｭ繧ｰ繧ｳ繝ｳ繧ｽ繝ｼ繝ｫ:</div>
                   <div id="debug-log-console" class="p-2.5 bg-slate-950 text-[10px] text-green-400 h-32 overflow-y-auto rounded-xl border border-slate-900 font-mono leading-relaxed space-y-0.5 select-text">
-                    <div>[システム] デバッグログ準備完了。</div>
+                    <div>[繧ｷ繧ｹ繝�Β] 繝�ヰ繝�げ繝ｭ繧ｰ貅門ｙ螳御ｺ��</div>
                   </div>
                 </div>
               </div>
             </div>
             
-            <!-- バーコード数字手入力エリア (iOS Safariカメラ制限対策) -->
+            <!-- 繝舌�繧ｳ繝ｼ繝画焚蟄玲焔蜈･蜉帙お繝ｪ繧｢ (iOS Safari繧ｫ繝｡繝ｩ蛻ｶ髯仙ｯｾ遲�) -->
             <div class="pt-4 border-t border-brand-200/50 space-y-2 select-text">
-              <label class="block text-xs font-bold text-brand-700">バーコードの数字をて入力する</label>
+              <label class="block text-xs font-bold text-brand-700">繝舌�繧ｳ繝ｼ繝峨�謨ｰ蟄励ｒ縺ｦ蜈･蜉帙☆繧�</label>
               <div class="flex gap-2">
-                <input type="text" id="manual-isbn-input" class="flex-grow bg-white text-md text-gray-800 px-4 py-3 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="978から始まる13けたの数字">
+                <input type="text" id="manual-isbn-input" class="flex-grow bg-white text-md text-gray-800 px-4 py-3 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="978縺九ｉ蟋九∪繧�13縺代◆縺ｮ謨ｰ蟄�">
                 <button type="button" onclick="submitManualIsbn()" class="px-5 py-3 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-black text-sm rounded-xl shadow-md transition-all flex-shrink-0">
-                  しらべる
+                  縺励ｉ縺ｹ繧�
                 </button>
               </div>
             </div>
           </div>
           
-          <!-- 一時リスト表示エリア (右側) -->
+          <!-- 荳譎ゅΜ繧ｹ繝郁｡ｨ遉ｺ繧ｨ繝ｪ繧｢ (蜿ｳ蛛ｴ) -->
           <div class="lg:col-span-7 space-y-4">
             <div class="flex justify-between items-center">
               <h2 class="text-xl font-black text-brand-800 flex items-center gap-2">
                 <i class="fa-solid fa-clipboard-list text-brand-500"></i>
-                スキャンした本（一時リスト）
+                繧ｹ繧ｭ繝｣繝ｳ縺励◆譛ｬ�井ｸ譎ゅΜ繧ｹ繝茨ｼ�
               </h2>
               <button type="button" onclick="clearTempListConfirm()" class="text-xs font-bold text-rose-500 hover:underline">
-                リストをからにする
+                繝ｪ繧ｹ繝医ｒ縺九ｉ縺ｫ縺吶ｋ
               </button>
             </div>
             
-            <!-- スキャン済み一時カードリスト -->
+            <!-- 繧ｹ繧ｭ繝｣繝ｳ貂医∩荳譎ゅき繝ｼ繝峨Μ繧ｹ繝� -->
             <div id="temp-list-container" class="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
-              <!-- 初期表示 (空状態) -->
+              <!-- 蛻晄悄陦ｨ遉ｺ (遨ｺ迥ｶ諷�) -->
               <div class="text-center py-16 px-4 border-4 border-dashed border-brand-200 rounded-3xl bg-brand-50/20">
                 <i class="fa-solid fa-camera-retro text-5xl text-brand-300 mb-4 animate-bounce"></i>
-                <p class="text-lg font-black text-brand-700">スキャンした本がここにでるよ！</p>
-                <p class="text-xs text-brand-500 mt-2">上の「カメラをスタート！」ボタンをおして、バーコードをうつしてね。</p>
+                <p class="text-lg font-black text-brand-700">繧ｹ繧ｭ繝｣繝ｳ縺励◆譛ｬ縺後％縺薙↓縺ｧ繧九ｈ��</p>
+                <p class="text-xs text-brand-500 mt-2">荳翫�縲後き繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ√阪�繧ｿ繝ｳ繧偵♀縺励※縲√ヰ繝ｼ繧ｳ繝ｼ繝峨ｒ縺�▽縺励※縺ｭ縲�</p>
               </div>
             </div>
             
-            <!-- まとめて登録ボタン（一括書き込み） -->
+            <!-- 縺ｾ縺ｨ繧√※逋ｻ骭ｲ繝懊ち繝ｳ�井ｸ諡ｬ譖ｸ縺崎ｾｼ縺ｿ�� -->
             <div id="batch-submit-btn-container" class="p-4 bg-brand-100/70 border border-brand-200 rounded-[24px] flex flex-col sm:flex-row justify-between items-center gap-4 hidden">
               <div>
                 <p class="text-md font-black text-brand-800">
-                  <span id="temp-count-badge" class="bg-brand-500 text-white px-3 py-1 rounded-full text-xs font-black mr-1">0</span>冊の本が並んでいるよ！
+                  <span id="temp-count-badge" class="bg-brand-500 text-white px-3 py-1 rounded-full text-xs font-black mr-1">0</span>蜀翫�譛ｬ縺御ｸｦ繧薙〒縺�ｋ繧茨ｼ�
                 </p>
-                <p class="text-[11px] text-brand-600 mt-0.5">本のなまえや感想を直して、下のボタンをおしてね。</p>
+                <p class="text-[11px] text-brand-600 mt-0.5">譛ｬ縺ｮ縺ｪ縺ｾ縺医ｄ諢滓Φ繧堤峩縺励※縲∽ｸ九�繝懊ち繝ｳ繧偵♀縺励※縺ｭ縲�</p>
               </div>
               <button type="button" onclick="submitBatchBooks()" class="w-full sm:w-auto px-6 py-3.5 bg-accent-500 hover:bg-accent-600 active:scale-95 text-white font-black text-md rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
                 <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
-                まとめて登録する！
+                縺ｾ縺ｨ繧√※逋ｻ骭ｲ縺吶ｋ��
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ================= 2. 手動登録タブ ================= -->
+      <!-- ================= 2. 謇句虚逋ｻ骭ｲ繧ｿ繝� ================= -->
       <section id="tab-manual" class="max-w-2xl mx-auto hidden bg-brand-50/20 p-6 md:p-8 rounded-[28px] border-2 border-brand-200/50">
         <h2 class="text-2xl font-black text-brand-800 mb-6 flex items-center gap-2">
           <i class="fa-solid fa-pen-to-square text-brand-500"></i>
-          ていねいに手動で登録する
+          縺ｦ縺��縺�↓謇句虚縺ｧ逋ｻ骭ｲ縺吶ｋ
         </h2>
         
         <form onsubmit="submitManualForm(event)" class="space-y-5">
-          <!-- タイトル -->
+          <!-- 繧ｿ繧､繝医Ν -->
           <div>
-            <label class="block text-sm font-bold text-brand-700 mb-1">本のなまえ（必須）</label>
-            <input type="text" id="manual-title" required class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="本のタイトルを書いてね">
+            <label class="block text-sm font-bold text-brand-700 mb-1">譛ｬ縺ｮ縺ｪ縺ｾ縺茨ｼ亥ｿ��茨ｼ�</label>
+            <input type="text" id="manual-title" required class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="譛ｬ縺ｮ繧ｿ繧､繝医Ν繧呈嶌縺�※縺ｭ">
           </div>
           
-          <!-- 著者 -->
+          <!-- 闡苓� -->
           <div>
-            <label class="block text-sm font-bold text-brand-700 mb-1">かいた人（著者）</label>
-            <input type="text" id="manual-author" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="作者のなまえ">
+            <label class="block text-sm font-bold text-brand-700 mb-1">縺九＞縺滉ｺｺ�郁送閠�ｼ�</label>
+            <input type="text" id="manual-author" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="菴懆��縺ｪ縺ｾ縺�">
           </div>
           
-          <!-- ジャンルと所有区分 (グリッド) -->
+          <!-- 繧ｸ繝｣繝ｳ繝ｫ縺ｨ謇譛牙玄蛻� (繧ｰ繝ｪ繝�ラ) -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- 所有区分 -->
+            <!-- 謇譛牙玄蛻� -->
             <div>
-              <label class="block text-sm font-bold text-brand-700 mb-1.5">どこにある本？</label>
+              <label class="block text-sm font-bold text-brand-700 mb-1.5">縺ｩ縺薙↓縺ゅｋ譛ｬ��</label>
               <div class="flex bg-white p-1 rounded-xl border-2 border-brand-200">
                 <label class="flex-1 text-center py-2.5 rounded-lg font-bold text-sm cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
-                  <input type="radio" name="manual-owner" value="図書館で借りた本" checked class="sr-only">
-                  図書館の本
+                  <input type="radio" name="manual-owner" value="蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽" checked class="sr-only">
+                  蝗ｳ譖ｸ鬢ｨ縺ｮ譛ｬ
                 </label>
                 <label class="flex-1 text-center py-2.5 rounded-lg font-bold text-sm cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
-                  <input type="radio" name="manual-owner" value="おうちの本" class="sr-only">
-                  おうちの本
+                  <input type="radio" name="manual-owner" value="縺翫≧縺｡縺ｮ譛ｬ" class="sr-only">
+                  縺翫≧縺｡縺ｮ譛ｬ
                 </label>
               </div>
             </div>
             
-            <!-- ジャンル -->
+            <!-- 繧ｸ繝｣繝ｳ繝ｫ -->
             <div>
-              <label class="block text-sm font-bold text-brand-700 mb-1.5">どんな本？（ジャンル）</label>
+              <label class="block text-sm font-bold text-brand-700 mb-1.5">縺ｩ繧薙↑譛ｬ�滂ｼ医ず繝｣繝ｳ繝ｫ��</label>
               <select id="manual-genre" class="w-full bg-white text-md font-bold p-3.5 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none">
-                <option value="物語" selected>📕 物語 (おはなし)</option>
-                <option value="図鑑・科学">🥦 図鑑・科学</option>
-                <option value="伝記">👑 伝記 (歴史や人物)</option>
-                <option value="絵本">🎨 絵本</option>
-                <option value="その他">⭐️ その他</option>
+                <option value="迚ｩ隱�" selected>�燈 迚ｩ隱� (縺翫�縺ｪ縺�)</option>
+                <option value="蝗ｳ髑代�遘大ｭｦ">�･ｦ 蝗ｳ髑代�遘大ｭｦ</option>
+                <option value="莨晁ｨ�">�荘 莨晁ｨ� (豁ｴ蜿ｲ繧�ｺｺ迚ｩ)</option>
+                <option value="邨ｵ譛ｬ">�耳 邨ｵ譛ｬ</option>
+                <option value="縺昴�莉�">箝撰ｸ� 縺昴�莉�</option>
               </select>
             </div>
           </div>
           
-          <!-- 読んだ日付 -->
+          <!-- 隱ｭ繧薙□譌･莉� -->
           <div>
-            <label class="block text-sm font-bold text-brand-700 mb-1">読んだ日</label>
+            <label class="block text-sm font-bold text-brand-700 mb-1">隱ｭ繧薙□譌･</label>
             <input type="date" id="manual-date" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none">
           </div>
           
-          <!-- 評価（スターレーティング） -->
+          <!-- 隧穂ｾ｡�医せ繧ｿ繝ｼ繝ｬ繝ｼ繝�ぅ繝ｳ繧ｰ�� -->
           <div>
-            <label class="block text-sm font-bold text-brand-700 mb-1.5">お気に入り度（評価）</label>
+            <label class="block text-sm font-bold text-brand-700 mb-1.5">縺頑ｰ励↓蜈･繧雁ｺｦ�郁ｩ穂ｾ｡��</label>
             <div class="flex items-center gap-2">
               <input type="hidden" id="manual-rating" value="5">
               <div id="manual-stars-container" class="flex bg-white px-4 py-2 rounded-xl border-2 border-brand-200">
-                <!-- JSでレンダリング -->
+                <!-- JS縺ｧ繝ｬ繝ｳ繝繝ｪ繝ｳ繧ｰ -->
               </div>
             </div>
           </div>
           
-          <!-- 感想 -->
+          <!-- 諢滓Φ -->
           <div>
-            <label class="block text-sm font-bold text-brand-700 mb-1">ひとことメモ（感想）</label>
-            <textarea id="manual-comment" rows="3" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="おもしろかったところや、みんなにおすすめしたいところを書いてね！"></textarea>
+            <label class="block text-sm font-bold text-brand-700 mb-1">縺ｲ縺ｨ縺薙→繝｡繝｢�域─諠ｳ��</label>
+            <textarea id="manual-comment" rows="3" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="縺翫ｂ縺励ｍ縺九▲縺溘→縺薙ｍ繧�√∩繧薙↑縺ｫ縺翫☆縺吶ａ縺励◆縺�→縺薙ｍ繧呈嶌縺�※縺ｭ��"></textarea>
           </div>
           
-          <!-- 登録ボタン -->
+          <!-- 逋ｻ骭ｲ繝懊ち繝ｳ -->
           <button type="submit" class="w-full py-4 bg-accent-500 hover:bg-accent-600 active:scale-95 text-white font-black text-xl rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all">
             <i class="fa-solid fa-check text-lg"></i>
-            この本を登録する！
+            縺薙�譛ｬ繧堤匳骭ｲ縺吶ｋ��
           </button>
         </form>
       </section>
 
-      <!-- ================= 3. 読んだ本の一覧タブ ================= -->
+      <!-- ================= 3. 隱ｭ繧薙□譛ｬ縺ｮ荳隕ｧ繧ｿ繝� ================= -->
       <section id="tab-gallery" class="space-y-6 hidden">
         
-        <!-- コントロールパネル (ソート・フィルタ) -->
+        <!-- 繧ｳ繝ｳ繝医Ο繝ｼ繝ｫ繝代ロ繝ｫ (繧ｽ繝ｼ繝医�繝輔ぅ繝ｫ繧ｿ) -->
         <div class="bg-brand-50/30 p-5 rounded-[24px] border-2 border-brand-200/50 space-y-4">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             
-            <!-- フィルタ：所有区分 (おうち/図書館) -->
+            <!-- 繝輔ぅ繝ｫ繧ｿ�壽園譛牙玄蛻� (縺翫≧縺｡/蝗ｳ譖ｸ鬢ｨ) -->
             <div class="space-y-1.5">
-              <span class="block text-xs font-bold text-brand-700">どこにある本？</span>
+              <span class="block text-xs font-bold text-brand-700">縺ｩ縺薙↓縺ゅｋ譛ｬ��</span>
               <div class="flex bg-white p-1 rounded-xl border border-brand-200">
                 <label class="px-4 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
-                  <input type="radio" name="filter-owner" value="すべて" checked onchange="renderRegisteredBooks()" class="sr-only">
-                  すべて
+                  <input type="radio" name="filter-owner" value="縺吶∋縺ｦ" checked onchange="renderRegisteredBooks()" class="sr-only">
+                  縺吶∋縺ｦ
                 </label>
                 <label class="px-4 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
-                  <input type="radio" name="filter-owner" value="図書館で借りた本" onchange="renderRegisteredBooks()" class="sr-only">
-                  図書館の本
+                  <input type="radio" name="filter-owner" value="蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽" onchange="renderRegisteredBooks()" class="sr-only">
+                  蝗ｳ譖ｸ鬢ｨ縺ｮ譛ｬ
                 </label>
                 <label class="px-4 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
-                  <input type="radio" name="filter-owner" value="おうちの本" onchange="renderRegisteredBooks()" class="sr-only">
-                  おうちの本
+                  <input type="radio" name="filter-owner" value="縺翫≧縺｡縺ｮ譛ｬ" onchange="renderRegisteredBooks()" class="sr-only">
+                  縺翫≧縺｡縺ｮ譛ｬ
                 </label>
               </div>
             </div>
             
-            <!-- フィルタ：ジャンル -->
+            <!-- 繝輔ぅ繝ｫ繧ｿ�壹ず繝｣繝ｳ繝ｫ -->
             <div class="space-y-1.5 flex-grow max-w-xs">
-              <span class="block text-xs font-bold text-brand-700">どんな本？（ジャンル）</span>
+              <span class="block text-xs font-bold text-brand-700">縺ｩ繧薙↑譛ｬ�滂ｼ医ず繝｣繝ｳ繝ｫ��</span>
               <select id="filter-genre" onchange="renderRegisteredBooks()" class="w-full bg-white text-xs font-bold p-2.5 rounded-xl border border-brand-200 focus:outline-none">
-                <option value="すべて">🌈 すべてのジャンル</option>
-                <option value="物語">📕 物語 (おはなし)</option>
-                <option value="図鑑・科学">🥦 図鑑・科学</option>
-                <option value="伝記">👑 伝記</option>
-                <option value="絵本">🎨 絵本</option>
-                <option value="その他">⭐️ その他</option>
+                <option value="縺吶∋縺ｦ">�決 縺吶∋縺ｦ縺ｮ繧ｸ繝｣繝ｳ繝ｫ</option>
+                <option value="迚ｩ隱�">�燈 迚ｩ隱� (縺翫�縺ｪ縺�)</option>
+                <option value="蝗ｳ髑代�遘大ｭｦ">�･ｦ 蝗ｳ髑代�遘大ｭｦ</option>
+                <option value="莨晁ｨ�">�荘 莨晁ｨ�</option>
+                <option value="邨ｵ譛ｬ">�耳 邨ｵ譛ｬ</option>
+                <option value="縺昴�莉�">箝撰ｸ� 縺昴�莉�</option>
               </select>
             </div>
             
-            <!-- ソート：日付、評価 -->
+            <!-- 繧ｽ繝ｼ繝茨ｼ壽律莉倥∬ｩ穂ｾ｡ -->
             <div class="space-y-1.5 flex-grow max-w-xs">
-              <span class="block text-xs font-bold text-brand-700">ならびかえ</span>
+              <span class="block text-xs font-bold text-brand-700">縺ｪ繧峨�縺九∴</span>
               <select id="sort-by" onchange="renderRegisteredBooks()" class="w-full bg-white text-xs font-bold p-2.5 rounded-xl border border-brand-200 focus:outline-none">
-                <option value="date-desc" selected>📅 読んだ日 (新しいじゅん)</option>
-                <option value="date-asc">📅 読んだ日 (古いじゅん)</option>
-                <option value="rating-desc">🏆 お気に入り度 (高いじゅん)</option>
+                <option value="date-desc" selected>�套 隱ｭ繧薙□譌･ (譁ｰ縺励＞縺倥ｅ繧�)</option>
+                <option value="date-asc">�套 隱ｭ繧薙□譌･ (蜿､縺�§繧�ｓ)</option>
+                <option value="rating-desc">�醇 縺頑ｰ励↓蜈･繧雁ｺｦ (鬮倥＞縺倥ｅ繧�)</option>
               </select>
             </div>
             
           </div>
         </div>
         
-        <!-- 本の一覧表示グリッド (カード型) -->
+        <!-- 譛ｬ縺ｮ荳隕ｧ陦ｨ遉ｺ繧ｰ繝ｪ繝�ラ (繧ｫ繝ｼ繝牙梛) -->
         <div id="registered-list-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          <!-- 読込完了後にJSでカードが追加されます -->
+          <!-- 隱ｭ霎ｼ螳御ｺ�ｾ後↓JS縺ｧ繧ｫ繝ｼ繝峨′霑ｽ蜉�縺輔ｌ縺ｾ縺� -->
         </div>
       </section>
       
     </main>
   </div>
 
-  <!-- 全画面ローディングオーバーレイ (スピナー) -->
+  <!-- 蜈ｨ逕ｻ髱｢繝ｭ繝ｼ繝�ぅ繝ｳ繧ｰ繧ｪ繝ｼ繝舌�繝ｬ繧､ (繧ｹ繝斐リ繝ｼ) -->
   <div id="loading-overlay" class="fixed inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center z-50 transition-all duration-300 opacity-0 pointer-events-none">
     <div class="bg-white p-8 rounded-[32px] border-4 border-brand-300 shadow-2xl flex flex-col items-center gap-4 text-center max-w-sm">
       <div class="relative w-20 h-20">
-        <!-- 外側の回転リング -->
+        <!-- 螟門�縺ｮ蝗櫁ｻ｢繝ｪ繝ｳ繧ｰ -->
         <div class="absolute inset-0 rounded-full border-8 border-brand-100"></div>
         <div class="absolute inset-0 rounded-full border-8 border-brand-400 border-t-transparent animate-spin"></div>
-        <!-- 中央のアイコン -->
+        <!-- 荳ｭ螟ｮ縺ｮ繧｢繧､繧ｳ繝ｳ -->
         <div class="absolute inset-0 flex items-center justify-center">
-          <span class="text-3xl animate-bounce">📚</span>
+          <span class="text-3xl animate-bounce">�答</span>
         </div>
       </div>
-      <p class="text-lg font-black text-brand-800 mt-2">スプレッドシートと<br>おはなししているよ...</p>
-      <p class="text-xs text-brand-500">ちょっとまってね</p>
+      <p class="text-lg font-black text-brand-800 mt-2">繧ｹ繝励Ξ繝�ラ繧ｷ繝ｼ繝医→<br>縺翫�縺ｪ縺励＠縺ｦ縺�ｋ繧�...</p>
+      <p class="text-xs text-brand-500">縺｡繧�▲縺ｨ縺ｾ縺｣縺ｦ縺ｭ</p>
     </div>
   </div>
 
-  <!-- トースト通知 -->
+  <!-- 繝医�繧ｹ繝磯夂衍 -->
   <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900/90 backdrop-blur text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 transition-all duration-300 translate-y-24 opacity-0 z-50 pointer-events-none">
-    <span class="text-xl">🔔</span>
+    <span class="text-xl">�粕</span>
     <p id="toast-text" class="font-bold text-sm sm:text-md"></p>
   </div>
 
-  <!-- Html5Qrcode ライブラリ -->
+  <!-- Html5Qrcode 繝ｩ繧､繝悶Λ繝ｪ -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   
   <script>
-    // 別ウィンドウで開かれたスキャナーモードかどうかの判定
+    // 蛻･繧ｦ繧｣繝ｳ繝峨え縺ｧ髢九°繧後◆繧ｹ繧ｭ繝｣繝翫�繝｢繝ｼ繝峨°縺ｩ縺�°縺ｮ蛻､螳�
     const urlParams = new URLSearchParams(window.location.search);
     const isScannerMode = urlParams.get('mode') === 'scanner';
-    let webAppUrl = ''; // GASで実行された場合に自動インジェクションされます
+    let webAppUrl = ''; // GAS縺ｧ螳溯｡後＆繧後◆蝣ｴ蜷医↓閾ｪ蜍輔う繝ｳ繧ｸ繧ｧ繧ｯ繧ｷ繝ｧ繝ｳ縺輔ｌ縺ｾ縺�
 
-    // 統合データベースドライバー
+    // 邨ｱ蜷医ョ繝ｼ繧ｿ繝吶�繧ｹ繝峨Λ繧､繝舌�
     const dbDriver = {
       getGasUrl: function() {
         if (webAppUrl && webAppUrl.trim() !== '') {
@@ -592,7 +591,7 @@
       }
     };
 
-    // --- PC/iPhoneローカルテスト用の疑似データベース(LocalStorage)設定 ---
+    // --- PC/iPhone繝ｭ繝ｼ繧ｫ繝ｫ繝�せ繝育畑縺ｮ逍台ｼｼ繝��繧ｿ繝吶�繧ｹ(LocalStorage)險ｭ螳� ---
     let isLocalStorageAvailable = false;
     const memoryStorage = {};
     try {
@@ -624,48 +623,48 @@
       }
     };
 
-    // ホスト名にgoogleが含まれる場合はGAS環境と判定
+    // 繝帙せ繝亥錐縺ｫgoogle縺悟性縺ｾ繧後ｋ蝣ｴ蜷医�GAS迺ｰ蠅�→蛻､螳�
     const isGAS = window.location.hostname.indexOf('google') !== -1;
-    // GASのURLが設定されているか確認
+    // GAS縺ｮURL縺瑚ｨｭ螳壹＆繧後※縺�ｋ縺狗｢ｺ隱�
     const hasGasUrl = !!safeStorage.getItem('yomuyomu_gas_url');
 
-    // GAS環境ではなく、かつGASのURLも設定されていない場合のみ、テスト用のモック（疑似）DBを起動する
+    // GAS迺ｰ蠅�〒縺ｯ縺ｪ縺上√°縺､GAS縺ｮURL繧りｨｭ螳壹＆繧後※縺�↑縺��ｴ蜷医�縺ｿ縲√ユ繧ｹ繝育畑縺ｮ繝｢繝�け�育桝莨ｼ�吋B繧定ｵｷ蜍輔☆繧�
     if (!isGAS && !hasGasUrl && typeof google === 'undefined') {
       console.warn("Running in local mock mode (google.script.run is not available).");
       
       const MOCK_DB_KEY = 'yomuyomu_mock_db';
-      // 初期モックデータの作成
+      // 蛻晄悄繝｢繝�け繝��繧ｿ縺ｮ菴懈�
       if (!safeStorage.getItem(MOCK_DB_KEY)) {
         const initialMockData = [
           {
             id: "id_mock_1",
             date: "2026/06/28 12:00:00",
             isbn: "9784041012345",
-            title: "モモ",
-            author: "ミヒャエル・エンデ",
+            title: "繝｢繝｢",
+            author: "繝溘ヲ繝｣繧ｨ繝ｫ繝ｻ繧ｨ繝ｳ繝�",
             coverUrl: "",
-            ownerType: "図書館で借りた本",
-            genre: "物語",
-            comment: "時間をぬすんだ「時間どろぼう」に立ち向かう女の子のお話。とてもわくわくした！",
+            ownerType: "蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽",
+            genre: "迚ｩ隱�",
+            comment: "譎る俣繧偵〓縺吶ｓ縺�縲梧凾髢薙←繧阪⊂縺�阪↓遶九■蜷代°縺�･ｳ縺ｮ蟄舌�縺願ｩｱ縲ゅ→縺ｦ繧ゅｏ縺上ｏ縺上＠縺滂ｼ�",
             rating: 5
           },
           {
             id: "id_mock_2",
             date: "2026/06/27 15:30:00",
             isbn: "9784834000825",
-            title: "ぐりとぐら",
-            author: "なかがわ りえこ, おおむら ゆりこ",
+            title: "縺舌ｊ縺ｨ縺舌ｉ",
+            author: "縺ｪ縺九′繧� 繧翫∴縺�, 縺翫♀繧繧� 繧�ｊ縺�",
             coverUrl: "",
-            ownerType: "おうちの本",
-            genre: "絵本",
-            comment: "おおきなカステラをつくるお話。みんなでおいしそうにたべるところがすき。",
+            ownerType: "縺翫≧縺｡縺ｮ譛ｬ",
+            genre: "邨ｵ譛ｬ",
+            comment: "縺翫♀縺阪↑繧ｫ繧ｹ繝�Λ繧偵▽縺上ｋ縺願ｩｱ縲ゅ∩繧薙↑縺ｧ縺翫＞縺励◎縺�↓縺溘∋繧九→縺薙ｍ縺後☆縺阪�",
             rating: 4
           }
         ];
         safeStorage.setItem(MOCK_DB_KEY, JSON.stringify(initialMockData));
       }
 
-      // google.script.runの挙動をモック
+      // google.script.run縺ｮ謖吝虚繧偵Δ繝�け
       window.google = {
         script: {
           run: {
@@ -702,17 +701,17 @@
                               id: id,
                               date: bookDate,
                               isbn: b.isbn || "",
-                              title: b.title || "（タイトルなし）",
-                              author: b.author || "（著者不明）",
+                              title: b.title || "�医ち繧､繝医Ν縺ｪ縺暦ｼ�",
+                              author: b.author || "�郁送閠�ｸ肴���",
                               coverUrl: b.coverUrl || "",
-                              ownerType: b.ownerType || "図書館で借りた本",
-                              genre: b.genre || "その他",
+                              ownerType: b.ownerType || "蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽",
+                              genre: b.genre || "縺昴�莉�",
                               comment: b.comment || "",
                               rating: b.rating || 3
                             };
                           });
                           
-                          // 新しい本を配列の先頭に追加
+                          // 譁ｰ縺励＞譛ｬ繧帝�蛻励�蜈磯�ｭ縺ｫ霑ｽ蜉�
                           const updated = [...saved, ...data];
                           safeStorage.setItem(MOCK_DB_KEY, JSON.stringify(updated));
                           successCb({ success: true, count: newBooks.length });
@@ -730,121 +729,53 @@
       };
     }
 
-    // グローバル状態
-    let tempBooks = [];          // スキャン済み一時リスト
-    let allRegisteredBooks = []; // DBから読み込んだ登録済みの本
-    let audioCtx = null;         // iOS用AudioContext
-    let html5QrCode = null;      // カメラオブジェクト
-    let isCameraRunning = false;  // カメラ稼働中フラグ
-    let isScanningPaused = false; // 一時停止（スキャンスロットリング）中フラグ
-    let lastScannedTime = 0;     // 直前スキャン時間 (ミリ秒)
+    // 繧ｰ繝ｭ繝ｼ繝舌Ν迥ｶ諷�
+    let tempBooks = [];          // 繧ｹ繧ｭ繝｣繝ｳ貂医∩荳譎ゅΜ繧ｹ繝�
+    let allRegisteredBooks = []; // DB縺九ｉ隱ｭ縺ｿ霎ｼ繧薙□逋ｻ骭ｲ貂医∩縺ｮ譛ｬ
+    let audioCtx = null;         // iOS逕ｨAudioContext
+    let html5QrCode = null;      // 繧ｫ繝｡繝ｩ繧ｪ繝悶ず繧ｧ繧ｯ繝�
+    let isCameraRunning = false;  // 繧ｫ繝｡繝ｩ遞ｼ蜒堺ｸｭ繝輔Λ繧ｰ
+    let isScanningPaused = false; // 荳譎ょ●豁｢�医せ繧ｭ繝｣繝ｳ繧ｹ繝ｭ繝�ヨ繝ｪ繝ｳ繧ｰ�我ｸｭ繝輔Λ繧ｰ
+    let lastScannedTime = 0;     // 逶ｴ蜑阪せ繧ｭ繝    // 繧ｭ繝｣繝ｳ繝舌せ繧定ｧ貞ｺｦ謖�ｮ壹〒蝗櫁ｻ｢縺励※謠冗判縺吶ｋ繝倥Ν繝代�髢｢謨ｰ
+    function drawRotated(videoEl, canvas, degrees) {
+      const ctx = canvas.getContext('2d');
+      const width = videoEl.videoWidth || 640;
+      const height = videoEl.videoHeight || 480;
 
-    // html5-qrcodeでデコード対象をEAN_13のみに限定し、スキャン処理を劇的に軽量・高速化する安全な指定ヘルパー
-    function getSupportedFormats() {
-      if (typeof window.Html5Qrcode !== 'undefined' && window.Html5Qrcode.SupportedFormats) {
-        return [ window.Html5Qrcode.SupportedFormats.EAN_13 ];
+      // 90蠎ｦ縺ｾ縺溘�270蠎ｦ蝗櫁ｻ｢縺輔○繧句�ｴ蜷医�縲√く繝｣繝ｳ繝舌せ縺ｮ邵ｦ讓ｪ繧貞�繧梧崛縺医ｋ
+      if (degrees === 90 || degrees === 270) {
+        canvas.width = height;
+        canvas.height = width;
+      } else {
+        canvas.width = width;
+        canvas.height = height;
       }
-      if (typeof window.Html5QrcodeSupportedFormats !== 'undefined') {
-        return [ window.Html5QrcodeSupportedFormats.EAN_13 ];
-      }
-      // フォールバック: html5-qrcode内部のenumインデックスは EAN_13 = 10
-      return [ 10 ];
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+
+      // 蝗櫁ｻ｢縺ｮ荳ｭ蠢�ｒ繧ｭ繝｣繝ｳ繝舌せ縺ｮ荳ｭ蠢�↓險ｭ螳�
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((degrees * Math.PI) / 180);
+
+      // 蝗櫁ｻ｢迥ｶ諷九〒繝薙ョ繧ｪ繧呈緒逕ｻ
+      ctx.drawImage(videoEl, -width / 2, -height / 2, width, height);
+      ctx.restore();
     }
 
-    // ================= 画面内デバッグツール用のJavaScript制御 =================
-    const nativeLog = console.log;
-    const nativeWarn = console.warn;
-    const nativeError = console.error;
-
-    function logToDebugConsole(message, type = 'info') {
-      const consoleDiv = document.getElementById('debug-log-console');
-      if (!consoleDiv) return;
-
-      const logRow = document.createElement('div');
-      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      
-      let typeColor = 'text-green-400';
-      let typeLabel = '[情報]';
-      if (type === 'warn') {
-        typeColor = 'text-yellow-400';
-        typeLabel = '[警告]';
-      } else if (type === 'error') {
-        typeColor = 'text-red-400';
-        typeLabel = '[エラー]';
-      }
-
-      logRow.className = `py-0.5 border-b border-slate-900/30 ${typeColor}`;
-      logRow.textContent = `${timeStr} ${typeLabel} ${message}`;
-      consoleDiv.appendChild(logRow);
-
-      // 行数制限（最大80行）
-      while (consoleDiv.children.length > 80) {
-        consoleDiv.removeChild(consoleDiv.firstChild);
-      }
-
-      // 最下部まで自動スクロール
-      consoleDiv.scrollTop = consoleDiv.scrollHeight;
-    }
-
-    // consoleのオーバーライド
-    console.log = function(...args) {
-      nativeLog.apply(console, args);
-      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-      // html5-qrcodeやカメラ関係のメッセージはコンソールに流す
-      if (msg.includes('Html5Qrcode') || msg.includes('camera') || msg.includes('video') || msg.includes('scan') || msg.includes('decod') || msg.includes('Stream') || msg.includes('Format')) {
-        logToDebugConsole(msg, 'info');
-      }
-    };
-    console.warn = function(...args) {
-      nativeWarn.apply(console, args);
-      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-      logToDebugConsole(msg, 'warn');
-    };
-    console.error = function(...args) {
-      nativeError.apply(console, args);
-      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-      logToDebugConsole(msg, 'error');
-    };
-
-    function clearDebugLogs() {
-      const consoleDiv = document.getElementById('debug-log-console');
-      if (consoleDiv) consoleDiv.innerHTML = '<div>[システム] ログをクリアしました。</div>';
-    }
-
-    // スキャン試行カウンタと状態管理変数
-    let scanAttemptCount = 0;
-
-    function incrementScanAttempts() {
-      scanAttemptCount++;
-      const attemptBadge = document.getElementById('debug-scan-attempts');
-      if (attemptBadge) attemptBadge.textContent = scanAttemptCount;
-    }
-
-    // カメラ解像度と状態の動的チェック
-    function updateDebugDimensions(videoEl) {
-      if (!videoEl) return;
-      const resLabel = document.getElementById('debug-video-resolution');
-      if (resLabel) {
-        const w = videoEl.videoWidth || videoEl.width || 0;
-        const h = videoEl.videoHeight || videoEl.height || 0;
-        resLabel.textContent = `${w}x${h} px`;
-        logToDebugConsole(`カメラ接続確立: 実解像度 ${w}x${h}`, 'info');
-      }
-    }
-
-    // 手動映像キャプチャ & スナップショットデコード解析
+    // 謇句虚譏�蜒上く繝｣繝励メ繝｣ & 繧ｹ繝翫ャ繝励す繝ｧ繝�ヨ繝�さ繝ｼ繝芽ｧ｣譫�
     async function captureAndTestDecode() {
-      logToDebugConsole('手動キャプチャ解析を開始します...', 'info');
+      logToDebugConsole('謇句虚繧ｭ繝｣繝励メ繝｣隗｣譫舌ｒ髢句ｧ九＠縺ｾ縺�...', 'info');
       
       const readerDiv = document.getElementById('reader');
       if (!readerDiv) {
-        logToDebugConsole('エラー: readerコンテナが見つかりません。', 'error');
+        logToDebugConsole('繧ｨ繝ｩ繝ｼ: reader繧ｳ繝ｳ繝�リ縺瑚ｦ九▽縺九ｊ縺ｾ縺帙ｓ縲�', 'error');
         return;
       }
       
       const videoEl = readerDiv.querySelector('video');
       if (!videoEl) {
-        logToDebugConsole('エラー: アクティブなビデオストリーム(カメラ)が見つかりません。', 'error');
+        logToDebugConsole('繧ｨ繝ｩ繝ｼ: 繧｢繧ｯ繝�ぅ繝悶↑繝薙ョ繧ｪ繧ｹ繝医Μ繝ｼ繝�(繧ｫ繝｡繝ｩ)縺瑚ｦ九▽縺九ｊ縺ｾ縺帙ｓ縲�', 'error');
         return;
       }
 
@@ -853,7 +784,164 @@
       const previewContainer = document.getElementById('debug-capture-preview-container');
       
       if (!canvas || !resultDiv || !previewContainer) {
-        logToDebugConsole('エラー: デバッグキャプチャ用DOM要素が不足しています。', 'error');
+        logToDebugConsole('繧ｨ繝ｩ繝ｼ: 繝�ヰ繝�げ繧ｭ繝｣繝励メ繝｣逕ｨDOM隕∫ｴ�縺御ｸ崎ｶｳ縺励※縺�∪縺吶�', 'error');
+        return;
+      }
+
+      // 繝懊ち繝ｳ繧剃ｸ譎ら噪縺ｫ辟｡蜉ｹ蛹�
+      const captureBtn = document.getElementById('debug-capture-btn');
+      if (captureBtn) captureBtn.disabled = true;
+
+      try {
+        previewContainer.classList.remove('hidden');
+        resultDiv.className = "text-yellow-300 font-bold";
+        resultDiv.textContent = "隗｣譫蝉ｸｭ (繧ｫ繝｡繝ｩ荳譎ょ●豁｢荳ｭ)...";
+
+        // html5-qrcode縺ｮ騾ｲ陦御ｸｭ繧ｹ繧ｭ繝｣繝ｳ縺ｫ繧医ｋ遶ｶ蜷医お繝ｩ繝ｼ(Cannot start file scan)繧帝亟縺舌◆繧√�
+        // 荳譌ｦ繧ｫ繝｡繝ｩ繧貞ｮ悟�縺ｫ蛛懈ｭ｢縺励∪縺吶�
+        let wasCameraRunning = isCameraRunning;
+        if (html5QrCode && isCameraRunning) {
+          logToDebugConsole('繝�さ繝ｼ繝臥ｫｶ蜷磯亟豁｢縺ｮ縺溘ａ縲√き繝｡繝ｩ繧剃ｸ譎ょ●豁｢縺励∪縺�...', 'info');
+          try {
+            await html5QrCode.stop();
+            isCameraRunning = false;
+          } catch (stopErr) {
+            logToDebugConsole(`繧ｫ繝｡繝ｩ蛛懈ｭ｢螟ｱ謨�: ${stopErr}`, 'error');
+          }
+        }
+
+        const angles = [0, 90, 180, 270];
+        let decodedText = null;
+        let successAngle = 0;
+
+        // 4譁ｹ蜷代☆縺ｹ縺ｦ蝗櫁ｻ｢縺輔○縺ｦ繝�さ繝ｼ繝峨ｒ隧ｦ縺� (ZXing縺ｮ蜷代″萓晏ｭ伜撫鬘後�螳悟�蜈区恪)
+        logToDebugConsole('逕ｻ蜒上�蝗櫁ｻ｢繝代ち繝ｼ繝ｳ(0ﾂｰ, 90ﾂｰ, 180ﾂｰ, 270ﾂｰ)繧帝��↓繝�さ繝ｼ繝峨ユ繧ｹ繝医＠縺ｾ縺�...', 'info');
+        for (const angle of angles) {
+          // 蜷�ｧ貞ｺｦ縺ｧ繧ｭ繝｣繝ｳ繝舌せ縺ｫ謠冗判
+          drawRotated(videoEl, canvas, angle);
+          
+          // Blob繧堤函謌�
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+          if (!blob) continue;
+          
+          const file = new File([blob], `captured-${angle}.png`, { type: "image/png" });
+          
+          try {
+            // 繧ｫ繝｡繝ｩ縺悟ｮ悟�縺ｫ蛛懈ｭ｢縺励※縺�ｌ縺ｰ縲《canFile縺ｯ遶ｶ蜷医↑縺丞ｮ溯｡悟庄閭ｽ
+            decodedText = await html5QrCode.scanFile(file, true);
+            successAngle = angle;
+            logToDebugConsole(`縲占ｧ貞ｺｦ ${angle}ﾂｰ 縺ｧ繝�さ繝ｼ繝画�蜉�!縲疏, 'info');
+            break; // 謌仙粥縺励◆譎らせ縺ｧ繝ｫ繝ｼ繝励ｒ閼ｱ蜃ｺ
+          } catch (scanErr) {
+            logToDebugConsole(`隗貞ｺｦ ${angle}ﾂｰ 繧ｹ繧ｭ繝｣繝ｳ螟ｱ謨�: ${String(scanErr).substring(0, 40)}`, 'warn');
+          }
+        }
+
+        // 繝�さ繝ｼ繝臥ｵ先棡縺ｮ蜃ｺ蜉�
+        if (decodedText) {
+          resultDiv.className = "text-green-400 font-bold";
+          resultDiv.textContent = `謌仙粥 (${successAngle}ﾂｰ): ${decodedText}`;
+          // 謌仙粥縺励◆隗貞ｺｦ縺ｮ縺ｾ縺ｾ繧ｭ繝｣繝ｳ繝舌せ縺ｮ謠冗判繧剃ｿ晄戟�域ｭｪ繧薙〒隕九∴縺ｪ縺�ｈ縺�↓縺吶ｋ��
+          drawRotated(videoEl, canvas, successAngle);
+          
+          playBeep();
+          onScanSuccess(decodedText);
+        } else {
+          resultDiv.className = "text-red-400 font-bold";
+          resultDiv.textContent = "蜈ｨ隗貞ｺｦ縺ｧ讀懷�縺ｧ縺阪★ (繝斐Φ繝懊こ繧��縺ｮ蜿榊ｰ�)";
+          // 螟ｱ謨励＠縺溷�ｴ蜷医�蜈��蜷代″(0蠎ｦ)縺ｧ謠冗判繧呈綾縺励※縺翫￥
+          drawRotated(videoEl, canvas, 0);
+        }
+
+        // 繧ｫ繝｡繝ｩ縺ｮ蜀埼幕
+        if (wasCameraRunning && html5QrCode) {
+          logToDebugConsole('繧ｫ繝｡繝ｩ繧貞�遞ｼ蜒阪＠縺ｾ縺�...', 'info');
+          const config = {
+            fps: 12,
+            videoConstraints: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: "environment"
+            }
+          };
+
+          try {
+            // 繧ｹ繧ｭ繝｣繝ｳ髢句ｧ�
+            await html5QrCode.start(
+              { facingMode: "environment" },
+              config,
+              (decodedText) => {
+                const debugLastDetected = document.getElementById('debug-last-detected');
+                if (debugLastDetected) debugLastDetected.textContent = decodedText;
+                onScanSuccess(decodedText);
+              },
+              (errorMessage) => {
+                incrementScanAttempts();
+                if (isScanningPaused) return;
+                if (errorMessage.includes("No MultiFormat Readers") || errorMessage.includes("NotFoundException") || errorMessage.includes("no barcode")) {
+                  return;
+                }
+                const debugLastError = document.getElementById('debug-last-error');
+                if (debugLastError) debugLastError.textContent = errorMessage.substring(0, 60);
+              }
+            );
+            isCameraRunning = true;
+            logToDebugConsole('繧ｫ繝｡繝ｩ縺ｮ蜀咲ｨｼ蜒阪′螳御ｺ�＠縺ｾ縺励◆縲�', 'info');
+          } catch (startErr) {
+            logToDebugConsole(`繧ｫ繝｡繝ｩ縺ｮ蜀咲ｨｼ蜒阪↓螟ｱ謨励＠縺ｾ縺励◆: ${startErr}`, 'error');
+          }
+        }
+
+      } catch (ex) {
+        logToDebugConsole(`繧ｭ繝｣繝励メ繝｣蜃ｦ逅�ｸｭ縺ｫ閾ｴ蜻ｽ逧�ｾ句､�: ${ex}`, 'error');
+        resultDiv.className = "text-red-400 font-bold";
+        resultDiv.textContent = "萓句､也匱逕�";
+      } finally {
+        if (captureBtn) captureBtn.disabled = false;
+      }
+    }ち縺ｨ迥ｶ諷狗ｮ｡逅�､画焚
+    let scanAttemptCount = 0;
+
+    function incrementScanAttempts() {
+      scanAttemptCount++;
+      const attemptBadge = document.getElementById('debug-scan-attempts');
+      if (attemptBadge) attemptBadge.textContent = scanAttemptCount;
+    }
+
+    // 繧ｫ繝｡繝ｩ隗｣蜒丞ｺｦ縺ｨ迥ｶ諷九�蜍慕噪繝√ぉ繝�け
+    function updateDebugDimensions(videoEl) {
+      if (!videoEl) return;
+      const resLabel = document.getElementById('debug-video-resolution');
+      if (resLabel) {
+        const w = videoEl.videoWidth || videoEl.width || 0;
+        const h = videoEl.videoHeight || videoEl.height || 0;
+        resLabel.textContent = `${w}x${h} px`;
+        logToDebugConsole(`繧ｫ繝｡繝ｩ謗･邯夂｢ｺ遶�: 螳溯ｧ｣蜒丞ｺｦ ${w}x${h}`, 'info');
+      }
+    }
+
+    // 謇句虚譏�蜒上く繝｣繝励メ繝｣ & 繧ｹ繝翫ャ繝励す繝ｧ繝�ヨ繝�さ繝ｼ繝芽ｧ｣譫�
+    async function captureAndTestDecode() {
+      logToDebugConsole('謇句虚繧ｭ繝｣繝励メ繝｣隗｣譫舌ｒ髢句ｧ九＠縺ｾ縺�...', 'info');
+      
+      const readerDiv = document.getElementById('reader');
+      if (!readerDiv) {
+        logToDebugConsole('繧ｨ繝ｩ繝ｼ: reader繧ｳ繝ｳ繝�リ縺瑚ｦ九▽縺九ｊ縺ｾ縺帙ｓ縲�', 'error');
+        return;
+      }
+      
+      const videoEl = readerDiv.querySelector('video');
+      if (!videoEl) {
+        logToDebugConsole('繧ｨ繝ｩ繝ｼ: 繧｢繧ｯ繝�ぅ繝悶↑繝薙ョ繧ｪ繧ｹ繝医Μ繝ｼ繝�(繧ｫ繝｡繝ｩ)縺瑚ｦ九▽縺九ｊ縺ｾ縺帙ｓ縲�', 'error');
+        return;
+      }
+
+      const canvas = document.getElementById('debug-canvas');
+      const resultDiv = document.getElementById('debug-capture-result');
+      const previewContainer = document.getElementById('debug-capture-preview-container');
+      
+      if (!canvas || !resultDiv || !previewContainer) {
+        logToDebugConsole('繧ｨ繝ｩ繝ｼ: 繝�ヰ繝�げ繧ｭ繝｣繝励メ繝｣逕ｨDOM隕∫ｴ�縺御ｸ崎ｶｳ縺励※縺�∪縺吶�', 'error');
         return;
       }
 
@@ -865,102 +953,102 @@
         canvas.height = height;
         
         const ctx = canvas.getContext('2d');
-        // 現在のビデオフレームをキャンバスに転写
+        // 迴ｾ蝨ｨ縺ｮ繝薙ョ繧ｪ繝輔Ξ繝ｼ繝�繧偵く繝｣繝ｳ繝舌せ縺ｫ霆｢蜀�
         ctx.drawImage(videoEl, 0, 0, width, height);
         
-        // プレビュー表示
+        // 繝励Ξ繝薙Η繝ｼ陦ｨ遉ｺ
         previewContainer.classList.remove('hidden');
         resultDiv.className = "text-yellow-300 font-bold";
-        resultDiv.textContent = "解析中...";
+        resultDiv.textContent = "隗｣譫蝉ｸｭ...";
 
-        logToDebugConsole(`キャプチャ成功: 静止画 ${width}x${height} を生成しました。`, 'info');
+        logToDebugConsole(`繧ｭ繝｣繝励メ繝｣謌仙粥: 髱呎ｭ｢逕ｻ ${width}x${height} 繧堤函謌舌＠縺ｾ縺励◆縲Ａ, 'info');
         
         if (!html5QrCode) {
-          logToDebugConsole('エラー: html5QrCode インスタンスが初期化されていません。', 'error');
+          logToDebugConsole('繧ｨ繝ｩ繝ｼ: html5QrCode 繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ縺悟�譛溷喧縺輔ｌ縺ｦ縺�∪縺帙ｓ縲�', 'error');
           resultDiv.className = "text-red-400 font-bold";
-          resultDiv.textContent = "インスタンス未初期化";
+          resultDiv.textContent = "繧､繝ｳ繧ｹ繧ｿ繝ｳ繧ｹ譛ｪ蛻晄悄蛹�";
           return;
         }
 
-        // キャンバスの画像データをBlobに変換
+        // 繧ｭ繝｣繝ｳ繝舌せ縺ｮ逕ｻ蜒上ョ繝ｼ繧ｿ繧達lob縺ｫ螟画鋤
         canvas.toBlob(async (blob) => {
           if (!blob) {
-            logToDebugConsole('エラー: Blobデータの生成に失敗しました。', 'error');
+            logToDebugConsole('繧ｨ繝ｩ繝ｼ: Blob繝��繧ｿ縺ｮ逕滓�縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲�', 'error');
             resultDiv.className = "text-red-400 font-bold";
-            resultDiv.textContent = "画像生成失敗";
+            resultDiv.textContent = "逕ｻ蜒冗函謌仙､ｱ謨�";
             return;
           }
           
-          // BlobをFileオブジェクトに変換 (html5-qrcodeのscanFileはFileオブジェクトを要求するため)
+          // Blob繧巽ile繧ｪ繝悶ず繧ｧ繧ｯ繝医↓螟画鋤 (html5-qrcode縺ｮscanFile縺ｯFile繧ｪ繝悶ず繧ｧ繧ｯ繝医ｒ隕∵ｱゅ☆繧九◆繧�)
           const file = new File([blob], "captured-frame.png", { type: "image/png" });
           
-          logToDebugConsole('静止画デコード処理を呼び出します...', 'info');
+          logToDebugConsole('髱呎ｭ｢逕ｻ繝�さ繝ｼ繝牙�逅�ｒ蜻ｼ縺ｳ蜃ｺ縺励∪縺�...', 'info');
           try {
-            // html5QrCode.scanFile を呼び出してデコード
+            // html5QrCode.scanFile 繧貞他縺ｳ蜃ｺ縺励※繝�さ繝ｼ繝�
             const decodedText = await html5QrCode.scanFile(file, true);
-            logToDebugConsole(`【デコード成功!】 検出したISBN: ${decodedText}`, 'info');
+            logToDebugConsole(`縲舌ョ繧ｳ繝ｼ繝画�蜉�!縲� 讀懷�縺励◆ISBN: ${decodedText}`, 'info');
             resultDiv.className = "text-green-400 font-bold";
-            resultDiv.textContent = `成功: ${decodedText}`;
+            resultDiv.textContent = `謌仙粥: ${decodedText}`;
             
-            // 音を鳴らして親処理を呼び出す
+            // 髻ｳ繧帝ｳｴ繧峨＠縺ｦ隕ｪ蜃ｦ逅�ｒ蜻ｼ縺ｳ蜃ｺ縺�
             playBeep();
             onScanSuccess(decodedText);
           } catch (err) {
-            logToDebugConsole(`【デコード失敗】 バーコードが見つかりません。理由: ${err}`, 'warn');
+            logToDebugConsole(`縲舌ョ繧ｳ繝ｼ繝牙､ｱ謨励� 繝舌�繧ｳ繝ｼ繝峨′隕九▽縺九ｊ縺ｾ縺帙ｓ縲ら炊逕ｱ: ${err}`, 'warn');
             resultDiv.className = "text-red-400 font-bold";
-            resultDiv.textContent = "検出できず (ピンボケや位置ずれ)";
+            resultDiv.textContent = "讀懷�縺ｧ縺阪★ (繝斐Φ繝懊こ繧�ｽ咲ｽｮ縺壹ｌ)";
           }
         }, 'image/png');
         
       } catch (ex) {
-        logToDebugConsole(`キャプチャ処理中に致命的例外: ${ex}`, 'error');
+        logToDebugConsole(`繧ｭ繝｣繝励メ繝｣蜃ｦ逅�ｸｭ縺ｫ閾ｴ蜻ｽ逧�ｾ句､�: ${ex}`, 'error');
         resultDiv.className = "text-red-400 font-bold";
-        resultDiv.textContent = "例外発生";
+        resultDiv.textContent = "萓句､也匱逕�";
       }
     }
 
-    // ================= アプリ初期化 =================
+    // ================= 繧｢繝励Μ蛻晄悄蛹� =================
     window.addEventListener('DOMContentLoaded', () => {
       if (isScannerMode) {
-        // メインアプリ画面を非表示にして、スキャナー画面を表示
+        // 繝｡繧､繝ｳ繧｢繝励Μ逕ｻ髱｢繧帝撼陦ｨ遉ｺ縺ｫ縺励※縲√せ繧ｭ繝｣繝翫�逕ｻ髱｢繧定｡ｨ遉ｺ
         document.getElementById('main-app-container').classList.add('hidden');
         document.getElementById('scanner-only-container').classList.remove('hidden');
-        return; // メインアプリのロードはスキップ
+        return; // 繝｡繧､繝ｳ繧｢繝励Μ縺ｮ繝ｭ繝ｼ繝峨�繧ｹ繧ｭ繝��
       }
 
-      // 本日の日付を手動登録の初期値に設定
+      // 譛ｬ譌･縺ｮ譌･莉倥ｒ謇句虚逋ｻ骭ｲ縺ｮ蛻晄悄蛟､縺ｫ險ｭ螳�
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('manual-date').value = today;
       
-      // 手動登録用のスター評価初期化
+      // 謇句虚逋ｻ骭ｲ逕ｨ縺ｮ繧ｹ繧ｿ繝ｼ隧穂ｾ｡蛻晄悄蛹�
       renderManualStars(5);
       
-      // 登録された本をロード
+      // 逋ｻ骭ｲ縺輔ｌ縺滓悽繧偵Ο繝ｼ繝�
       fetchRegisteredBooks();
 
-      // 別ウィンドウのカメラからのデータ受信リスナー
+      // 蛻･繧ｦ繧｣繝ｳ繝峨え縺ｮ繧ｫ繝｡繝ｩ縺九ｉ縺ｮ繝��繧ｿ蜿嶺ｿ｡繝ｪ繧ｹ繝翫�
       window.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'isbn_scanned') {
           const isbn = event.data.isbn;
           addTempBookPlaceholder(isbn);
-          showToast("別画面でバーコードを検知したよ！");
+          showToast("蛻･逕ｻ髱｢縺ｧ繝舌�繧ｳ繝ｼ繝峨ｒ讀懃衍縺励◆繧茨ｼ�");
         }
       });
     });
 
-    // ================= 別ウィンドウカメラ起動 (iOS/iPadOS対策) =================
+    // ================= 蛻･繧ｦ繧｣繝ｳ繝峨え繧ｫ繝｡繝ｩ襍ｷ蜍� (iOS/iPadOS蟇ｾ遲�) =================
     function openScannerWindow() {
-      // 音声初期化と呼び出しテスト
+      // 髻ｳ螢ｰ蛻晄悄蛹悶→蜻ｼ縺ｳ蜃ｺ縺励ユ繧ｹ繝�
       initAudio();
       playBeep();
       
-      // NetlifyのURLをベースにして別ウィンドウを開きます（GASのURLを直接開くとiframe制限でカメラが起動しません）
+      // Netlify縺ｮURL繧偵�繝ｼ繧ｹ縺ｫ縺励※蛻･繧ｦ繧｣繝ｳ繝峨え繧帝幕縺阪∪縺呻ｼ�AS縺ｮURL繧堤峩謗･髢九￥縺ｨiframe蛻ｶ髯舌〒繧ｫ繝｡繝ｩ縺瑚ｵｷ蜍輔＠縺ｾ縺帙ｓ��
       const currentUrl = window.location.href;
       const scanUrl = currentUrl + (currentUrl.indexOf('?') === -1 ? '?' : '&') + 'mode=scanner';
       window.open(scanUrl, '_blank');
     }
 
-    // ================= 設定管理モーダル制御 =================
+    // ================= 險ｭ螳夂ｮ｡逅�Δ繝ｼ繝繝ｫ蛻ｶ蠕｡ =================
     function showSettingsModal(show) {
       const modal = document.getElementById('settings-modal');
       const input = document.getElementById('settings-gas-url-input');
@@ -980,28 +1068,28 @@
       const url = input.value.trim();
       
       if (url === "") {
-        showToast("URLを入力してください");
+        showToast("URL繧貞�蜉帙＠縺ｦ縺上□縺輔＞");
         return;
       }
       
       if (url.indexOf("https://script.google.com/") !== 0) {
-        showToast("有効なGASウェブアプリのURLではありません");
+        showToast("譛牙柑縺ｪGAS繧ｦ繧ｧ繝悶い繝励Μ縺ｮURL縺ｧ縺ｯ縺ゅｊ縺ｾ縺帙ｓ");
         return;
       }
       
       safeStorage.setItem('yomuyomu_gas_url', url);
-      showToast("GASウェブアプリのURLを保存したよ！🎉");
+      showToast("GAS繧ｦ繧ｧ繝悶い繝励Μ縺ｮURL繧剃ｿ晏ｭ倥＠縺溘ｈ�Å沁�");
       showSettingsModal(false);
       
-      // リロードしてデータを再読み込み
+      // 繝ｪ繝ｭ繝ｼ繝峨＠縺ｦ繝��繧ｿ繧貞�隱ｭ縺ｿ霎ｼ縺ｿ
       showLoading(true);
       fetchRegisteredBooks();
     }
 
-    // ================= スキャナー専用画面用の処理 =================
+    // ================= 繧ｹ繧ｭ繝｣繝翫�蟆ら畑逕ｻ髱｢逕ｨ縺ｮ蜃ｦ逅� =================
     let scannerQrCode = null;
     let isScannerCameraRunning = false;
-    let isScannerScanningPaused = false; // スキャナー専用画面の一時停止中フラグ
+    let isScannerScanningPaused = false; // 繧ｹ繧ｭ繝｣繝翫�蟆ら畑逕ｻ髱｢縺ｮ荳譎ょ●豁｢荳ｭ繝輔Λ繧ｰ
 
     async function startScannerModeCamera() {
       const startBtn = document.getElementById('scanner-start-btn');
@@ -1017,7 +1105,7 @@
         isScannerCameraRunning = false;
         isScannerScanningPaused = false;
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
-        startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> カメラをスタート！';
+        startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> 繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ�';
         document.getElementById('scanner-hint-text').classList.add('hidden');
         const overlayStop = document.getElementById('scanner-scan-area-overlay');
         if (overlayStop) overlayStop.classList.add('hidden');
@@ -1028,11 +1116,11 @@
       
       try {
         isScannerCameraRunning = true;
-        isScannerScanningPaused = false; // 一時停止状態をクリア
+        isScannerScanningPaused = false; // 荳譎ょ●豁｢迥ｶ諷九ｒ繧ｯ繝ｪ繧｢
         const overlayStart = document.getElementById('scanner-scan-area-overlay');
         if (overlayStart) overlayStart.classList.remove('hidden');
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-rose-500 hover:bg-rose-600 text-white shadow-lg flex items-center justify-center gap-2";
-        startBtn.innerHTML = '<i class="fa-solid fa-circle-stop"></i> カメラをとめる';
+        startBtn.innerHTML = '<i class="fa-solid fa-circle-stop"></i> 繧ｫ繝｡繝ｩ繧偵→繧√ｋ';
         
         scannerQrCode = new Html5Qrcode("scanner-reader", {
           formatsToSupport: getSupportedFormats()
@@ -1049,7 +1137,7 @@
 
         document.getElementById('scanner-hint-text').classList.remove('hidden');
 
-        // スキャナーデバッグパネルを表示
+        // 繧ｹ繧ｭ繝｣繝翫�繝�ヰ繝�げ繝代ロ繝ｫ繧定｡ｨ遉ｺ
         const sDebugPanel = document.getElementById('scanner-debug-panel');
         const sDebugIndicator = document.getElementById('scanner-debug-indicator');
         const sDebugStatus = document.getElementById('scanner-debug-status');
@@ -1058,10 +1146,10 @@
         if (sDebugPanel) {
           sDebugPanel.classList.remove('hidden');
           sDebugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
-          sDebugStatus.textContent = 'スキャン中...';
+          sDebugStatus.textContent = '繧ｹ繧ｭ繝｣繝ｳ荳ｭ...';
         }
 
-        // playsinlineの強制適用 (iOS/iPad Safari対策)
+        // playsinline縺ｮ蠑ｷ蛻ｶ驕ｩ逕ｨ (iOS/iPad Safari蟇ｾ遲�)
         const observer = new MutationObserver((mutations) => {
           const videoEl = readerDiv.querySelector('video');
           if (videoEl) {
@@ -1075,13 +1163,13 @@
         });
         observer.observe(readerDiv, { childList: true, subtree: true });
 
-        // スキャナー用のエラーコールバック
+        // 繧ｹ繧ｭ繝｣繝翫�逕ｨ縺ｮ繧ｨ繝ｩ繝ｼ繧ｳ繝ｼ繝ｫ繝舌ャ繧ｯ
         const onScannerError = (errorMessage) => {
-          if (isScannerScanningPaused) return; // 一時停止中なら無視
+          if (isScannerScanningPaused) return; // 荳譎ょ●豁｢荳ｭ縺ｪ繧臥┌隕�
           
-          // 通常の未検出エラーは無視して "なし" とする
+          // 騾壼ｸｸ縺ｮ譛ｪ讀懷�繧ｨ繝ｩ繝ｼ縺ｯ辟｡隕悶＠縺ｦ "縺ｪ縺�" 縺ｨ縺吶ｋ
           if (errorMessage.includes("No MultiFormat Readers") || errorMessage.includes("NotFoundException") || errorMessage.includes("no barcode")) {
-            if (sDebugError) sDebugError.textContent = "なし";
+            if (sDebugError) sDebugError.textContent = "縺ｪ縺�";
             return;
           }
           if (sDebugError) {
@@ -1090,7 +1178,7 @@
         };
 
         try {
-          // iOS Safari向けに environment で起動
+          // iOS Safari蜷代￠縺ｫ environment 縺ｧ襍ｷ蜍�
           await scannerQrCode.start(
             { facingMode: "environment" },
             config,
@@ -1101,9 +1189,9 @@
             onScannerError
           );
         } catch (cameraInitErr) {
-          console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
-          if (sDebugError) sDebugError.textContent = "背面カメラ起動失敗: " + String(cameraInitErr).substring(0, 40);
-          // デバイスのデフォルトカメラで起動
+          console.warn("閭碁擇繧ｫ繝｡繝ｩ縺ｮ謖�ｮ夊ｵｷ蜍輔↓螟ｱ謨励＠縺ｾ縺励◆縲ゅヵ繧ｩ繝ｼ繝ｫ繝舌ャ繧ｯ縺励∪縺�:", cameraInitErr);
+          if (sDebugError) sDebugError.textContent = "閭碁擇繧ｫ繝｡繝ｩ襍ｷ蜍募､ｱ謨�: " + String(cameraInitErr).substring(0, 40);
+          // 繝�ヰ繧､繧ｹ縺ｮ繝�ヵ繧ｩ繝ｫ繝医き繝｡繝ｩ縺ｧ襍ｷ蜍�
           await scannerQrCode.start(
             {},
             config,
@@ -1117,19 +1205,19 @@
         
       } catch (e) {
         console.error("Scanner mode camera error:", e);
-        alert("カメラをスタートできませんでした。カメラへのアクセスを許可してね。");
+        alert("繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝医〒縺阪∪縺帙ｓ縺ｧ縺励◆縲ゅき繝｡繝ｩ縺ｸ縺ｮ繧｢繧ｯ繧ｻ繧ｹ繧定ｨｱ蜿ｯ縺励※縺ｭ縲�");
         isScannerCameraRunning = false;
         startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
-        startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> カメラをスタート！';
+        startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> 繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ�';
       }
     }
 
     function onScannerScanSuccess(decodedText, decodedResult) {
-      if (isScannerScanningPaused) return; // すでにポーズ中なら無視
+      if (isScannerScanningPaused) return; // 縺吶〒縺ｫ繝昴�繧ｺ荳ｭ縺ｪ繧臥┌隕�
       
       const isbn = decodedText.trim();
       
-      // 日本の書籍用：本のバーコードは978から始まる
+      // 譌･譛ｬ縺ｮ譖ｸ邀咲畑�壽悽縺ｮ繝舌�繧ｳ繝ｼ繝峨�978縺九ｉ蟋九∪繧�
       if (!isbn.startsWith("978")) {
         return;
       }
@@ -1139,31 +1227,31 @@
         return;
       }
       
-      // スキャン一時停止処理
+      // 繧ｹ繧ｭ繝｣繝ｳ荳譎ょ●豁｢蜃ｦ逅�
       isScannerScanningPaused = true;
       lastScannedIsbn = isbn;
       lastScannedTime = now;
       
-      // デバッグパネルを一時停止中に変更
+      // 繝�ヰ繝�げ繝代ロ繝ｫ繧剃ｸ譎ょ●豁｢荳ｭ縺ｫ螟画峩
       const sDebugIndicator = document.getElementById('scanner-debug-indicator');
       const sDebugStatus = document.getElementById('scanner-debug-status');
       const sDebugDetected = document.getElementById('scanner-debug-detected');
       const sDebugError = document.getElementById('scanner-debug-error');
       if (sDebugIndicator && sDebugStatus) {
         sDebugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse';
-        sDebugStatus.textContent = '一時停止中（親画面へ送信中...）';
+        sDebugStatus.textContent = '荳譎ょ●豁｢荳ｭ�郁ｦｪ逕ｻ髱｢縺ｸ騾∽ｿ｡荳ｭ...��';
       }
       if (sDebugDetected) {
         sDebugDetected.textContent = isbn;
       }
       if (sDebugError) {
-        sDebugError.textContent = "なし";
+        sDebugError.textContent = "縺ｪ縺�";
       }
       
-      // html5QrCode のビデオ自体を一時停止
+      // html5QrCode 縺ｮ繝薙ョ繧ｪ閾ｪ菴薙ｒ荳譎ょ●豁｢
       if (scannerQrCode) {
         try {
-          scannerQrCode.pause(true); // ビデオフレームも止める
+          scannerQrCode.pause(true); // 繝薙ョ繧ｪ繝輔Ξ繝ｼ繝�繧よｭ｢繧√ｋ
         } catch (e) {
           console.warn("scannerQrCode pause failed:", e);
         }
@@ -1171,25 +1259,25 @@
       
       playBeep();
       
-      // 親ウィンドウに結果を送信
+      // 隕ｪ繧ｦ繧｣繝ｳ繝峨え縺ｫ邨先棡繧帝∽ｿ｡
       if (window.opener) {
         window.opener.postMessage({ type: 'isbn_scanned', isbn: isbn }, '*');
         
-        // 画面を緑に光らせて通知
+        // 逕ｻ髱｢繧堤ｷ代↓蜈峨ｉ縺帙※騾夂衍
         const readerDiv = document.getElementById('scanner-reader');
         readerDiv.style.borderColor = '#10b981';
         setTimeout(() => {
           readerDiv.style.borderColor = '#475569';
         }, 1000);
       } else {
-        alert("メイン画面（親ウィンドウ）が見つかりません。連携できませんでした。");
+        alert("繝｡繧､繝ｳ逕ｻ髱｢�郁ｦｪ繧ｦ繧｣繝ｳ繝峨え�峨′隕九▽縺九ｊ縺ｾ縺帙ｓ縲る｣謳ｺ縺ｧ縺阪∪縺帙ｓ縺ｧ縺励◆縲�");
       }
       
-      // 1.5秒（1500ms）後にスキャン自動再開
+      // 1.5遘抵ｼ�1500ms�牙ｾ後↓繧ｹ繧ｭ繝｣繝ｳ閾ｪ蜍募�髢�
       setTimeout(() => {
         if (!isScannerCameraRunning) {
           isScannerScanningPaused = false;
-          return; // すでにカメラ自体が止められていたら何もしない
+          return; // 縺吶〒縺ｫ繧ｫ繝｡繝ｩ閾ｪ菴薙′豁｢繧√ｉ繧後※縺�◆繧我ｽ輔ｂ縺励↑縺�
         }
         
         if (scannerQrCode) {
@@ -1202,16 +1290,16 @@
         
         isScannerScanningPaused = false;
         
-        // デバッグパネルを稼働中に戻す
+        // 繝�ヰ繝�げ繝代ロ繝ｫ繧堤ｨｼ蜒堺ｸｭ縺ｫ謌ｻ縺�
         if (sDebugIndicator && sDebugStatus) {
           sDebugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
-          sDebugStatus.textContent = 'スキャン中...';
+          sDebugStatus.textContent = '繧ｹ繧ｭ繝｣繝ｳ荳ｭ...';
         }
       }, 1500);
     }
 
-    // ================= 音声・ビープ音制御 =================
-    // iPad Safari等の音声開始ブロック解除用
+    // ================= 髻ｳ螢ｰ繝ｻ繝薙�繝鈴浹蛻ｶ蠕｡ =================
+    // iPad Safari遲峨�髻ｳ螢ｰ髢句ｧ九ヶ繝ｭ繝�け隗｣髯､逕ｨ
     function initAudio() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1221,7 +1309,7 @@
       }
     }
 
-    // ピピッというビープ音の再生
+    // 繝斐ヴ繝�→縺�≧繝薙�繝鈴浹縺ｮ蜀咲函
     function playBeep() {
       try {
         initAudio();
@@ -1229,7 +1317,7 @@
         
         const now = audioCtx.currentTime;
         
-        // 1音目 (ピッ)
+        // 1髻ｳ逶ｮ (繝斐ャ)
         const osc1 = audioCtx.createOscillator();
         const gain1 = audioCtx.createGain();
         osc1.connect(gain1);
@@ -1242,7 +1330,7 @@
         osc1.start(now);
         osc1.stop(now + 0.08);
         
-        // 2音目 (ピピッの後半部分)
+        // 2髻ｳ逶ｮ (繝斐ヴ繝��蠕悟濠驛ｨ蛻�)
         const osc2 = audioCtx.createOscillator();
         const gain2 = audioCtx.createGain();
         osc2.connect(gain2);
@@ -1256,11 +1344,11 @@
         osc2.stop(now + 0.18);
         
       } catch (e) {
-        console.warn("ビープ音の再生に失敗しました:", e);
+        console.warn("繝薙�繝鈴浹縺ｮ蜀咲函縺ｫ螟ｱ謨励＠縺ｾ縺励◆:", e);
       }
     }
 
-    // ================= トースト & ローディング制御 =================
+    // ================= 繝医�繧ｹ繝� & 繝ｭ繝ｼ繝�ぅ繝ｳ繧ｰ蛻ｶ蠕｡ =================
     function showToast(message) {
       const toast = document.getElementById('toast-container');
       const toastText = document.getElementById('toast-text');
@@ -1286,7 +1374,7 @@
       }
     }
 
-    // ================= タブ切り替え =================
+    // ================= 繧ｿ繝門�繧頑崛縺� =================
     function switchTab(tabId) {
       document.getElementById('tab-scan').classList.add('hidden');
       document.getElementById('tab-manual').classList.add('hidden');
@@ -1304,20 +1392,20 @@
         }
       });
       
-      // カメラ作動中かつスキャンタブ以外に移動した場合はカメラ停止
+      // 繧ｫ繝｡繝ｩ菴懷虚荳ｭ縺九▽繧ｹ繧ｭ繝｣繝ｳ繧ｿ繝紋ｻ･螟悶↓遘ｻ蜍輔＠縺溷�ｴ蜷医�繧ｫ繝｡繝ｩ蛛懈ｭ｢
       if (tabId !== 'tab-scan' && isCameraRunning) {
         stopCamera();
       }
       
-      // 一覧タブを開いたときは最新情報に更新
+      // 荳隕ｧ繧ｿ繝悶ｒ髢九＞縺溘→縺阪�譛譁ｰ諠��ｱ縺ｫ譖ｴ譁ｰ
       if (tabId === 'tab-gallery') {
         fetchRegisteredBooks();
       }
     }
 
-    // ================= カメラ・バーコード連続スキャン =================
+    // ================= 繧ｫ繝｡繝ｩ繝ｻ繝舌�繧ｳ繝ｼ繝蛾｣邯壹せ繧ｭ繝｣繝ｳ =================
     async function toggleCamera() {
-      initAudio(); // ユーザー操作契機でオーディオ有効化
+      initAudio(); // 繝ｦ繝ｼ繧ｶ繝ｼ謫堺ｽ懷･第ｩ溘〒繧ｪ繝ｼ繝�ぅ繧ｪ譛牙柑蛹�
       
       const cameraBtn = document.getElementById('camera-toggle-btn');
       const cameraBtnText = document.getElementById('camera-btn-text');
@@ -1329,14 +1417,14 @@
       } else {
         try {
           isCameraRunning = true;
-          isScanningPaused = false; // 一時停止状態をクリア
+          isScanningPaused = false; // 荳譎ょ●豁｢迥ｶ諷九ｒ繧ｯ繝ｪ繧｢
           readerDiv.classList.remove('hidden');
           const overlay = document.getElementById('scan-area-overlay');
           if (overlay) overlay.classList.remove('hidden');
           document.getElementById('camera-hint-text').classList.remove('hidden');
           
           cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-rose-500 hover:bg-rose-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
-          cameraBtnText.textContent = "カメラをとめる";
+          cameraBtnText.textContent = "繧ｫ繝｡繝ｩ繧偵→繧√ｋ";
           cameraIcon.className = "fa-solid fa-circle-stop text-xl animate-pulse";
           
           html5QrCode = new Html5Qrcode("reader", {
@@ -1352,7 +1440,7 @@
             }
           };
           
-          // デバッグパネルを表示してスキャン中状態にする
+          // 繝�ヰ繝�げ繝代ロ繝ｫ繧定｡ｨ遉ｺ縺励※繧ｹ繧ｭ繝｣繝ｳ荳ｭ迥ｶ諷九↓縺吶ｋ
           const debugPanel = document.getElementById('camera-debug-panel');
           const debugIndicator = document.getElementById('debug-scan-indicator');
           const debugStatus = document.getElementById('debug-scan-status');
@@ -1361,10 +1449,10 @@
           if (debugPanel) {
             debugPanel.classList.remove('hidden');
             debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
-            debugStatus.textContent = 'スキャン中...';
+            debugStatus.textContent = '繧ｹ繧ｭ繝｣繝ｳ荳ｭ...';
           }
           
-          // playsinlineの強制適用 (iOS/iPad Safari対策)
+          // playsinline縺ｮ蠑ｷ蛻ｶ驕ｩ逕ｨ (iOS/iPad Safari蟇ｾ遲�)
           const observer = new MutationObserver((mutations) => {
             const videoEl = readerDiv.querySelector('video');
             if (videoEl) {
@@ -1373,22 +1461,22 @@
               videoEl.setAttribute('autoplay', 'true');
               videoEl.setAttribute('muted', 'true');
               videoEl.play().catch(err => console.log("Video play intercept failed:", err));
-              // カメラ解像度とステータス表示を更新
+              // 繧ｫ繝｡繝ｩ隗｣蜒丞ｺｦ縺ｨ繧ｹ繝��繧ｿ繧ｹ陦ｨ遉ｺ繧呈峩譁ｰ
               setTimeout(() => updateDebugDimensions(videoEl), 500);
               observer.disconnect();
             }
           });
           observer.observe(readerDiv, { childList: true, subtree: true });
 
-          // エラーコールバック: 検出失敗ごとのエラーをフィルタしてデバッグパネルに表示
+          // 繧ｨ繝ｩ繝ｼ繧ｳ繝ｼ繝ｫ繝舌ャ繧ｯ: 讀懷�螟ｱ謨励＃縺ｨ縺ｮ繧ｨ繝ｩ繝ｼ繧偵ヵ繧｣繝ｫ繧ｿ縺励※繝�ヰ繝�げ繝代ロ繝ｫ縺ｫ陦ｨ遉ｺ
           const onScanError = (errorMessage) => {
-            incrementScanAttempts(); // スキャン試行カウンタを更新
+            incrementScanAttempts(); // 繧ｹ繧ｭ繝｣繝ｳ隧ｦ陦後き繧ｦ繝ｳ繧ｿ繧呈峩譁ｰ
             
-            if (isScanningPaused) return; // 一時停止中ならエラー更新も無視
+            if (isScanningPaused) return; // 荳譎ょ●豁｢荳ｭ縺ｪ繧峨お繝ｩ繝ｼ譖ｴ譁ｰ繧ら┌隕�
             
-            // "No MultiFormat Readers" などの日常的な未検出エラーは無視して "なし" とする
+            // "No MultiFormat Readers" 縺ｪ縺ｩ縺ｮ譌･蟶ｸ逧�↑譛ｪ讀懷�繧ｨ繝ｩ繝ｼ縺ｯ辟｡隕悶＠縺ｦ "縺ｪ縺�" 縺ｨ縺吶ｋ
             if (errorMessage.includes("No MultiFormat Readers") || errorMessage.includes("NotFoundException") || errorMessage.includes("no barcode")) {
-              if (debugLastError) debugLastError.textContent = "なし";
+              if (debugLastError) debugLastError.textContent = "縺ｪ縺�";
               return;
             }
             if (debugLastError) {
@@ -1397,7 +1485,7 @@
           };
 
           try {
-            // iOS Safari向けに environment で起動
+            // iOS Safari蜷代￠縺ｫ environment 縺ｧ襍ｷ蜍�
             await html5QrCode.start(
               { facingMode: "environment" },
               config,
@@ -1408,9 +1496,9 @@
               onScanError
             );
           } catch (cameraInitErr) {
-            console.warn("背面カメラの指定起動に失敗しました。フォールバックします:", cameraInitErr);
-            if (debugLastError) debugLastError.textContent = "背面カメラ起動失敗: " + String(cameraInitErr).substring(0, 40);
-            // デバイスのデフォルトカメラ（内蔵フロントカメラなど）で起動
+            console.warn("閭碁擇繧ｫ繝｡繝ｩ縺ｮ謖�ｮ夊ｵｷ蜍輔↓螟ｱ謨励＠縺ｾ縺励◆縲ゅヵ繧ｩ繝ｼ繝ｫ繝舌ャ繧ｯ縺励∪縺�:", cameraInitErr);
+            if (debugLastError) debugLastError.textContent = "閭碁擇繧ｫ繝｡繝ｩ襍ｷ蜍募､ｱ謨�: " + String(cameraInitErr).substring(0, 40);
+            // 繝�ヰ繧､繧ｹ縺ｮ繝�ヵ繧ｩ繝ｫ繝医き繝｡繝ｩ�亥�阡ｵ繝輔Ο繝ｳ繝医き繝｡繝ｩ縺ｪ縺ｩ�峨〒襍ｷ蜍�
             await html5QrCode.start(
               {},
               config,
@@ -1424,7 +1512,7 @@
           
         } catch (e) {
           console.error("Camera error:", e);
-          showToast("カメラをスタートできませんでした。カメラへのアクセスを許可してね。");
+          showToast("繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝医〒縺阪∪縺帙ｓ縺ｧ縺励◆縲ゅき繝｡繝ｩ縺ｸ縺ｮ繧｢繧ｯ繧ｻ繧ｹ繧定ｨｱ蜿ｯ縺励※縺ｭ縲�");
           isCameraRunning = false;
           readerDiv.classList.add('hidden');
           const overlay = document.getElementById('scan-area-overlay');
@@ -1432,7 +1520,7 @@
           const debugPanel2 = document.getElementById('camera-debug-panel');
           if (debugPanel2) debugPanel2.classList.add('hidden');
           cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
-          cameraBtnText.textContent = "カメラをスタート！";
+          cameraBtnText.textContent = "繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ�";
           cameraIcon.className = "fa-solid fa-camera-retro text-xl";
         }
       }
@@ -1461,34 +1549,34 @@
       const debugPanel = document.getElementById('camera-debug-panel');
       if (debugPanel) debugPanel.classList.add('hidden');
       cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
-      cameraBtnText.textContent = "カメラをスタート！";
+      cameraBtnText.textContent = "繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ�";
       cameraIcon.className = "fa-solid fa-camera-retro text-xl";
       document.getElementById('camera-hint-text').classList.add('hidden');
     }
 
-    // バーコード検知時の処理
+    // 繝舌�繧ｳ繝ｼ繝画､懃衍譎ゅ�蜃ｦ逅�
     function onScanSuccess(decodedText, decodedResult) {
-      if (isScanningPaused) return; // すでにポーズ中なら無視
+      if (isScanningPaused) return; // 縺吶〒縺ｫ繝昴�繧ｺ荳ｭ縺ｪ繧臥┌隕�
       
       const isbn = decodedText.trim();
       
-      // 日本の書籍用：本のバーコードは978から始まる
+      // 譌･譛ｬ縺ｮ譖ｸ邀咲畑�壽悽縺ｮ繝舌�繧ｳ繝ｼ繝峨�978縺九ｉ蟋九∪繧�
       if (!isbn.startsWith("978")) {
         return;
       }
       
       const now = Date.now();
-      // 同一ISBNの重複読み取り防止（5秒間スキップ）
+      // 蜷御ｸISBN縺ｮ驥崎､�ｪｭ縺ｿ蜿悶ｊ髦ｲ豁｢��5遘帝俣繧ｹ繧ｭ繝����
       if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
         return;
       }
       
-      // スキャン一時停止処理
+      // 繧ｹ繧ｭ繝｣繝ｳ荳譎ょ●豁｢蜃ｦ逅�
       isScanningPaused = true;
       lastScannedIsbn = isbn;
       lastScannedTime = now;
       
-      // デバッグパネルを一時停止中に変更
+      // 繝�ヰ繝�げ繝代ロ繝ｫ繧剃ｸ譎ょ●豁｢荳ｭ縺ｫ螟画峩
       const debugIndicator = document.getElementById('debug-scan-indicator');
       const debugStatus = document.getElementById('debug-scan-status');
       const debugLastDetected = document.getElementById('debug-last-detected');
@@ -1496,39 +1584,39 @@
       const debugPausedState = document.getElementById('debug-scan-paused-state');
       if (debugIndicator && debugStatus) {
         debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse';
-        debugStatus.textContent = '一時停止中（本の情報を取得中...）';
+        debugStatus.textContent = '荳譎ょ●豁｢荳ｭ�域悽縺ｮ諠��ｱ繧貞叙蠕嶺ｸｭ...��';
       }
       if (debugLastDetected) {
         debugLastDetected.textContent = isbn;
       }
       if (debugLastError) {
-        debugLastError.textContent = "なし";
+        debugLastError.textContent = "縺ｪ縺�";
       }
       if (debugPausedState) {
-        debugPausedState.textContent = "はい";
+        debugPausedState.textContent = "縺ｯ縺�";
       }
       
-      // html5QrCode のビデオ自体を一時停止
+      // html5QrCode 縺ｮ繝薙ョ繧ｪ閾ｪ菴薙ｒ荳譎ょ●豁｢
       if (html5QrCode) {
         try {
-          html5QrCode.pause(true); // ビデオフレームも止める
+          html5QrCode.pause(true); // 繝薙ョ繧ｪ繝輔Ξ繝ｼ繝�繧よｭ｢繧√ｋ
         } catch (e) {
           console.warn("html5QrCode pause failed:", e);
         }
       }
       
-      // 成功通知
+      // 謌仙粥騾夂衍
       playBeep();
-      showToast("バーコードをみつけたよ！本の名前を調べています...");
+      showToast("繝舌�繧ｳ繝ｼ繝峨ｒ縺ｿ縺､縺代◆繧茨ｼ∵悽縺ｮ蜷榊燕繧定ｪｿ縺ｹ縺ｦ縺�∪縺�...");
       
-      // 一時リストに追加 (ローディングプレースホルダー)
+      // 荳譎ゅΜ繧ｹ繝医↓霑ｽ蜉� (繝ｭ繝ｼ繝�ぅ繝ｳ繧ｰ繝励Ξ繝ｼ繧ｹ繝帙Ν繝繝ｼ)
       addTempBookPlaceholder(isbn);
       
-      // 1.5秒（1500ms）後にスキャン自動再開
+      // 1.5遘抵ｼ�1500ms�牙ｾ後↓繧ｹ繧ｭ繝｣繝ｳ閾ｪ蜍募�髢�
       setTimeout(() => {
         if (!isCameraRunning) {
           isScanningPaused = false;
-          return; // すでにカメラ自体が止められていたら何もしない
+          return; // 縺吶〒縺ｫ繧ｫ繝｡繝ｩ閾ｪ菴薙′豁｢繧√ｉ繧後※縺�◆繧我ｽ輔ｂ縺励↑縺�
         }
         
         if (html5QrCode) {
@@ -1541,22 +1629,22 @@
         
         isScanningPaused = false;
         
-        // デバッグパネルを稼働中に戻す
+        // 繝�ヰ繝�げ繝代ロ繝ｫ繧堤ｨｼ蜒堺ｸｭ縺ｫ謌ｻ縺�
         const debugPausedState2 = document.getElementById('debug-scan-paused-state');
         if (debugPausedState2) {
-          debugPausedState2.textContent = "いいえ";
+          debugPausedState2.textContent = "縺�＞縺�";
         }
         if (debugIndicator && debugStatus) {
           debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
-          debugStatus.textContent = 'スキャン中...';
+          debugStatus.textContent = '繧ｹ繧ｭ繝｣繝ｳ荳ｭ...';
         }
       }, 1500);
     }
 
 
-    // ================= openBD + Google Books クライアント側直接検索 =================
+    // ================= openBD + Google Books 繧ｯ繝ｩ繧､繧｢繝ｳ繝亥�逶ｴ謗･讀懃ｴ｢ =================
     async function fetchBookInfo(isbn) {
-      // 1. まずは日本国内に非常に強い openBD API をブラウザから直接試す (CORSサポート)
+      // 1. 縺ｾ縺壹�譌･譛ｬ蝗ｽ蜀�↓髱槫ｸｸ縺ｫ蠑ｷ縺� openBD API 繧偵ヶ繝ｩ繧ｦ繧ｶ縺九ｉ逶ｴ謗･隧ｦ縺� (CORS繧ｵ繝昴�繝�)
       try {
         const openBdUrl = 'https://api.openbd.jp/v1/get?isbn=' + isbn;
         const response = await fetch(openBdUrl);
@@ -1566,7 +1654,7 @@
             const summary = data[0].summary;
             return {
               title: summary.title || "",
-              author: summary.author || "（著者不明）",
+              author: summary.author || "�郁送閠�ｸ肴���",
               coverUrl: summary.cover || ""
             };
           }
@@ -1575,7 +1663,7 @@
         console.warn("openBD API browser fetch error:", e);
       }
 
-      // 2. フォールバックとして Google Books API をブラウザから直接試す (CORSサポート)
+      // 2. 繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ縺ｨ縺励※ Google Books API 繧偵ヶ繝ｩ繧ｦ繧ｶ縺九ｉ逶ｴ謗･隧ｦ縺� (CORS繧ｵ繝昴�繝�)
       try {
         const googleUrl = 'https://www.googleapis.com/books/v1/volumes?q=isbn=' + isbn;
         const response = await fetch(googleUrl);
@@ -1601,97 +1689,97 @@
         console.error("Google Books API browser fetch error:", e);
       }
 
-      // 3. 両方で見つからなかった場合は空データ
+      // 3. 荳｡譁ｹ縺ｧ隕九▽縺九ｉ縺ｪ縺九▲縺溷�ｴ蜷医�遨ｺ繝��繧ｿ
       return { title: "", author: "", coverUrl: "" };
     }
 
-    // ================= 一時リスト管理 & 編集 =================
+    // ================= 荳譎ゅΜ繧ｹ繝育ｮ｡逅� & 邱ｨ髮� =================
     function addTempBookPlaceholder(isbn) {
       const tempId = 'temp_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
       
       const newBook = {
         tempId: tempId,
         isbn: isbn,
-        title: "しらべているよ...",
-        author: "しらべているよ...",
+        title: "縺励ｉ縺ｹ縺ｦ縺�ｋ繧�...",
+        author: "縺励ｉ縺ｹ縺ｦ縺�ｋ繧�...",
         coverUrl: "",
-        ownerType: "図書館で借りた本", // 初期値: 図書館
-        genre: "物語",                // 初期値: 物語
+        ownerType: "蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽", // 蛻晄悄蛟､: 蝗ｳ譖ｸ鬢ｨ
+        genre: "迚ｩ隱�",                // 蛻晄悄蛟､: 迚ｩ隱�
         comment: "",
-        rating: 5,                   // 初期値: 5
+        rating: 5,                   // 蛻晄悄蛟､: 5
         isLoading: true
       };
       
-      // 先頭に追加
+      // 蜈磯�ｭ縺ｫ霑ｽ蜉�
       tempBooks.unshift(newBook);
       
-      // 一時リストエリアの初期テキスト（空状態）を消去する準備として、
-      // 最初の要素追加時のみ親コンテナの中身を空にする
+      // 荳譎ゅΜ繧ｹ繝医お繝ｪ繧｢縺ｮ蛻晄悄繝�く繧ｹ繝茨ｼ育ｩｺ迥ｶ諷具ｼ峨ｒ豸亥悉縺吶ｋ貅門ｙ縺ｨ縺励※縲�
+      // 譛蛻昴�隕∫ｴ�霑ｽ蜉�譎ゅ�縺ｿ隕ｪ繧ｳ繝ｳ繝�リ縺ｮ荳ｭ霄ｫ繧堤ｩｺ縺ｫ縺吶ｋ
       const container = document.getElementById('temp-list-container');
       if (tempBooks.length === 1) {
         container.innerHTML = '';
       }
       
-      // DOMに新規カードを追加 (一から全部再描画せず、フォーカス維持のために個別追加)
+      // DOM縺ｫ譁ｰ隕上き繝ｼ繝峨ｒ霑ｽ蜉� (荳縺九ｉ蜈ｨ驛ｨ蜀肴緒逕ｻ縺帙★縲√ヵ繧ｩ繝ｼ繧ｫ繧ｹ邯ｭ謖√�縺溘ａ縺ｫ蛟句挨霑ｽ蜉�)
       container.insertAdjacentHTML('afterbegin', renderSingleTempBookHTML(newBook));
       updateTempCountBadge();
       
-      // 非同期で書籍情報を取得
+      // 髱槫酔譛溘〒譖ｸ邀肴ュ蝣ｱ繧貞叙蠕�
       fetchBookInfo(isbn).then(info => {
         const book = tempBooks.find(b => b.tempId === tempId);
         if (book) {
-          book.title = info.title || ('バーコードの本 (' + isbn + ')');
-          book.author = info.author || "（著者不明）";
+          book.title = info.title || ('繝舌�繧ｳ繝ｼ繝峨�譛ｬ (' + isbn + ')');
+          book.author = info.author || "�郁送閠�ｸ肴���";
           book.coverUrl = info.coverUrl;
           book.isLoading = false;
           
-          // 該当カードのDOMのみ書き換える
+          // 隧ｲ蠖薙き繝ｼ繝峨�DOM縺ｮ縺ｿ譖ｸ縺肴鋤縺医ｋ
           updateTempBookCardDOM(book);
         }
       });
     }
 
-    // ジャンルの色定義
+    // 繧ｸ繝｣繝ｳ繝ｫ縺ｮ濶ｲ螳夂ｾｩ
     function getGenreColor(genre) {
       switch (genre) {
-        case '物語': return { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-300', fill: '#f43f5e' };
-        case '図鑑・科学': return { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300', fill: '#10b981' };
-        case '伝記': return { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-300', fill: '#6366f1' };
-        case '絵本': return { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300', fill: '#a855f7' };
+        case '迚ｩ隱�': return { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-300', fill: '#f43f5e' };
+        case '蝗ｳ髑代�遘大ｭｦ': return { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300', fill: '#10b981' };
+        case '莨晁ｨ�': return { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-300', fill: '#6366f1' };
+        case '邨ｵ譛ｬ': return { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300', fill: '#a855f7' };
         default: return { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300', fill: '#f59e0b' };
       }
     }
 
-    // 本のカバーHTMLの取得
+    // 譛ｬ縺ｮ繧ｫ繝舌�HTML縺ｮ蜿門ｾ�
     function getBookCoverHTML(coverUrl, title, genre) {
       if (coverUrl && coverUrl.trim() !== "") {
-        return '<img src="' + coverUrl + '" alt="' + title + '" class="w-full h-full object-cover rounded-xl shadow border border-gray-100" onerror="this.src=\'\'; this.onerror=null; this.parentNode.innerHTML=getFallbackCoverHTML(\'' + (title || '無題').replace(/'/g, "\\'") + '\', \'' + genre + '\')">';
+        return '<img src="' + coverUrl + '" alt="' + title + '" class="w-full h-full object-cover rounded-xl shadow border border-gray-100" onerror="this.src=\'\'; this.onerror=null; this.parentNode.innerHTML=getFallbackCoverHTML(\'' + (title || '辟｡鬘�').replace(/'/g, "\\'") + '\', \'' + genre + '\')">';
       }
       return getFallbackCoverHTML(title, genre);
     }
 
-    // カバー画像が無い場合のフォールバックデザイン (ジャンル別色分け)
+    // 繧ｫ繝舌�逕ｻ蜒上′辟｡縺��ｴ蜷医�繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ繝�じ繧､繝ｳ (繧ｸ繝｣繝ｳ繝ｫ蛻･濶ｲ蛻�￠)
     function getFallbackCoverHTML(title, genre) {
       const colors = getGenreColor(genre);
       return [
         '<div class="w-full h-full ' + colors.bg + ' ' + colors.border + ' border-2 rounded-xl flex flex-col items-center justify-between p-3 shadow relative overflow-hidden">',
-        '  <!-- 飾り背表紙 -->',
+        '  <!-- 鬟ｾ繧願レ陦ｨ邏� -->',
         '  <div class="absolute left-0 top-0 bottom-0 w-2.5 bg-black opacity-10"></div>',
         '  <div class="w-full flex justify-end">',
         '    <span class="text-[9px] font-black px-1.5 py-0.5 rounded-full ' + colors.bg + ' ' + colors.text + ' border border-current">' + genre + '</span>',
         '  </div>',
         '  <div class="my-auto text-center px-1">',
         '    <i class="fa-solid fa-book text-3xl mb-1" style="color: ' + colors.fill + '"></i>',
-        '    <p class="text-xs font-black text-gray-800 line-clamp-3 leading-snug">' + (title || '無題') + '</p>',
+        '    <p class="text-xs font-black text-gray-800 line-clamp-3 leading-snug">' + (title || '辟｡鬘�') + '</p>',
         '  </div>',
         '  <div class="w-full text-center">',
-        '    <span class="text-[9px] text-gray-400 font-bold tracking-wider">よむよむ</span>',
+        '    <span class="text-[9px] text-gray-400 font-bold tracking-wider">繧医�繧医�</span>',
         '  </div>',
         '</div>'
       ].join('\n');
     }
 
-    // スターのHTMLレンダリング
+    // 繧ｹ繧ｿ繝ｼ縺ｮHTML繝ｬ繝ｳ繝繝ｪ繝ｳ繧ｰ
     function renderStarsHTML(tempId, rating) {
       let stars = '';
       for (let i = 1; i <= 5; i++) {
@@ -1704,7 +1792,7 @@
       return stars;
     }
 
-    // 単一一時リストカードのHTML
+    // 蜊倅ｸ荳譎ゅΜ繧ｹ繝医き繝ｼ繝峨�HTML
     function renderSingleTempBookHTML(book) {
       const colors = getGenreColor(book.genre);
       const isLoading = book.isLoading;
@@ -1712,63 +1800,63 @@
       
       return [
         '<div id="temp-card-' + book.tempId + '" class="bg-white rounded-[24px] p-5 shadow border-2 border-brand-100/80 flex flex-col md:flex-row gap-5 relative transition-all duration-300 ' + opacityClass + '">',
-        '  <!-- ローディング中スピナー -->',
+        '  <!-- 繝ｭ繝ｼ繝�ぅ繝ｳ繧ｰ荳ｭ繧ｹ繝斐リ繝ｼ -->',
         '  <div class="card-loader absolute inset-0 bg-white/60 rounded-[24px] flex items-center justify-center z-10 ' + (isLoading ? '' : 'hidden') + '">',
         '    <i class="fa-solid fa-circle-notch animate-spin text-3xl text-brand-500"></i>',
         '  </div>',
         '  ',
-        '  <!-- 削除ボタン (タップ領域拡大) -->',
+        '  <!-- 蜑企勁繝懊ち繝ｳ (繧ｿ繝��鬆伜沺諡｡螟ｧ) -->',
         '  <button type="button" onclick="deleteTempBook(\'' + book.tempId + '\')" class="absolute -top-3 -right-3 w-10 h-10 bg-rose-500 hover:bg-rose-600 active:scale-90 text-white rounded-full flex items-center justify-center shadow-lg transition-transform focus:outline-none z-20">',
         '    <i class="fa-solid fa-trash-can text-lg"></i>',
         '  </button>',
         '',
-        '  <!-- 本のカバー -->',
+        '  <!-- 譛ｬ縺ｮ繧ｫ繝舌� -->',
         '  <div class="cover-container w-24 h-32 mx-auto md:mx-0 flex-shrink-0">',
         '    ' + getBookCoverHTML(book.coverUrl, book.title, book.genre),
         '  </div>',
         '',
-        '  <!-- 入力項目フォーム -->',
+        '  <!-- 蜈･蜉幃��岼繝輔か繝ｼ繝� -->',
         '  <div class="flex-grow flex flex-col justify-between gap-3">',
         '    ',
-        '    <!-- タイトルと著者 (インライン編集可能) -->',
+        '    <!-- 繧ｿ繧､繝医Ν縺ｨ闡苓� (繧､繝ｳ繝ｩ繧､繝ｳ邱ｨ髮�庄閭ｽ) -->',
         '    <div>',
-        '      <input type="text" value="' + book.title + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'title\', this.value)" class="title-input font-black text-lg text-gray-800 w-full border-b-2 border-dashed border-brand-200 focus:border-brand-500 focus:outline-none bg-transparent py-1 rounded" placeholder="本のなまえを入力してね" ' + (isLoading ? 'disabled' : '') + '>',
-        '      <input type="text" value="' + book.author + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'author\', this.value)" class="author-input text-sm text-gray-500 w-full border-b-2 border-dashed border-brand-100 focus:border-brand-400 focus:outline-none bg-transparent py-1 mt-1 rounded" placeholder="かいた人のなまえ" ' + (isLoading ? 'disabled' : '') + '>',
+        '      <input type="text" value="' + book.title + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'title\', this.value)" class="title-input font-black text-lg text-gray-800 w-full border-b-2 border-dashed border-brand-200 focus:border-brand-500 focus:outline-none bg-transparent py-1 rounded" placeholder="譛ｬ縺ｮ縺ｪ縺ｾ縺医ｒ蜈･蜉帙＠縺ｦ縺ｭ" ' + (isLoading ? 'disabled' : '') + '>',
+        '      <input type="text" value="' + book.author + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'author\', this.value)" class="author-input text-sm text-gray-500 w-full border-b-2 border-dashed border-brand-100 focus:border-brand-400 focus:outline-none bg-transparent py-1 mt-1 rounded" placeholder="縺九＞縺滉ｺｺ縺ｮ縺ｪ縺ｾ縺�" ' + (isLoading ? 'disabled' : '') + '>',
         '    </div>',
         '',
-        '    <!-- 所有とジャンル -->',
+        '    <!-- 謇譛峨→繧ｸ繝｣繝ｳ繝ｫ -->',
         '    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">',
-        '      <!-- 所有区分トグルボタン -->',
+        '      <!-- 謇譛牙玄蛻�ヨ繧ｰ繝ｫ繝懊ち繝ｳ -->',
         '      <div>',
-        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">どこにある本？</span>',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">縺ｩ縺薙↓縺ゅｋ譛ｬ��</span>',
         '        <div class="flex bg-brand-50/50 p-0.5 rounded-lg border border-brand-200">',
-        '          <button type="button" id="owner-lib-' + book.tempId + '" onclick="setTempBookOwner(\'' + book.tempId + '\', \'図書館で借りた本\')" class="flex-1 text-xs font-black py-1.5 rounded transition-all ' + (book.ownerType === '図書館で借りた本' ? 'bg-brand-400 text-white shadow-sm' : 'text-brand-700 hover:bg-brand-100/30') + '">図書館</button>',
-        '          <button type="button" id="owner-home-' + book.tempId + '" onclick="setTempBookOwner(\'' + book.tempId + '\', \'おうちの本\')" class="flex-1 text-xs font-black py-1.5 rounded transition-all ' + (book.ownerType === 'おうちの本' ? 'bg-brand-400 text-white shadow-sm' : 'text-brand-700 hover:bg-brand-100/30') + '">おうち</button>',
+        '          <button type="button" id="owner-lib-' + book.tempId + '" onclick="setTempBookOwner(\'' + book.tempId + '\', \'蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽\')" class="flex-1 text-xs font-black py-1.5 rounded transition-all ' + (book.ownerType === '蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽' ? 'bg-brand-400 text-white shadow-sm' : 'text-brand-700 hover:bg-brand-100/30') + '">蝗ｳ譖ｸ鬢ｨ</button>',
+        '          <button type="button" id="owner-home-' + book.tempId + '" onclick="setTempBookOwner(\'' + book.tempId + '\', \'縺翫≧縺｡縺ｮ譛ｬ\')" class="flex-1 text-xs font-black py-1.5 rounded transition-all ' + (book.ownerType === '縺翫≧縺｡縺ｮ譛ｬ' ? 'bg-brand-400 text-white shadow-sm' : 'text-brand-700 hover:bg-brand-100/30') + '">縺翫≧縺｡</button>',
         '        </div>',
         '      </div>',
         '      <div>',
-        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">どんな本？</span>',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">縺ｩ繧薙↑譛ｬ��</span>',
         '        <select onchange="setTempBookGenre(\'' + book.tempId + '\', this.value)" class="w-full bg-white text-xs font-bold p-1.5 rounded-lg border border-brand-200 focus:border-brand-500 focus:outline-none">',
-        '          <option value="物語" ' + (book.genre === '物語' ? 'selected' : '') + '>📕 物語</option>',
-        '          <option value="図鑑・科学" ' + (book.genre === '図鑑・科学' ? 'selected' : '') + '>🥦 図鑑・科学</option>',
-        '          <option value="伝記" ' + (book.genre === '伝記' ? 'selected' : '') + '>👑 伝記</option>',
-        '          <option value="絵本" ' + (book.genre === '絵本' ? 'selected' : '') + '>🎨 絵本</option>',
-        '          <option value="その他" ' + (book.genre === 'その他' ? 'selected' : '') + '>⭐️ その他</option>',
+        '          <option value="迚ｩ隱�" ' + (book.genre === '迚ｩ隱�' ? 'selected' : '') + '>�燈 迚ｩ隱�</option>',
+        '          <option value="蝗ｳ髑代�遘大ｭｦ" ' + (book.genre === '蝗ｳ髑代�遘大ｭｦ' ? 'selected' : '') + '>�･ｦ 蝗ｳ髑代�遘大ｭｦ</option>',
+        '          <option value="莨晁ｨ�" ' + (book.genre === '莨晁ｨ�' ? 'selected' : '') + '>�荘 莨晁ｨ�</option>',
+        '          <option value="邨ｵ譛ｬ" ' + (book.genre === '邨ｵ譛ｬ' ? 'selected' : '') + '>�耳 邨ｵ譛ｬ</option>',
+        '          <option value="縺昴�莉�" ' + (book.genre === '縺昴�莉�' ? 'selected' : '') + '>箝撰ｸ� 縺昴�莉�</option>',
         '        </select>',
         '      </div>',
         '    </div>',
         '',
-        '    <!-- 星評価とひとこと -->',
+        '    <!-- 譏溯ｩ穂ｾ｡縺ｨ縺ｲ縺ｨ縺薙→ -->',
         '    <div class="flex flex-wrap items-center gap-3 justify-between">',
         '      <div>',
-        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">お気に入り度</span>',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">縺頑ｰ励↓蜈･繧雁ｺｦ</span>',
         '        <div class="stars-container flex items-center bg-brand-50/50 px-2 py-0.5 rounded-xl border border-brand-200">',
         '          ' + renderStarsHTML(book.tempId, book.rating),
         '        </div>',
         '      </div>',
         '      <div class="flex-grow min-w-[180px]">',
-        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">感想メモ</span>',
-        '        <input type="text" value="' + book.comment + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'comment\', this.value)" class="w-full bg-white text-xs text-gray-700 p-2 rounded-xl border border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="おもしろかったことなど">',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">諢滓Φ繝｡繝｢</span>',
+        '        <input type="text" value="' + book.comment + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'comment\', this.value)" class="w-full bg-white text-xs text-gray-700 p-2 rounded-xl border border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="縺翫ｂ縺励ｍ縺九▲縺溘％縺ｨ縺ｪ縺ｩ">',
         '      </div>',
         '    </div>',
         '  </div>',
@@ -1776,18 +1864,18 @@
       ].join('\n');
     }
 
-    // 非同期情報フェッチ完了時のDOM更新
+    // 髱槫酔譛滓ュ蝣ｱ繝輔ぉ繝�メ螳御ｺ�凾縺ｮDOM譖ｴ譁ｰ
     function updateTempBookCardDOM(book) {
       const cardEl = document.getElementById('temp-card-' + book.tempId);
       if (!cardEl) return;
       
-      // カバーの更新
+      // 繧ｫ繝舌�縺ｮ譖ｴ譁ｰ
       const coverContainer = cardEl.querySelector('.cover-container');
       if (coverContainer) {
         coverContainer.innerHTML = getBookCoverHTML(book.coverUrl, book.title, book.genre);
       }
       
-      // 入力値の更新
+      // 蜈･蜉帛､縺ｮ譖ｴ譁ｰ
       const titleInput = cardEl.querySelector('.title-input');
       if (titleInput) {
         titleInput.value = book.title;
@@ -1799,7 +1887,7 @@
         authorInput.disabled = false;
       }
       
-      // ローディングの非表示
+      // 繝ｭ繝ｼ繝�ぅ繝ｳ繧ｰ縺ｮ髱櫁｡ｨ遉ｺ
       cardEl.classList.remove('opacity-70');
       const loader = cardEl.querySelector('.card-loader');
       if (loader) {
@@ -1807,7 +1895,7 @@
       }
     }
 
-    // フィールド更新ハンドラー
+    // 繝輔ぅ繝ｼ繝ｫ繝画峩譁ｰ繝上Φ繝峨Λ繝ｼ
     function updateTempBookField(tempId, field, value) {
       const book = tempBooks.find(b => b.tempId === tempId);
       if (book) {
@@ -1815,7 +1903,7 @@
       }
     }
 
-    // 所有者選択ハンドラー
+    // 謇譛芽�∈謚槭ワ繝ｳ繝峨Λ繝ｼ
     function setTempBookOwner(tempId, ownerType) {
       const book = tempBooks.find(b => b.tempId === tempId);
       if (book) {
@@ -1825,7 +1913,7 @@
         const homeBtn = document.getElementById('owner-home-' + tempId);
         
         if (libBtn && homeBtn) {
-          if (ownerType === '図書館で借りた本') {
+          if (ownerType === '蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽') {
             libBtn.className = "flex-1 text-xs font-black py-1.5 rounded transition-all bg-brand-400 text-white shadow-sm";
             homeBtn.className = "flex-1 text-xs font-black py-1.5 rounded transition-all text-brand-700 hover:bg-brand-100/30";
           } else {
@@ -1836,7 +1924,7 @@
       }
     }
 
-    // ジャンル選択ハンドラー (フォールバックカバーが依存)
+    // 繧ｸ繝｣繝ｳ繝ｫ驕ｸ謚槭ワ繝ｳ繝峨Λ繝ｼ (繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ繧ｫ繝舌�縺御ｾ晏ｭ�)
     function setTempBookGenre(tempId, genre) {
       const book = tempBooks.find(b => b.tempId === tempId);
       if (book) {
@@ -1853,7 +1941,7 @@
       }
     }
 
-    // 星変更ハンドラー
+    // 譏溷､画峩繝上Φ繝峨Λ繝ｼ
     function setTempBookRating(tempId, rating) {
       const book = tempBooks.find(b => b.tempId === tempId);
       if (book) {
@@ -1868,7 +1956,7 @@
       }
     }
 
-    // リストの個別削除
+    // 繝ｪ繧ｹ繝医�蛟句挨蜑企勁
     function deleteTempBook(tempId) {
       tempBooks = tempBooks.filter(b => b.tempId !== tempId);
       const cardEl = document.getElementById('temp-card-' + tempId);
@@ -1883,29 +1971,29 @@
       }
     }
 
-    // 一時リスト空状態レンダリング
+    // 荳譎ゅΜ繧ｹ繝育ｩｺ迥ｶ諷九Ξ繝ｳ繝繝ｪ繝ｳ繧ｰ
     function renderTempListEmpty() {
       const container = document.getElementById('temp-list-container');
       container.innerHTML = [
         '<div class="text-center py-16 px-4 border-4 border-dashed border-brand-200 rounded-3xl bg-brand-50/20">',
         '  <i class="fa-solid fa-camera-retro text-5xl text-brand-300 mb-4 animate-bounce"></i>',
-        '  <p class="text-lg font-black text-brand-700">スキャンした本がここにでるよ！</p>',
-        '  <p class="text-xs text-brand-500 mt-2">上の「カメラをスタート！」ボタンをおして、バーコードをうつしてね。</p>',
+        '  <p class="text-lg font-black text-brand-700">繧ｹ繧ｭ繝｣繝ｳ縺励◆譛ｬ縺後％縺薙↓縺ｧ繧九ｈ��</p>',
+        '  <p class="text-xs text-brand-500 mt-2">荳翫�縲後き繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ√阪�繧ｿ繝ｳ繧偵♀縺励※縲√ヰ繝ｼ繧ｳ繝ｼ繝峨ｒ縺�▽縺励※縺ｭ縲�</p>',
         '</div>'
       ].join('\n');
     }
 
-    // 一時リストのクリア
+    // 荳譎ゅΜ繧ｹ繝医�繧ｯ繝ｪ繧｢
     function clearTempListConfirm() {
       if (tempBooks.length === 0) return;
-      if (confirm("一時リストをからにしますか？")) {
+      if (confirm("荳譎ゅΜ繧ｹ繝医ｒ縺九ｉ縺ｫ縺励∪縺吶°��")) {
         tempBooks = [];
         renderTempListEmpty();
         updateTempCountBadge();
       }
     }
 
-    // 一括登録バッジ＆ボタンの表示制御
+    // 荳諡ｬ逋ｻ骭ｲ繝舌ャ繧ｸ���繧ｿ繝ｳ縺ｮ陦ｨ遉ｺ蛻ｶ蠕｡
     function updateTempCountBadge() {
       const badge = document.getElementById('temp-count-badge');
       const count = tempBooks.length;
@@ -1922,20 +2010,20 @@
       }
     }
 
-    // スキャン済み一時リストの一括登録処理
+    // 繧ｹ繧ｭ繝｣繝ｳ貂医∩荳譎ゅΜ繧ｹ繝医�荳諡ｬ逋ｻ骭ｲ蜃ｦ逅�
     function submitBatchBooks() {
       if (tempBooks.length === 0) return;
       
-      // 未入力（タイトル無し）のチェック
-      const invalid = tempBooks.find(b => !b.title || b.title.trim() === "" || b.title === "しらべているよ...");
+      // 譛ｪ蜈･蜉幢ｼ医ち繧､繝医Ν辟｡縺暦ｼ峨�繝√ぉ繝�け
+      const invalid = tempBooks.find(b => !b.title || b.title.trim() === "" || b.title === "縺励ｉ縺ｹ縺ｦ縺�ｋ繧�...");
       if (invalid) {
-        showToast("本のなまえを入力していないものがあるよ。書いてね！");
+        showToast("譛ｬ縺ｮ縺ｪ縺ｾ縺医ｒ蜈･蜉帙＠縺ｦ縺�↑縺�ｂ縺ｮ縺後≠繧九ｈ縲よ嶌縺�※縺ｭ��");
         return;
       }
       
       showLoading(true);
       
-      // GAS送信用の配列に変換
+      // GAS騾∽ｿ｡逕ｨ縺ｮ驟榊�縺ｫ螟画鋤
       const booksPayload = tempBooks.map(b => ({
         isbn: b.isbn,
         title: b.title,
@@ -1950,27 +2038,27 @@
       dbDriver.addBooks(booksPayload, function(res) {
         showLoading(false);
         if (res.success) {
-          showToast(res.count + '冊の本を新しく登録したよ！🎉');
+          showToast(res.count + '蜀翫�譛ｬ繧呈眠縺励￥逋ｻ骭ｲ縺励◆繧茨ｼÅ沁�');
           
-          // 一時リストクリア
+          // 荳譎ゅΜ繧ｹ繝医け繝ｪ繧｢
           tempBooks = [];
           renderTempListEmpty();
           updateTempCountBadge();
           
-          // 一覧タブへ切り替え & リロード
+          // 荳隕ｧ繧ｿ繝悶∈蛻�ｊ譖ｿ縺� & 繝ｪ繝ｭ繝ｼ繝�
           switchTab('tab-gallery');
         } else {
-          showToast("登録にしっぱいしちゃった。");
+          showToast("逋ｻ骭ｲ縺ｫ縺励▲縺ｱ縺�＠縺｡繧�▲縺溘�");
         }
       }, function(err) {
         showLoading(false);
         console.error(err);
-        showToast("データベースとの通信に失敗しました。");
+        showToast("繝��繧ｿ繝吶�繧ｹ縺ｨ縺ｮ騾壻ｿ｡縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲�");
       });
     }
 
-    // ================= 手動登録管理 =================
-    // 手動スターのレンダリング
+    // ================= 謇句虚逋ｻ骭ｲ邂｡逅� =================
+    // 謇句虚繧ｹ繧ｿ繝ｼ縺ｮ繝ｬ繝ｳ繝繝ｪ繝ｳ繧ｰ
     function renderManualStars(rating) {
       const container = document.getElementById('manual-stars-container');
       let html = '';
@@ -1989,7 +2077,7 @@
       renderManualStars(rating);
     }
 
-    // 手動フォーム送信処理
+    // 謇句虚繝輔か繝ｼ繝�騾∽ｿ｡蜃ｦ逅�
     function submitManualForm(event) {
       event.preventDefault();
       
@@ -2002,7 +2090,7 @@
       const comment = document.getElementById('manual-comment').value.trim();
       
       if (!title) {
-        showToast("本の名前を書いてね！");
+        showToast("譛ｬ縺ｮ蜷榊燕繧呈嶌縺�※縺ｭ��");
         return;
       }
       
@@ -2012,10 +2100,10 @@
         isbn: "",
         title: title,
         author: author,
-        coverUrl: "", // 手動は表紙無し
+        coverUrl: "", // 謇句虚縺ｯ陦ｨ邏咏┌縺�
         ownerType: ownerType,
         genre: genre,
-        date: dateVal, // カスタム登録日
+        date: dateVal, // 繧ｫ繧ｹ繧ｿ繝�逋ｻ骭ｲ譌･
         comment: comment,
         rating: rating
       }];
@@ -2023,9 +2111,9 @@
       dbDriver.addBooks(singlePayload, function(res) {
         showLoading(false);
         if (res.success) {
-          showToast("本を1冊登録したよ！📖");
+          showToast("譛ｬ繧�1蜀顔匳骭ｲ縺励◆繧茨ｼÅ沒�");
           
-          // フォームリセット
+          // 繝輔か繝ｼ繝�繝ｪ繧ｻ繝�ヨ
           document.getElementById('manual-title').value = "";
           document.getElementById('manual-author').value = "";
           document.getElementById('manual-comment').value = "";
@@ -2033,80 +2121,80 @@
           document.getElementById('manual-date').value = today;
           renderManualStars(5);
           
-          // 一覧へ
+          // 荳隕ｧ縺ｸ
           switchTab('tab-gallery');
         } else {
-          showToast("登録にしっぱいしちゃった。");
+          showToast("逋ｻ骭ｲ縺ｫ縺励▲縺ｱ縺�＠縺｡繧�▲縺溘�");
         }
       }, function(err) {
         showLoading(false);
         console.error(err);
-        showToast("データベースとの通信に失敗しました。");
+        showToast("繝��繧ｿ繝吶�繧ｹ縺ｨ縺ｮ騾壻ｿ｡縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲�");
       });
     }
 
-    // ================= 読書実績ダッシュボード・フィルタ・ソート =================
-    // スプレッドシートからデータを取得
+    // ================= 隱ｭ譖ｸ螳溽ｸｾ繝繝�す繝･繝懊�繝峨�繝輔ぅ繝ｫ繧ｿ繝ｻ繧ｽ繝ｼ繝� =================
+    // 繧ｹ繝励Ξ繝�ラ繧ｷ繝ｼ繝医°繧峨ョ繝ｼ繧ｿ繧貞叙蠕�
     function fetchRegisteredBooks() {
       showLoading(true);
       dbDriver.getBooks(function(books) {
         allRegisteredBooks = books;
         
-        // 読書貯金カウンター更新
+        // 隱ｭ譖ｸ雋ｯ驥代き繧ｦ繝ｳ繧ｿ繝ｼ譖ｴ譁ｰ
         const counterEl = document.getElementById('dashboard-counter');
         if (counterEl) {
           counterEl.textContent = books.length;
         }
         
-        // ギャラリーを描画
+        // 繧ｮ繝｣繝ｩ繝ｪ繝ｼ繧呈緒逕ｻ
         renderRegisteredBooks();
         showLoading(false);
       }, function(err) {
         showLoading(false);
         console.error(err);
-        showToast("データベースからの読み込みに失敗しました。");
+        showToast("繝��繧ｿ繝吶�繧ｹ縺九ｉ縺ｮ隱ｭ縺ｿ霎ｼ縺ｿ縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲�");
       });
     }
 
-    // フィルタ・ソートを適用して登録済み本を描画
+    // 繝輔ぅ繝ｫ繧ｿ繝ｻ繧ｽ繝ｼ繝医ｒ驕ｩ逕ｨ縺励※逋ｻ骭ｲ貂医∩譛ｬ繧呈緒逕ｻ
     function renderRegisteredBooks() {
       const container = document.getElementById('registered-list-container');
       if (!container) return;
       
-      // フィルタ値の取得
+      // 繝輔ぅ繝ｫ繧ｿ蛟､縺ｮ蜿門ｾ�
       const filterOwner = document.querySelector('[name="filter-owner"]:checked').value;
       const filterGenre = document.getElementById('filter-genre').value;
       const sortBy = document.getElementById('sort-by').value;
       
-      // フィルタリング処理
+      // 繝輔ぅ繝ｫ繧ｿ繝ｪ繝ｳ繧ｰ蜃ｦ逅�
       let filtered = allRegisteredBooks.filter(book => {
-        const matchOwner = (filterOwner === 'すべて') || (book.ownerType === filterOwner);
-        const matchGenre = (filterGenre === 'すべて') || (book.genre === filterGenre);
+        const matchOwner = (filterOwner === '縺吶∋縺ｦ') || (book.ownerType === filterOwner);
+        const matchGenre = (filterGenre === '縺吶∋縺ｦ') || (book.genre === filterGenre);
         return matchOwner && matchGenre;
       });
       
-      // ソーティング処理
+      // 繧ｽ繝ｼ繝�ぅ繝ｳ繧ｰ蜃ｦ逅�
       filtered.sort((a, b) => {
         if (sortBy === 'date-desc') {
-          // 日付の新しい順
+          // 譌･莉倥�譁ｰ縺励＞鬆�
           return new Date(b.date.replace(/\//g, '-')) - new Date(a.date.replace(/\//g, '-'));
         } else if (sortBy === 'date-asc') {
-          // 日付の古い順
+          // 譌･莉倥�蜿､縺���
           return new Date(a.date.replace(/\//g, '-')) - new Date(b.date.replace(/\//g, '-'));
         } else if (sortBy === 'rating-desc') {
-          // 評価の高い順
+          // 隧穂ｾ｡縺ｮ鬮倥＞鬆�
           return b.rating - a.rating;
         }
         return 0;
       });
       
-      // リスト描画
+      // 繝ｪ繧ｹ繝域緒逕ｻ
       if (filtered.length === 0) {
         container.innerHTML = [
           '<div class="col-span-full text-center py-16 px-4 bg-white/60 rounded-3xl border-2 border-dashed border-gray-200">',
           '  <i class="fa-solid fa-folder-open text-5xl text-gray-300 mb-4 animate-bounce"></i>',
-          '  <p class="text-lg font-black text-gray-500">あてはまる本がないよ</p>',
-          '  <p class="text-xs text-gray-400 mt-2">ほかのしぼりこみをためすか、新しく本を登録してみてね！</p>',
+          '  <p class="text-lg font-black text-gray-500">縺ゅ※縺ｯ縺ｾ繧区悽縺後↑縺�ｈ</p>',
+          '  <p class="text-xs text-gray-400 mt-2">縺ｻ縺九�縺励⊂繧翫％縺ｿ繧偵◆繧√☆縺九∵眠縺励￥譛ｬ繧堤匳骭ｲ縺励※縺ｿ縺ｦ縺ｭ��</p>',
           '</div>'
         ].join('\n');
         return;
@@ -2114,11 +2202,11 @@
       
       let html = '';
       filtered.forEach(book => {
-        const ownerBadgeColor = book.ownerType === '図書館で借りた本' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700';
-        const ownerLabel = book.ownerType === '図書館で借りた本' ? '図書館' : 'おうち';
+        const ownerBadgeColor = book.ownerType === '蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700';
+        const ownerLabel = book.ownerType === '蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽' ? '蝗ｳ譖ｸ鬢ｨ' : '縺翫≧縺｡';
         const colors = getGenreColor(book.genre);
         
-        // スター表示
+        // 繧ｹ繧ｿ繝ｼ陦ｨ遉ｺ
         let starsHTML = '';
         for (let i = 1; i <= 5; i++) {
           if (i <= book.rating) {
@@ -2128,50 +2216,50 @@
           }
         }
         
-        // 感想メモ（吹き出し風）
+        // 諢滓Φ繝｡繝｢�亥聖縺榊�縺鈴｢ｨ��
         const commentHTML = book.comment ? [
           '<div class="mt-2.5 relative bg-amber-50/70 border border-amber-100 p-2.5 rounded-xl text-xs text-brand-900 leading-snug">',
           '  <div class="absolute -top-1 w-2.5 h-2.5 bg-amber-50/70 border-t border-l border-amber-100 rotate-45 left-4"></div>',
-          '  <p class="line-clamp-3">💬 ' + book.comment + '</p>',
+          '  <p class="line-clamp-3">�町 ' + book.comment + '</p>',
           '</div>'
         ].join('\n') : '';
         
-        // 日付整形
-        const displayDate = book.date ? book.date.split(' ')[0] : '日付不明';
+        // 譌･莉俶紛蠖｢
+        const displayDate = book.date ? book.date.split(' ')[0] : '譌･莉倅ｸ肴�';
         
         html += [
           '<div class="bg-white rounded-3xl p-4 shadow border border-gray-100 hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between">',
           '  <div>',
-          '    <!-- 本のカバー -->',
+          '    <!-- 譛ｬ縺ｮ繧ｫ繝舌� -->',
           '    <div class="w-full h-36 flex items-center justify-center mb-3">',
           '      <div class="w-24 h-32">',
           '        ' + getBookCoverHTML(book.coverUrl, book.title, book.genre),
           '      </div>',
           '    </div>',
           '    ',
-          '    <!-- 区分・ジャンルバッジ -->',
+          '    <!-- 蛹ｺ蛻��繧ｸ繝｣繝ｳ繝ｫ繝舌ャ繧ｸ -->',
           '    <div class="flex gap-1.5 mb-1.5 flex-wrap">',
           '      <span class="text-[9px] font-black px-2 py-0.5 rounded-full ' + ownerBadgeColor + '">' + ownerLabel + '</span>',
           '      <span class="text-[9px] font-black px-2 py-0.5 rounded-full ' + colors.bg + ' ' + colors.text + '">' + book.genre + '</span>',
           '    </div>',
           '    ',
-          '    <!-- タイトルと作者 -->',
+          '    <!-- 繧ｿ繧､繝医Ν縺ｨ菴懆� -->',
           '    <h3 class="font-black text-sm text-gray-800 line-clamp-2 leading-snug" title="' + book.title + '">' + book.title + '</h3>',
-          '    <p class="text-[11px] text-gray-400 line-clamp-1 mt-0.5">' + (book.author || '（著者不明）') + '</p>',
+          '    <p class="text-[11px] text-gray-400 line-clamp-1 mt-0.5">' + (book.author || '�郁送閠�ｸ肴���') + '</p>',
           '  </div>',
           '  ',
           '  <div class="mt-2">',
-          '    <!-- 星評価 -->',
+          '    <!-- 譏溯ｩ穂ｾ｡ -->',
           '    <div class="flex items-center gap-0.5">',
           '      ' + starsHTML,
           '    </div>',
           '    ',
-          '    <!-- 感想 -->',
+          '    <!-- 諢滓Φ -->',
           '    ' + commentHTML,
           '    ',
-          '    <!-- 日付・メタ情報 -->',
+          '    <!-- 譌･莉倥�繝｡繧ｿ諠��ｱ -->',
           '    <div class="text-[9px] text-gray-300 mt-3 pt-2 border-t border-gray-100 flex justify-between items-center">',
-          '      <span class="font-bold">📅 ' + displayDate + '</span>',
+          '      <span class="font-bold">�套 ' + displayDate + '</span>',
           '      ' + (book.isbn ? '<span class="font-mono text-gray-300 scale-90">ISBN</span>' : ''),
           '    </div>',
           '  </div>',
@@ -2182,80 +2270,81 @@
       container.innerHTML = html;
     }
 
-    // バーコード（ISBN）の手入力検索処理
+    // 繝舌�繧ｳ繝ｼ繝会ｼ�SBN�峨�謇句�蜉帶､懃ｴ｢蜃ｦ逅�
     function submitManualIsbn() {
       const input = document.getElementById('manual-isbn-input');
       if (!input) return;
       
       const isbn = input.value.trim().replace(/[-\s]/g, '');
       if (!/^\d{10}$|^\d{13}$/.test(isbn)) {
-        showToast("バーコードの数字は10けたか13けたで入れてね！");
+        showToast("繝舌�繧ｳ繝ｼ繝峨�謨ｰ蟄励�10縺代◆縺�13縺代◆縺ｧ蜈･繧後※縺ｭ��");
         return;
       }
       
-      // 入力欄をクリア
+      // 蜈･蜉帶ｬ�ｒ繧ｯ繝ｪ繧｢
       input.value = "";
       
-      // 音声初期化とビープ音
+      // 髻ｳ螢ｰ蛻晄悄蛹悶→繝薙�繝鈴浹
       initAudio();
       playBeep();
-      showToast("バーコードをうけつけました。しらべています...");
+      showToast("繝舌�繧ｳ繝ｼ繝峨ｒ縺�￠縺､縺代∪縺励◆縲ゅ＠繧峨∋縺ｦ縺�∪縺�...");
       
-      // 一時リストに追加処理を開始
+      // 荳譎ゅΜ繧ｹ繝医↓霑ｽ蜉�蜃ｦ逅�ｒ髢句ｧ�
       addTempBookPlaceholder(isbn);
     }
   </script>
 
-  <!-- ================= 設定管理モーダル (GAS URL連携用) ================= -->
+  <!-- ================= 險ｭ螳夂ｮ｡逅�Δ繝ｼ繝繝ｫ (GAS URL騾｣謳ｺ逕ｨ) ================= -->
+  <!-- ================= 險ｭ螳夂ｮ｡逅Δ繝ｼ繝€繝ｫ (GAS URL騾｣謳ｺ逕ｨ) ================= -->
   <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300 opacity-0 pointer-events-none">
     <div class="bg-white p-6 md:p-8 rounded-[32px] border-4 border-brand-300 shadow-2xl w-full max-w-md mx-4">
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v1.9</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v2.0</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
       
       <div class="space-y-4">
         <div class="bg-brand-50 p-4 rounded-2xl border border-brand-200 text-xs text-brand-800 leading-relaxed">
-          <p class="font-bold mb-1">🔗 Google Apps Script 連携設定</p>
-          <p>Netlify等の外部サーバーからデータを保存・取得するために、公開した「GASウェブアプリのデプロイURL」を設定してください。</p>
+          <p class="font-bold mb-1">�迫 Google Apps Script 騾｣謳ｺ險ｭ螳�</p>
+          <p>Netlify遲峨�螟夜Κ繧ｵ繝ｼ繝舌�縺九ｉ繝��繧ｿ繧剃ｿ晏ｭ倥�蜿門ｾ励☆繧九◆繧√↓縲∝�髢九＠縺溘隈AS繧ｦ繧ｧ繝悶い繝励Μ縺ｮ繝��繝ｭ繧､URL縲阪ｒ險ｭ螳壹＠縺ｦ縺上□縺輔＞縲�</p>
         </div>
         
         <div>
-          <label class="block text-xs font-black text-brand-700 mb-1.5">GASウェブアプリのURL</label>
+          <label class="block text-xs font-black text-brand-700 mb-1.5">GAS繧ｦ繧ｧ繝悶い繝励Μ縺ｮURL</label>
           <input type="text" id="settings-gas-url-input" class="w-full bg-slate-50 text-xs text-slate-800 p-3 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="https://script.google.com/macros/s/.../exec">
         </div>
         
         <div class="flex gap-3 pt-2">
           <button type="button" onclick="saveGasUrlSettings()" class="flex-1 py-3.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-black text-sm rounded-xl shadow-md transition-all">
-            設定を保存する
+            險ｭ螳壹ｒ菫晏ｭ倥☆繧�
           </button>
           <button type="button" onclick="showSettingsModal(false)" class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-sm rounded-xl transition-all">
-            とじる
+            縺ｨ縺倥ｋ
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ================= スキャナー専用 全画面レイアウト (iOS Safari用) ================= -->
+  <!-- ================= 繧ｹ繧ｭ繝｣繝翫�蟆ら畑 蜈ｨ逕ｻ髱｢繝ｬ繧､繧｢繧ｦ繝� (iOS Safari逕ｨ) ================= -->
   <div id="scanner-only-container" class="hidden min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">
     <div class="text-center mb-6">
-      <h1 class="text-2xl font-black text-brand-400">よむよむスキャナー 📷</h1>
-      <p class="text-xs text-slate-400 mt-1">メイン画面と連動してバーコードを読み取ります</p>
+      <h1 class="text-2xl font-black text-brand-400">繧医�繧医�繧ｹ繧ｭ繝｣繝翫� �胴</h1>
+      <p class="text-xs text-slate-400 mt-1">繝｡繧､繝ｳ逕ｻ髱｢縺ｨ騾｣蜍輔＠縺ｦ繝舌�繧ｳ繝ｼ繝峨ｒ隱ｭ縺ｿ蜿悶ｊ縺ｾ縺�</p>
     </div>
     
     <div class="relative w-full max-w-md aspect-square mb-2">
       <div id="scanner-reader" class="w-full h-full bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-600 relative">
-        <!-- カメラ表示領域 -->
-        <!-- スキャンターゲット枠（カメラ稼働中のみ表示、外側を半透明マスクし中央をくり抜く） -->
+        <!-- 繧ｫ繝｡繝ｩ陦ｨ遉ｺ鬆伜沺 -->
+        <!-- 繧ｹ繧ｭ繝｣繝ｳ繧ｿ繝ｼ繧ｲ繝�ヨ譫��医き繝｡繝ｩ遞ｼ蜒堺ｸｭ縺ｮ縺ｿ陦ｨ遉ｺ縲∝､門�繧貞濠騾乗�繝槭せ繧ｯ縺嶺ｸｭ螟ｮ繧偵￥繧頑栢縺擾ｼ� -->
         <div id="scanner-scan-area-overlay" class="hidden absolute inset-0 pointer-events-none flex items-center justify-center z-10">
           <div class="w-[80%] h-[28%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
-            <!-- 照準赤線 -->
+            <!-- 辣ｧ貅冶ｵ､邱� -->
             <div class="absolute inset-x-0 top-1/2 h-[1px] bg-rose-500/80 -translate-y-1/2 animate-pulse"></div>
-            <!-- 角のブラケット装飾 -->
+            <!-- 隗偵�繝悶Λ繧ｱ繝�ヨ陬�｣ｾ -->
             <div class="absolute -top-[2px] -left-[2px] w-3 h-3 border-t-4 border-l-4 border-rose-500 rounded-tl-sm"></div>
             <div class="absolute -top-[2px] -right-[2px] w-3 h-3 border-t-4 border-r-4 border-rose-500 rounded-tr-sm"></div>
             <div class="absolute -bottom-[2px] -left-[2px] w-3 h-3 border-b-4 border-l-4 border-rose-500 rounded-bl-sm"></div>
@@ -2264,25 +2353,25 @@
         </div>
       </div>
       <div id="scanner-hint-text" class="hidden text-center text-xs text-slate-400 font-bold mt-3 animate-pulse">
-        💡 バーコードを少しはなして（20cmくらい）、ピントをあわせてね！
+        �庁 繝舌�繧ｳ繝ｼ繝峨ｒ蟆代＠縺ｯ縺ｪ縺励※��20cm縺上ｉ縺�ｼ峨√ヴ繝ｳ繝医ｒ縺ゅｏ縺帙※縺ｭ��
       </div>
-      <!-- デバッグパネル -->
+      <!-- 繝�ヰ繝�げ繝代ロ繝ｫ -->
       <div id="scanner-debug-panel" class="hidden mt-2 p-3 bg-slate-700 rounded-xl text-xs font-mono space-y-1">
         <div class="flex items-center gap-2">
           <span id="scanner-debug-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
-          <span id="scanner-debug-status" class="text-gray-300">待機中</span>
+          <span id="scanner-debug-status" class="text-gray-300">蠕�ｩ滉ｸｭ</span>
         </div>
-        <div class="text-gray-400">最後に検出: <span id="scanner-debug-detected" class="text-yellow-300">なし</span></div>
-        <div class="text-gray-400">エラー: <span id="scanner-debug-error" class="text-red-400">なし</span></div>
+        <div class="text-gray-400">譛蠕後↓讀懷�: <span id="scanner-debug-detected" class="text-yellow-300">縺ｪ縺�</span></div>
+        <div class="text-gray-400">繧ｨ繝ｩ繝ｼ: <span id="scanner-debug-error" class="text-red-400">縺ｪ縺�</span></div>
       </div>
     </div>
     
     <div class="mt-6 w-full max-w-md flex flex-col gap-4">
       <button type="button" id="scanner-start-btn" onclick="startScannerModeCamera()" class="w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2">
-        <i class="fa-solid fa-camera-retro"></i> カメラをスタート！
+        <i class="fa-solid fa-camera-retro"></i> 繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ�
       </button>
       <button type="button" onclick="window.close()" class="w-full py-3 rounded-2xl font-bold text-sm bg-slate-800 hover:bg-slate-700 text-slate-300">
-        スキャナーを閉じる
+        繧ｹ繧ｭ繝｣繝翫�繧帝哩縺倥ｋ
       </button>
     </div>
   </div>
