@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.7</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.8</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.7</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v5.8</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -257,7 +257,7 @@
                     <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
                     <span id="debug-scan-status" class="text-gray-300 font-bold">待機中</span>
                   </div>
-                  <span class="text-[10px] text-slate-400">v5.7 デバッグ</span>
+                  <span class="text-[10px] text-slate-400">v5.8 デバッグ</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400">
                   <div>最後に検出: <span id="debug-last-detected" class="text-yellow-300 font-bold">なし</span></div>
@@ -1003,13 +1003,26 @@
         resultDiv.textContent = "Analyzing (camera paused)...";
 
         // [CRITICAL FIX] Capture the video frame *before* stopping the camera stream
+        // 中央のスリット領域（赤いターゲット枠。高さ約28%）のみを切り出して保存
         const tempCanvas = document.createElement('canvas');
         const vWidth = videoEl.videoWidth || videoEl.width || 640;
         const vHeight = videoEl.videoHeight || videoEl.height || 480;
-        tempCanvas.width = vWidth;
-        tempCanvas.height = vHeight;
+        
+        let cropX = 0, cropY = 0, cropW = vWidth, cropH = vHeight;
+        if (vHeight > vWidth) {
+          // 縦長の場合: 高さの中央 22% を切り抜く
+          cropH = Math.floor(vHeight * 0.22);
+          cropY = Math.floor((vHeight - cropH) / 2);
+        } else {
+          // 横長の場合: 高さの中央 28% を切り抜く
+          cropH = Math.floor(vHeight * 0.28);
+          cropY = Math.floor((vHeight - cropH) / 2);
+        }
+        
+        tempCanvas.width = cropW;
+        tempCanvas.height = cropH;
         const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.drawImage(videoEl, 0, 0, vWidth, vHeight);
+        tempCtx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
 
         let wasCameraRunning = isCameraRunning;
         if (html5QrCode && isCameraRunning) {
@@ -1785,6 +1798,9 @@
               { facingMode: "environment" },
               config,
               (decodedText) => {
+                // OSネイティブエンジンが有効な場合は、裏の全画面ZXingスキャン結果は完全に無視（スルー）する
+                if (barcodeDetector) return;
+                
                 if (isScanningPaused) return; // 一時停止（スロットリング）中なら一切無視する！
                 
                 const isbn = decodedText.trim();
@@ -1805,6 +1821,9 @@
               {},
               config,
               (decodedText) => {
+                // OSネイティブエンジンが有効な場合は、裏の全画面ZXingスキャン結果は完全に無視（スルー）する
+                if (barcodeDetector) return;
+                
                 if (isScanningPaused) return; // 一時停止（スロットリング）中なら一切無視する！
                 
                 const isbn = decodedText.trim();
@@ -2693,7 +2712,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v5.7</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v5.8</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
