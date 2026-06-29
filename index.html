@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v4.1</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v2.2</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v4.1</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v2.2</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -216,51 +216,28 @@
                 <div id="reader" class="hidden w-full h-full bg-black border-4 border-brand-300 shadow-md"></div>
                 <!-- スキャンターゲット枠（カメラ稼働中のみ表示、外側を半透明マスクし中央をくり抜く） -->
                 <div id="scan-area-overlay" class="hidden absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-                  <div class="w-[80%] h-[24%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
+                  <div class="w-[80%] h-[28%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
                     <!-- 照準赤線 -->
                     <div class="absolute inset-x-0 top-1/2 h-[1px] bg-rose-500/80 -translate-y-1/2 animate-pulse"></div>
-                    <!-- 角 of ブラケット装飾 -->
-                    <div class="absolute -top-[2px] -left-[2px] w-3.5 h-3 border-t-4 border-l-4 border-rose-500 rounded-tl-sm"></div>
-                    <div class="absolute -top-[2px] -right-[2px] w-3.5 h-3 border-t-4 border-r-4 border-rose-500 rounded-tr-sm"></div>
-                    <div class="absolute -bottom-[2px] -left-[2px] w-3.5 h-3 border-b-4 border-l-4 border-rose-500 rounded-bl-sm"></div>
-                    <div class="absolute -bottom-[2px] -right-[2px] w-3.5 h-3 border-b-4 border-r-4 border-rose-500 rounded-br-sm"></div>
+                    <!-- 角のブラケット装飾 -->
+                    <div class="absolute -top-[2px] -left-[2px] w-3 h-3 border-t-4 border-l-4 border-rose-500 rounded-tl-sm"></div>
+                    <div class="absolute -top-[2px] -right-[2px] w-3 h-3 border-t-4 border-r-4 border-rose-500 rounded-tr-sm"></div>
+                    <div class="absolute -bottom-[2px] -left-[2px] w-3 h-3 border-b-4 border-l-4 border-rose-500 rounded-bl-sm"></div>
+                    <div class="absolute -bottom-[2px] -right-[2px] w-3 h-3 border-b-4 border-r-4 border-rose-500 rounded-br-sm"></div>
                   </div>
                 </div>
-              </div>
               </div>
               <div id="camera-hint-text" class="hidden text-center text-xs text-brand-600 font-bold mt-2 animate-pulse">
                 💡 バーコードを少しはなして（20cmくらい）、ピントをあわせてね！
               </div>
-              
-              <!-- スキャン状況モニター -->
-              <div id="scan-status-monitor" class="mt-3 px-4 py-3.5 bg-brand-50/90 backdrop-blur-sm rounded-2xl border-2 border-brand-200 text-xs font-bold text-brand-800 flex flex-col gap-3 shadow-sm select-none">
-                <div class="flex justify-between items-center">
-                  <span class="text-[9px] text-brand-500 uppercase tracking-widest leading-none">LATEST SCAN STATUS</span>
-                  <span id="scan-status-badge" class="px-2 py-0.5 rounded-full text-[9px] font-black bg-slate-200 text-slate-700 leading-none">待機中</span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-sm font-black text-slate-800 tracking-wider leading-none" id="scan-status-isbn">----</span>
-                  <span class="text-[11px] text-brand-700 font-bold leading-none" id="scan-status-message">バーコードをカメラにうつしてね！</span>
-                </div>
-                <div class="flex gap-2 mt-1">
-                  <button type="button" id="scan-capture-btn" onclick="captureAndTestDecode()" class="flex-grow py-3 px-4 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-black text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-camera"></i> 📸 パシャッとスキャン！
-                  </button>
-                </div>
-                <div class="text-[9.5px] text-brand-600 font-medium border-t border-brand-200/50 pt-2 leading-relaxed">
-                  💡 <b>よむためのコツ:</b> 細い赤いスリット枠に、本の「上の段」のバーコードだけをあわせてね！<br>
-                  本を <b>20cm〜30cmほど少しはなして</b>、ピントを合わせると一瞬で読み取れるよ。
-                </div>
-              </div>
-              
               <!-- デバッグパネル -->
-              <div id="camera-debug-panel" class="mt-3 p-4 bg-slate-800 rounded-2xl text-xs font-mono space-y-2 border border-slate-700 shadow-inner">
+              <div id="camera-debug-panel" class="hidden mt-2 p-4 bg-slate-800 rounded-2xl text-xs font-mono space-y-2 border border-slate-700 shadow-inner">
                 <div class="flex justify-between items-center border-b border-slate-700 pb-1.5">
                   <div class="flex items-center gap-2">
                     <span id="debug-scan-indicator" class="inline-block w-2 h-2 rounded-full bg-gray-500"></span>
                     <span id="debug-scan-status" class="text-gray-300 font-bold">待機中</span>
                   </div>
-                  <span class="text-[10px] text-slate-400">v4.1 デバッグ</span>
+                  <span class="text-[10px] text-slate-400">v2.2 デバッグ</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-400">
                   <div>最後に検出: <span id="debug-last-detected" class="text-yellow-300 font-bold">なし</span></div>
@@ -755,88 +732,7 @@
     let html5QrCode = null;      // カメラオブジェクト
     let isCameraRunning = false;  // カメラ稼働中フラグ
     let isScanningPaused = false; // 一時停止（スキャンスロットリング）中フラグ
-    // ネイティブ BarcodeDetector の初期化
-    let barcodeDetector = null;
-    if ('BarcodeDetector' in window) {
-      try {
-        barcodeDetector = new BarcodeDetector({ formats: ['ean_13'] });
-        console.log("OS Native BarcodeDetector initialized successfully.");
-      } catch (e) {
-        console.warn("OS Native BarcodeDetector initialization failed:", e);
-      }
-    }
-    
-    let autoScanInterval = null;
-    let lastZxingScanTime = 0;
-
-    function startAutoScanLoop(videoEl) {
-      if (autoScanInterval) clearInterval(autoScanInterval);
-      
-      autoScanInterval = setInterval(async () => {
-        if (!isCameraRunning || isScanningPaused) return;
-        
-        const vWidth = videoEl.videoWidth || videoEl.width || 0;
-        const vHeight = videoEl.videoHeight || videoEl.height || 0;
-        if (vWidth === 0 || vHeight === 0) return;
-        
-        if (barcodeDetector) {
-          try {
-            // OSネイティブエンジンはビデオをそのまま超高速に全画面解析可能
-            const barcodes = await barcodeDetector.detect(videoEl);
-            if (barcodes.length > 0) {
-              const isbn = barcodes[0].rawValue.trim();
-              
-              // 978始まり（書籍）以外のコードはサイレントに無視
-              if (!isbn.startsWith("978")) return;
-              
-              // 既に登録済み、または一時リストに存在するものもサイレントに無視
-              const isAlreadyRegistered = allRegisteredBooks.some(b => b.isbn === isbn);
-              const isAlreadyInTemp = tempBooks.some(b => b.isbn === isbn);
-              if (isAlreadyRegistered || isAlreadyInTemp) return;
-
-              onScanSuccess(isbn);
-            }
-          } catch (err) {
-            console.warn("BarcodeDetector detect error:", err);
-          }
-        } else {
-          // フォールバック: ZXingでの400ms間隔の全画面スキャン (CPU負荷を下げるため)
-          if (Date.now() - lastZxingScanTime > 400) {
-            lastZxingScanTime = Date.now();
-            try {
-              const tempCanvas = document.createElement('canvas');
-              tempCanvas.width = vWidth;
-              tempCanvas.height = vHeight;
-              const tempCtx = tempCanvas.getContext('2d');
-              tempCtx.drawImage(videoEl, 0, 0, vWidth, vHeight);
-
-              const blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/png'));
-              if (blob) {
-                const file = new File([blob], 'auto.png', { type: 'image/png' });
-                const decodedText = await html5QrCode.scanFile(file, true);
-                const isbn = decodedText.trim();
-                
-                if (!isbn.startsWith("978")) return;
-                const isAlreadyRegistered = allRegisteredBooks.some(b => b.isbn === isbn);
-                const isAlreadyInTemp = tempBooks.some(b => b.isbn === isbn);
-                if (isAlreadyRegistered || isAlreadyInTemp) return;
-
-                onScanSuccess(isbn);
-              }
-            } catch (e) {
-              // 未検出時
-            }
-          }
-        }
-      }, 120);
-    }
-    
-    function stopAutoScanLoop() {
-      if (autoScanInterval) {
-        clearInterval(autoScanInterval);
-        autoScanInterval = null;
-      }
-    }
+    let lastScannedTime = 0;     // 直前スキャン時間 (ミリ秒)
 
     // html5-qrcodeでデコード対象をEAN_13のみに限定し、スキャン処理を劇的に軽量・高速化する安全な指定ヘルパー
     function getSupportedFormats() {
@@ -918,7 +814,7 @@
       const resLabel = document.getElementById('debug-video-resolution');
       if (resLabel) {
         const w = videoEl.videoWidth || videoEl.width || 0;
-        const h = videoEl.videoHeight || videoEl.height || 480;
+        const h = videoEl.videoHeight || videoEl.height || 0;
         resLabel.textContent = `${w}x${h} px`;
         logToDebugConsole(`Camera connected. Resolution: ${w}x${h}`, 'info');
       }
@@ -941,7 +837,8 @@
       ctx.save();
       
       if (applyFilter) {
-        ctx.filter = "grayscale(100%) contrast(180%) brightness(100%)";
+        // 白と黒の比率をはっきり浮き立たせて二値化に近づける超強力フィルター
+        ctx.filter = "grayscale(100%) contrast(250%) brightness(95%)";
       } else {
         ctx.filter = "none";
       }
@@ -964,7 +861,6 @@
       const videoEl = readerDiv.querySelector('video');
       if (!videoEl) {
         logToDebugConsole('Error: active video stream not found.', 'error');
-        showToast("カメラが起動していません。");
         return;
       }
 
@@ -972,159 +868,101 @@
       const resultDiv = document.getElementById('debug-capture-result');
       const previewContainer = document.getElementById('debug-capture-preview-container');
       
-      if (canvas && resultDiv && previewContainer) {
+      if (!canvas || !resultDiv || !previewContainer) {
+        logToDebugConsole('Error: debug canvas DOM elements missing.', 'error');
+        return;
+      }
+
+      const captureBtn = document.getElementById('debug-capture-btn');
+      if (captureBtn) captureBtn.disabled = true;
+
+      try {
         previewContainer.classList.remove('hidden');
         resultDiv.className = "text-yellow-300 font-bold";
         resultDiv.textContent = "Analyzing (camera paused)...";
-      }
 
-      const captureBtn = document.getElementById('scan-capture-btn');
-      if (captureBtn) {
-        captureBtn.disabled = true;
-        captureBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> スキャン中...';
-      }
-
-      updateScanStatus("", "分析中", "パシャリと撮影して解析しています...");
-
-      try {
+        // [CRITICAL FIX] Capture the video frame *before* stopping the camera stream
+        const tempCanvas = document.createElement('canvas');
         const vWidth = videoEl.videoWidth || videoEl.width || 640;
         const vHeight = videoEl.videoHeight || videoEl.height || 480;
-
-        const tempCanvas = document.createElement('canvas');
         tempCanvas.width = vWidth;
         tempCanvas.height = vHeight;
         const tempCtx = tempCanvas.getContext('2d');
         tempCtx.drawImage(videoEl, 0, 0, vWidth, vHeight);
 
         let wasCameraRunning = isCameraRunning;
-        stopAutoScanLoop();
         if (html5QrCode && isCameraRunning) {
+          logToDebugConsole('Stopping active scan stream to avoid conflict...', 'info');
           try {
             await html5QrCode.stop();
             isCameraRunning = false;
           } catch (stopErr) {
-            console.warn("Capture stop camera failed:", stopErr);
+            logToDebugConsole(`Stop failed: ${stopErr}`, 'error');
           }
         }
 
-        const canvas = document.createElement('canvas');
         const angles = [0, 90, 180, 270];
         let decodedText = null;
         let successAngle = 0;
         let successFilter = false;
 
-        // 1. OS Native BarcodeDetector での検証 (最優先・高速・高精度)
-        if (barcodeDetector) {
-          // パス 1: フィルターなし
-          for (const angle of angles) {
-            drawRotatedSource(tempCanvas, canvas, angle, false);
-            try {
-              const barcodes = await barcodeDetector.detect(canvas);
-              if (barcodes.length > 0) {
-                decodedText = barcodes[0].rawValue;
-                successAngle = angle;
-                successFilter = false;
-                break;
-              }
-            } catch (detectorErr) {
-              console.warn("Detector step 1 failed:", detectorErr);
-            }
-          }
+        // 1st pass: Plain rotation checks
+        logToDebugConsole('Running rotation decode checks (0, 90, 180, 270)...', 'info');
+        for (const angle of angles) {
+          drawRotatedSource(tempCanvas, canvas, angle, false);
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+          if (!blob) continue;
           
-          // パス 2: フィルターあり (白黒コントラスト調整)
-          if (!decodedText) {
-            for (const angle of angles) {
-              drawRotatedSource(tempCanvas, canvas, angle, true);
-              try {
-                const barcodes = await barcodeDetector.detect(canvas);
-                if (barcodes.length > 0) {
-                  decodedText = barcodes[0].rawValue;
-                  successAngle = angle;
-                  successFilter = true;
-                  break;
-                }
-              } catch (detectorErr) {
-                console.warn("Detector step 2 failed:", detectorErr);
-              }
-            }
+          const file = new File([blob], `captured-${angle}.png`, { type: "image/png" });
+          
+          try {
+            decodedText = await html5QrCode.scanFile(file, true);
+            successAngle = angle;
+            successFilter = false;
+            logToDebugConsole(`[Success at angle ${angle} (Plain)]`, 'info');
+            break;
+          } catch (scanErr) {
+            // Check next angle
           }
         }
 
-        // 2. フォールバック: ZXing (html5QrCode.scanFile) での検証
+        // 2nd pass: High-contrast filter rotation checks if plain checks failed
         if (!decodedText) {
-          // パス 3: フィルターなし (ZXing)
-          for (const angle of angles) {
-            drawRotatedSource(tempCanvas, canvas, angle, false);
-            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-            if (!blob) continue;
-            const file = new File([blob], `captured-${angle}.png`, { type: "image/png" });
-            
-            try {
-              decodedText = await html5QrCode.scanFile(file, true);
-              successAngle = angle;
-              successFilter = false;
-              break;
-            } catch (e) {}
-          }
-        }
-
-        if (!decodedText) {
-          // パス 4: フィルターあり (ZXing)
+          logToDebugConsole('Plain scan failed. Retrying with high-contrast filter...', 'info');
           for (const angle of angles) {
             drawRotatedSource(tempCanvas, canvas, angle, true);
             const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
             if (!blob) continue;
+            
             const file = new File([blob], `captured-${angle}-filtered.png`, { type: "image/png" });
             
             try {
               decodedText = await html5QrCode.scanFile(file, true);
               successAngle = angle;
               successFilter = true;
+              logToDebugConsole(`[Success at angle ${angle} (Filtered)]`, 'info');
               break;
-            } catch (e) {}
+            } catch (scanErr) {
+              logToDebugConsole(`Angle ${angle} + filter fail: ${String(scanErr).substring(0, 30)}`, 'warn');
+            }
           }
         }
 
         if (decodedText) {
-          if (resultDiv) {
-            resultDiv.className = "text-green-400 font-bold";
-            resultDiv.textContent = `Success (${successAngle} deg, Filter:${successFilter}): ${decodedText}`;
-          }
-          if (canvas) {
-            drawRotatedSource(tempCanvas, canvas, successAngle, successFilter);
-          }
-          const isbn = decodedText.trim();
-          if (!isbn.startsWith("978")) {
-            updateScanStatus(isbn, '対象外', '本の「上の段」のバーコード（978始まり）をうつしてね！');
-          } else {
-            const isAlreadyRegistered = allRegisteredBooks.some(b => b.isbn === isbn);
-            if (isAlreadyRegistered) {
-              updateScanStatus(isbn, '重複', 'よんだ本の一覧に登録済みです');
-            } else {
-              const isAlreadyInTemp = tempBooks.some(b => b.isbn === isbn);
-              if (isAlreadyInTemp) {
-                updateScanStatus(isbn, '重複', '一時リストに登録済みです');
-              } else {
-                updateScanStatus(isbn, '成功', '本の情報をしらべて一時リストに追加したよ！');
-                playBeep();
-                showToast("バーコードを読み取りました！");
-                addTempBookPlaceholder(isbn);
-              }
-            }
-          }
+          resultDiv.className = "text-green-400 font-bold";
+          resultDiv.textContent = `Success (${successAngle} deg, Filter:${successFilter}): ${decodedText}`;
+          drawRotatedSource(tempCanvas, canvas, successAngle, successFilter);
+          
+          playBeep();
+          onScanSuccess(decodedText);
         } else {
-          if (resultDiv) {
-            resultDiv.className = "text-red-400 font-bold";
-            resultDiv.textContent = "Not detected in all angles/filters";
-          }
-          if (canvas) {
-            drawRotatedSource(tempCanvas, canvas, 0, false);
-          }
-          updateScanStatus("", "失敗", "バーコードを読めなかったよ。本を少し離してみてね！");
-          showToast("バーコードを検出できませんでした。ピントをあわせてね。");
+          resultDiv.className = "text-red-400 font-bold";
+          resultDiv.textContent = "Not detected in all angles/filters";
+          drawRotatedSource(tempCanvas, canvas, 0, false);
         }
 
         if (wasCameraRunning && html5QrCode) {
+          logToDebugConsole('Restarting camera scan stream...', 'info');
           const config = {
             fps: 12,
             videoConstraints: {
@@ -1139,29 +977,33 @@
               { facingMode: "environment" },
               config,
               (decodedText) => {
-                // 自動スキャンは無効化（パシャッとスキャン専用）
+                const debugLastDetected = document.getElementById('debug-last-detected');
+                if (debugLastDetected) debugLastDetected.textContent = decodedText;
+                onScanSuccess(decodedText);
               },
               (errorMessage) => {
+                incrementScanAttempts();
                 if (isScanningPaused) return;
+                if (errorMessage.includes("No MultiFormat Readers") || errorMessage.includes("NotFoundException") || errorMessage.includes("no barcode")) {
+                  return;
+                }
+                const debugLastError = document.getElementById('debug-last-error');
+                if (debugLastError) debugLastError.textContent = errorMessage.substring(0, 60);
               }
             );
             isCameraRunning = true;
-            const newVideoEl = readerDiv.querySelector('video');
-            if (newVideoEl) {
-              startAutoScanLoop(newVideoEl);
-            }
+            logToDebugConsole('Camera scanner restarted.', 'info');
           } catch (startErr) {
-            console.error("Camera restart failed:", startErr);
+            logToDebugConsole(`Restart failed: ${startErr}`, 'error');
           }
         }
 
       } catch (ex) {
-        console.error("Capture exception:", ex);
+        logToDebugConsole(`Fatal capture exception: ${ex}`, 'error');
+        resultDiv.className = "text-red-400 font-bold";
+        resultDiv.textContent = "Exception";
       } finally {
-        if (captureBtn) {
-          captureBtn.disabled = false;
-          captureBtn.innerHTML = '<i class="fa-solid fa-camera"></i> 📸 パシャッとスキャン！';
-        }
+        if (captureBtn) captureBtn.disabled = false;
       }
     }
 
@@ -1619,11 +1461,8 @@
               videoEl.setAttribute('autoplay', 'true');
               videoEl.setAttribute('muted', 'true');
               videoEl.play().catch(err => console.log("Video play intercept failed:", err));
-              // カメラ解像度とステータス表示を更新、自作の超高速スキャンループを開始
-              setTimeout(() => {
-                updateDebugDimensions(videoEl);
-                startAutoScanLoop(videoEl);
-              }, 500);
+              // カメラ解像度とステータス表示を更新
+              setTimeout(() => updateDebugDimensions(videoEl), 500);
               observer.disconnect();
             }
           });
@@ -1651,7 +1490,8 @@
               { facingMode: "environment" },
               config,
               (decodedText) => {
-                // 自動スキャンは無効化（パシャッとスキャン専用）
+                if (debugLastDetected) debugLastDetected.textContent = decodedText;
+                onScanSuccess(decodedText);
               },
               onScanError
             );
@@ -1663,7 +1503,8 @@
               {},
               config,
               (decodedText) => {
-                // 自動スキャンは無効化（パシャッとスキャン専用）
+                if (debugLastDetected) debugLastDetected.textContent = decodedText;
+                onScanSuccess(decodedText);
               },
               onScanError
             );
@@ -1686,7 +1527,6 @@
     }
 
     async function stopCamera() {
-      stopAutoScanLoop();
       if (html5QrCode && isCameraRunning) {
         try {
           await html5QrCode.stop();
@@ -1714,30 +1554,6 @@
       document.getElementById('camera-hint-text').classList.add('hidden');
     }
 
-    // ================= SCAN STATUS MONITOR =================
-    function updateScanStatus(isbn, status, message) {
-      const isbnEl = document.getElementById('scan-status-isbn');
-      const badgeEl = document.getElementById('scan-status-badge');
-      const msgEl = document.getElementById('scan-status-message');
-      
-      if (isbnEl) isbnEl.textContent = isbn || "----";
-      if (msgEl) msgEl.textContent = message || "";
-      
-      if (badgeEl) {
-        badgeEl.textContent = status || "待機中";
-        badgeEl.className = "px-2 py-0.5 rounded-full text-[9px] font-black leading-none transition-colors duration-300";
-        if (status === '成功') {
-          badgeEl.classList.add('bg-emerald-100', 'text-emerald-700');
-        } else if (status === '重複') {
-          badgeEl.classList.add('bg-amber-100', 'text-amber-700');
-        } else if (status === '対象外') {
-          badgeEl.classList.add('bg-rose-100', 'text-rose-700');
-        } else {
-          badgeEl.classList.add('bg-slate-200', 'text-slate-700');
-        }
-      }
-    }
-
     // バーコード検知時の処理
     function onScanSuccess(decodedText, decodedResult) {
       if (isScanningPaused) return; // すでにポーズ中なら無視
@@ -1746,31 +1562,39 @@
       
       // 日本の書籍用：本のバーコードは978から始まる
       if (!isbn.startsWith("978")) {
-        updateScanStatus(isbn, '対象外', '本の「上の段」のバーコード（978始まり）をうつしてね！');
-        return;
-      }
-
-      // すでに登録済み、または一時リストに入っている場合は完全にスルーする
-      const isAlreadyRegistered = allRegisteredBooks.some(b => b.isbn === isbn);
-      if (isAlreadyRegistered) {
-        updateScanStatus(isbn, '重複', 'よんだ本の一覧に登録済みです');
-        return;
-      }
-      
-      const isAlreadyInTemp = tempBooks.some(b => b.isbn === isbn);
-      if (isAlreadyInTemp) {
-        updateScanStatus(isbn, '重複', '一時リストに登録済みです');
         return;
       }
       
       const now = Date.now();
+      // 同一ISBNの重複読み取り防止（5秒間スキップ）
+      if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
+        return;
+      }
       
       // スキャン一時停止処理
       isScanningPaused = true;
       lastScannedIsbn = isbn;
       lastScannedTime = now;
       
-      updateScanStatus(isbn, '成功', '本の情報をしらべて一時リストに追加したよ！');
+      // デバッグパネルを一時停止中に変更
+      const debugIndicator = document.getElementById('debug-scan-indicator');
+      const debugStatus = document.getElementById('debug-scan-status');
+      const debugLastDetected = document.getElementById('debug-last-detected');
+      const debugLastError = document.getElementById('debug-last-error');
+      const debugPausedState = document.getElementById('debug-scan-paused-state');
+      if (debugIndicator && debugStatus) {
+        debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+        debugStatus.textContent = '一時停止中（本の情報を取得中...）';
+      }
+      if (debugLastDetected) {
+        debugLastDetected.textContent = isbn;
+      }
+      if (debugLastError) {
+        debugLastError.textContent = "なし";
+      }
+      if (debugPausedState) {
+        debugPausedState.textContent = "はい";
+      }
       
       // html5QrCode のビデオ自体を一時停止
       if (html5QrCode) {
@@ -1805,8 +1629,15 @@
         
         isScanningPaused = false;
         
-        // スキャン状況モニターを初期状態に戻す
-        updateScanStatus("", "待機中", "バーコードをカメラにうつしてね！");
+        // デバッグパネルを稼働中に戻す
+        const debugPausedState2 = document.getElementById('debug-scan-paused-state');
+        if (debugPausedState2) {
+          debugPausedState2.textContent = "いいえ";
+        }
+        if (debugIndicator && debugStatus) {
+          debugIndicator.className = 'inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse';
+          debugStatus.textContent = 'スキャン中...';
+        }
       }, 1500);
     }
 
@@ -2469,7 +2300,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v4.1</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v2.2</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
