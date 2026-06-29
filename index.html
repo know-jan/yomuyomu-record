@@ -140,7 +140,7 @@
         <!-- スマホ/タブレット用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform relative">
           <i class="fa-solid fa-gear text-2xl"></i>
-          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v4.0</span>
+          <span class="absolute bottom-0 right-0 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v4.1</span>
         </button>
       </div>
       
@@ -148,7 +148,7 @@
         <!-- PC用 設定ギアボタン -->
         <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center relative">
           <i class="fa-solid fa-gear text-xl"></i>
-          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v4.0</span>
+          <span class="absolute -bottom-1 -right-1 bg-brand-500 text-white text-[8px] px-1 rounded-md font-bold border border-white">v4.1</span>
         </button>
         
         <!-- 読書貯金カウンター (コイン風UI) -->
@@ -216,14 +216,14 @@
                 <div id="reader" class="hidden w-full h-full bg-black border-4 border-brand-300 shadow-md"></div>
                 <!-- スキャンターゲット枠（カメラ稼働中のみ表示、外側を半透明マスクし中央をくり抜く） -->
                 <div id="scan-area-overlay" class="hidden absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-                  <div class="w-[80%] h-[12%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
+                  <div class="w-[80%] h-[24%] border-2 border-rose-500 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] relative">
                     <!-- 照準赤線 -->
                     <div class="absolute inset-x-0 top-1/2 h-[1px] bg-rose-500/80 -translate-y-1/2 animate-pulse"></div>
-                    <!-- 角のブラケット装飾 -->
-                    <div class="absolute -top-[2px] -left-[2px] w-3.5 h-2.5 border-t-4 border-l-4 border-rose-500 rounded-tl-sm"></div>
-                    <div class="absolute -top-[2px] -right-[2px] w-3.5 h-2.5 border-t-4 border-r-4 border-rose-500 rounded-tr-sm"></div>
-                    <div class="absolute -bottom-[2px] -left-[2px] w-3.5 h-2.5 border-b-4 border-l-4 border-rose-500 rounded-bl-sm"></div>
-                    <div class="absolute -bottom-[2px] -right-[2px] w-3.5 h-2.5 border-b-4 border-r-4 border-rose-500 rounded-br-sm"></div>
+                    <!-- 角 of ブラケット装飾 -->
+                    <div class="absolute -top-[2px] -left-[2px] w-3.5 h-3 border-t-4 border-l-4 border-rose-500 rounded-tl-sm"></div>
+                    <div class="absolute -top-[2px] -right-[2px] w-3.5 h-3 border-t-4 border-r-4 border-rose-500 rounded-tr-sm"></div>
+                    <div class="absolute -bottom-[2px] -left-[2px] w-3.5 h-3 border-b-4 border-l-4 border-rose-500 rounded-bl-sm"></div>
+                    <div class="absolute -bottom-[2px] -right-[2px] w-3.5 h-3 border-b-4 border-r-4 border-rose-500 rounded-br-sm"></div>
                   </div>
                 </div>
               </div>
@@ -736,47 +736,52 @@
         const vHeight = videoEl.videoHeight || videoEl.height || 0;
         if (vWidth === 0 || vHeight === 0) return;
         
-        // 中央のスリット領域（高さ20%）だけを切り取る
-        let cropX = 0, cropY = 0, cropW = vWidth, cropH = vHeight;
-        if (vHeight > vWidth) {
-          // 縦長の場合: 高さの中央20%
-          cropH = Math.floor(vHeight * 0.20);
-          cropY = Math.floor((vHeight - cropH) / 2);
-        } else {
-          // 横長の場合: 高さの中央25%
-          cropH = Math.floor(vHeight * 0.25);
-          cropY = Math.floor((vHeight - cropH) / 2);
-        }
-        
-        const cropCanvas = document.createElement('canvas');
-        cropCanvas.width = cropW;
-        cropCanvas.height = cropH;
-        const cropCtx = cropCanvas.getContext('2d');
-        cropCtx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-        
         if (barcodeDetector) {
           try {
-            const barcodes = await barcodeDetector.detect(cropCanvas);
+            // OSネイティブエンジンはビデオをそのまま超高速に全画面解析可能
+            const barcodes = await barcodeDetector.detect(videoEl);
             if (barcodes.length > 0) {
-              const isbn = barcodes[0].rawValue;
+              const isbn = barcodes[0].rawValue.trim();
+              
+              // 978始まり（書籍）以外のコードはサイレントに無視
+              if (!isbn.startsWith("978")) return;
+              
+              // 既に登録済み、または一時リストに存在するものもサイレントに無視
+              const isAlreadyRegistered = allRegisteredBooks.some(b => b.isbn === isbn);
+              const isAlreadyInTemp = tempBooks.some(b => b.isbn === isbn);
+              if (isAlreadyRegistered || isAlreadyInTemp) return;
+
               onScanSuccess(isbn);
             }
           } catch (err) {
             console.warn("BarcodeDetector detect error:", err);
           }
         } else {
-          // フォールバック: ZXingでの400ms間隔スキャン (CPU負荷を下げるため間隔を空ける)
+          // フォールバック: ZXingでの400ms間隔の全画面スキャン (CPU負荷を下げるため)
           if (Date.now() - lastZxingScanTime > 400) {
             lastZxingScanTime = Date.now();
             try {
-              const blob = await new Promise(resolve => cropCanvas.toBlob(resolve, 'image/png'));
+              const tempCanvas = document.createElement('canvas');
+              tempCanvas.width = vWidth;
+              tempCanvas.height = vHeight;
+              const tempCtx = tempCanvas.getContext('2d');
+              tempCtx.drawImage(videoEl, 0, 0, vWidth, vHeight);
+
+              const blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/png'));
               if (blob) {
                 const file = new File([blob], 'auto.png', { type: 'image/png' });
                 const decodedText = await html5QrCode.scanFile(file, true);
-                onScanSuccess(decodedText);
+                const isbn = decodedText.trim();
+                
+                if (!isbn.startsWith("978")) return;
+                const isAlreadyRegistered = allRegisteredBooks.some(b => b.isbn === isbn);
+                const isAlreadyInTemp = tempBooks.some(b => b.isbn === isbn);
+                if (isAlreadyRegistered || isAlreadyInTemp) return;
+
+                onScanSuccess(isbn);
               }
             } catch (e) {
-              // 未検出時は無視
+              // 未検出時
             }
           }
         }
@@ -855,24 +860,12 @@
       try {
         const vWidth = videoEl.videoWidth || videoEl.width || 640;
         const vHeight = videoEl.videoHeight || videoEl.height || 480;
-        
-        // クロップ位置とサイズを計算 (中央の細長いバーコード帯のみを切り出し)
-        let cropX = 0, cropY = 0, cropW = vWidth, cropH = vHeight;
-        if (vHeight > vWidth) {
-          // 縦長(720x1280等): 左右は100%保持し、高さの中央20%だけをクロップ
-          cropH = Math.floor(vHeight * 0.20);
-          cropY = Math.floor((vHeight - cropH) / 2);
-        } else {
-          // 横長(1280x720等): 左右は100%保持し、高さの中央25%だけをクロップ
-          cropH = Math.floor(vHeight * 0.25);
-          cropY = Math.floor((vHeight - cropH) / 2);
-        }
 
         const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = cropW;
-        tempCanvas.height = cropH;
+        tempCanvas.width = vWidth;
+        tempCanvas.height = vHeight;
         const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.drawImage(videoEl, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+        tempCtx.drawImage(videoEl, 0, 0, vWidth, vHeight);
 
         let wasCameraRunning = isCameraRunning;
         stopAutoScanLoop();
@@ -2333,7 +2326,7 @@
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
           <i class="fa-solid fa-gear text-brand-500"></i>
-          システム設定 <span class="text-xs font-bold text-slate-400">v4.0</span>
+          システム設定 <span class="text-xs font-bold text-slate-400">v4.1</span>
         </h3>
         <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
