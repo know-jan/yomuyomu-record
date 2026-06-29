@@ -1567,10 +1567,6 @@
       }
       
       const now = Date.now();
-      // 同一ISBNの重複読み取り防止（5秒間スキップ）
-      if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
-        return;
-      }
       
       // スキャン一時停止処理
       isScanningPaused = true;
