@@ -2331,7 +2331,7 @@
       }
     }
 
-    // 非同期で Google Books API から画像を探して差し替える
+    // 非同期で Google Books API から画像を探して差し替える（CORS/429を避けるためGASを優先）
     function fetchAndApplyBookCover(bookId, title, author, genre, forceReload = false, isbn = "") {
       if (!title && !isbn) return;
       
@@ -2340,40 +2340,71 @@
       // すでに検索済みで「画像なし(none)」と判定されている場合は再検索しない（forceReloadを除く）
       if (!forceReload && coverCache[cacheKey] === "none") return;
       
-      // APIクエリ構築
-      let query = "";
-      if (isbn && isbn.trim() !== "") {
-        query = `isbn:${isbn.trim()}`;
-      } else {
-        query = `intitle:${encodeURIComponent(title)}`;
-        if (author && author !== "（著者不明）" && author !== "著者不明") {
-          query += `+inauthor:${encodeURIComponent(author)}`;
-        }
-      }
+      let url = "";
+      let isUsingGas = false;
+      let isIsbnSearch = false;
       
-      const url = `https://www.googleapis.com/books/v1/volumes?q=${urlQueryHelper(query)}&maxResults=3`;
+      if (webAppUrl && webAppUrl.trim() !== "") {
+        isUsingGas = true;
+        if (isbn && isbn.trim() !== "") {
+          url = `${webAppUrl}?action=fetchBookInfo&isbn=${isbn.trim()}`;
+          isIsbnSearch = true;
+        } else {
+          url = `${webAppUrl}?action=fetchBookInfoBySearch&title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}`;
+        }
+      } else {
+        // 直接 Google Books API へのフォールバック
+        let query = "";
+        if (isbn && isbn.trim() !== "") {
+          query = `isbn:${isbn.trim()}`;
+        } else {
+          const queryClean = title.replace(/[・\-\/]/g, ' ').trim();
+          query = `intitle:${encodeURIComponent(queryClean)}`;
+          if (author && author !== "（著者不明）" && author !== "著者不明") {
+            const authorClean = author.replace(/[・\-\/]/g, ' ').trim();
+            query += `+inauthor:${encodeURIComponent(authorClean)}`;
+          }
+        }
+        url = `https://www.googleapis.com/books/v1/volumes?q=${urlQueryHelper(query)}&maxResults=3`;
+      }
       
       fetch(url)
         .then(res => res.json())
         .then(data => {
           let foundUrl = "";
-          if (data && data.items && data.items.length > 0) {
-            for (let i = 0; i < data.items.length; i++) {
-              const item = data.items[i];
-              if (item.volumeInfo && item.volumeInfo.imageLinks) {
-                let thumb = item.volumeInfo.imageLinks.thumbnail || item.volumeInfo.imageLinks.smallThumbnail;
-                if (thumb) {
-                  if (thumb.startsWith("http://")) {
-                    thumb = thumb.replace("http://", "https://");
+          
+          if (isUsingGas) {
+            if (isIsbnSearch) {
+              // action=fetchBookInfo の返却値は { title, author, coverUrl }
+              if (data && data.coverUrl) {
+                foundUrl = data.coverUrl;
+              }
+            } else {
+              // action=fetchBookInfoBySearch の返却値は [url1, url2, ...]
+              if (Array.isArray(data) && data.length > 0) {
+                foundUrl = data[0];
+              }
+            }
+          } else {
+            // 直接 Google Books API の場合
+            if (data && data.items && data.items.length > 0) {
+              for (let i = 0; i < data.items.length; i++) {
+                const item = data.items[i];
+                if (item.volumeInfo && item.volumeInfo.imageLinks) {
+                  let thumb = item.volumeInfo.imageLinks.thumbnail || item.volumeInfo.imageLinks.smallThumbnail;
+                  if (thumb) {
+                    if (thumb.startsWith("http://")) {
+                      thumb = thumb.replace("http://", "https://");
+                    }
+                    foundUrl = thumb;
+                    break;
                   }
-                  foundUrl = thumb;
-                  break;
                 }
               }
             }
           }
           
-          if (foundUrl) {
+          if (foundUrl && foundUrl !== "none") {
             // キャッシュ保存
             coverCache[cacheKey] = foundUrl;
             if (window.localStorage) {
@@ -2401,6 +2432,7 @@
           console.warn("Async cover search error for:", title, err);
         });
     }
+
 
 
     // Google Books クエリ用の補助エンコード
@@ -2735,7 +2767,7 @@
       renderManualStars(rating);
     }
 
-    // Google Books APIによる表紙画像検索処理
+    // Google Books APIによる表紙画像検索処理（429/CORSを避けるためGASを優先）
     function searchManualCoverImage(isSilent = false) {
       const title = document.getElementById('manual-title').value.trim();
       const author = document.getElementById('manual-author').value.trim();
@@ -2752,13 +2784,20 @@
         statusEl.textContent = "インターネットで表紙をさがしています...";
       }
       
-      // Google Books APIクエリの構築
-      let query = `intitle:${encodeURIComponent(title)}`;
-      if (author) {
-        query += `+inauthor:${encodeURIComponent(author)}`;
+      // GASウェブアプリのURLが登録されている場合はそれを利用する
+      let url = "";
+      if (webAppUrl && webAppUrl.trim() !== "") {
+        url = `${webAppUrl}?action=fetchBookInfoBySearch&title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}`;
+      } else {
+        // GAS URLが未設定の時の直接フォールバック
+        const queryClean = title.replace(/[・\-\/]/g, ' ').trim();
+        let query = `intitle:${encodeURIComponent(queryClean)}`;
+        if (author && author !== "（著者不明）" && author !== "著者不明") {
+          const authorClean = author.replace(/[・\-\/]/g, ' ').trim();
+          query += `+inauthor:${encodeURIComponent(authorClean)}`;
+        }
+        url = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5`;
       }
-      
-      const url = `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=5`;
       
       fetch(url)
         .then(res => res.json())
@@ -2766,7 +2805,12 @@
           manualCoverCandidates = [];
           currentCoverCandidateIndex = 0;
           
-          if (data && data.items && data.items.length > 0) {
+          // GASから返ってきた場合は画像URL配列。直接Google Booksの場合はオブジェクト。
+          const isFromGas = Array.isArray(data);
+          
+          if (isFromGas) {
+            manualCoverCandidates = data;
+          } else if (data && data.items && data.items.length > 0) {
             data.items.forEach(item => {
               if (item.volumeInfo && item.volumeInfo.imageLinks) {
                 let thumbnail = item.volumeInfo.imageLinks.thumbnail || item.volumeInfo.imageLinks.smallThumbnail;
@@ -2808,6 +2852,7 @@
           }
         });
     }
+
 
     // プレビュー表示の更新
     function updateCoverPreview() {

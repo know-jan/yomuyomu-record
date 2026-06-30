@@ -33,6 +33,16 @@ function doGet(e) {
         .setMimeType(ContentService.MimeType.JSON);
   }
   
+  // API経由でのキーワード（タイトル・著者）による書籍画像検索
+  if (action === "fetchBookInfoBySearch") {
+    var title = e.parameter.title || "";
+    var author = e.parameter.author || "";
+    var covers = fetchBookInfoBySearchBackend(title, author);
+    return ContentService.createTextOutput(JSON.stringify(covers))
+        .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  
   // 通常のウェブアプリ画面表示 (Netlifyを使わず直接GASで開く場合のフォールバック)
   var mode = e.parameter.mode || "";
   var webAppUrl = ScriptApp.getService().getUrl();
@@ -304,3 +314,42 @@ function fetchBookInfoBackend(isbn) {
 function fetchBookInfoFromBackend(isbn) {
   return fetchBookInfoBackend(isbn);
 }
+
+// バックエンドでのキーワード（タイトル・著者）による表紙検索
+function fetchBookInfoBySearchBackend(title, author) {
+  var covers = [];
+  if (!title) return covers;
+  
+  // クエリの単純化（記号などを取り除いてスペースでつなぐ）
+  var queryClean = title.replace(/[・\-\/]/g, ' ').trim();
+  var query = 'intitle:' + queryClean;
+  if (author && author !== "（著者不明）" && author !== "著者不明") {
+    var authorClean = author.replace(/[・\-\/]/g, ' ').trim();
+    query += '+inauthor:' + authorClean;
+  }
+  
+  var url = 'https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(query) + '&maxResults=5';
+  try {
+    var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    if (response.getResponseCode() === 200) {
+      var data = JSON.parse(response.getContentText());
+      if (data && data.items) {
+        data.items.forEach(function(item) {
+          if (item.volumeInfo && item.volumeInfo.imageLinks) {
+            var thumb = item.volumeInfo.imageLinks.thumbnail || item.volumeInfo.imageLinks.smallThumbnail;
+            if (thumb) {
+              if (thumb.indexOf("http://") === 0) {
+                thumb = thumb.replace("http://", "https://");
+              }
+              covers.push(thumb);
+            }
+          }
+        });
+      }
+    }
+  } catch (e) {
+    Logger.log("fetchBookInfoBySearchBackend error: " + e.message);
+  }
+  return covers;
+}
+
