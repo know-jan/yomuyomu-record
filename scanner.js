@@ -139,16 +139,10 @@ const scanner = {
 
   fetchBookInfoExt: async (isbn) => {
     return new Promise((resolve) => {
-      const driver = window.dbDriver || dbDriver;
-      const url = driver ? driver.getGasUrl() : '';
-      if(url) {
-        fetch(url+'?action=fetchBookInfo&isbn='+isbn)
-          .then(r=>r.json())
-          .then(resolve)
-          .catch(()=>resolve({}));
-      } else {
-        resolve({});
-      }
+      dbDriver.fetchBookInfo(isbn,
+        (info) => resolve(info || {}),
+        (err)  => { console.warn('fetchBookInfo失敗:', err); resolve({}); }
+      );
     });
   },
 

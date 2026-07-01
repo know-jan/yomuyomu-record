@@ -11,6 +11,20 @@ const dbDriver = {
     const url = dbDriver.getGasUrl();
     fetch(url + '?action=getBooks&sheetName=' + encodeURIComponent(sheetName)).then(r=>r.json()).then(successCb).catch(failCb);
   },
+  fetchBookInfo: (isbn, successCb, failCb) => {
+    const url = dbDriver.getGasUrl();
+    if (!url) { failCb(new Error("GAS URL not set")); return; }
+    fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=fetchBookInfo&isbn=' + isbn, {
+      method: 'GET',
+      mode: 'cors'
+    })
+    .then(response => {
+      if (!response.ok) throw new Error("fetchBookInfo failed: " + response.status);
+      return response.json();
+    })
+    .then(data => successCb(data))
+    .catch(err => failCb(err));
+  },
   addBooks: (payload, sheetName, successCb, failCb) => {
     const url = dbDriver.getGasUrl();
     fetch(url + '?action=addBooks', {
