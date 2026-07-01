@@ -1925,12 +1925,32 @@
     }
 
     function getSharedPrefix(str1, str2) { let i = 0; const minLen = Math.min(str1.length, str2.length); while (i < minLen && str1[i] === str2[i]) i++; return str1.substring(0, i); }
+
     function cleanSeriesName(prefix) {
-      if (!prefix) return ""; let clean = prefix.trim(); const regex = /[\s\d０-９①-⑯㈠-㈩Ⅰ-Ⅻ#＃\-:：〜~_&＆\(\)（）!！?？巻第]+/g; let prevLen;
-      do { prevLen = clean.length; clean = clean.replace(regex, " ").trim(); } while (clean.length !== prevLen);
-      const particles = /[のとがを]$/; if (particles.test(clean) && clean.length > 2) clean = clean.replace(particles, "").trim();
+      if (!prefix) return "";
+      let clean = prefix.trim();
+      
+      // 機種依存文字（丸数字や全角数字、記号）による文字化けバグを完全に防ぐため、すべてUnicodeエスケープで指定
+      // \uFF10-\uFF19 (全角数字 ０-９)
+      // \u2460-\u2473 (丸数字 ①-⑳)
+      // \u3220-\u3229 (丸括弧付き数字 ㈠-㈩)
+      // \u2160-\u216B (ローマ数字 Ⅰ-Ⅻ)
+      const regex = /[\s\d\uFF10-\uFF19\u2460-\u2473\u3220-\u3229\u2160-\u216B#＃\-:：〜~_&＆\(\)（）!！?？巻第]+/g;
+      
+      let prevLen;
+      do {
+        prevLen = clean.length;
+        clean = clean.replace(regex, " ").trim();
+      } while (clean.length !== prevLen);
+      
+      const particles = /[のとがを]$/;
+      if (particles.test(clean) && clean.length > 2) {
+        clean = clean.replace(particles, "").trim();
+      }
+      
       return clean;
     }
+
   </script>
 
   <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300 opacity-0 pointer-events-none">
