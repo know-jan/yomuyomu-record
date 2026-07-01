@@ -1,0 +1,1771 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- 繧ｨ繝ｩ繝ｼ讀懃衍繝・ヰ繝・げ繧ｹ繧ｯ繝ｪ繝励ヨ -->
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.position = 'fixed';
+      errorDiv.style.top = '0';
+      errorDiv.style.left = '0';
+      errorDiv.style.width = '100%';
+      errorDiv.style.backgroundColor = '#fee2e2';
+      errorDiv.style.color = '#991b1b';
+      errorDiv.style.padding = '16px';
+      errorDiv.style.borderBottom = '4px solid #f87171';
+      errorDiv.style.zIndex = '99999';
+      errorDiv.style.fontFamily = 'monospace';
+      errorDiv.style.fontSize = '12px';
+      errorDiv.style.whiteSpace = 'pre-wrap';
+      errorDiv.style.userSelect = 'text';
+      errorDiv.style.webkitUserSelect = 'text';
+      errorDiv.innerHTML = '<strong>[JS Error]</strong> ' + message + '<br>蝣ｴ謇: ' + source + ':' + lineno + ':' + colno;
+      
+      if (document.body) {
+        document.body.appendChild(errorDiv);
+      } else {
+        window.addEventListener('DOMContentLoaded', () => {
+          document.body.appendChild(errorDiv);
+        });
+      }
+      return false;
+    };
+  </script>
+  <meta charset="UTF-8">
+  <title>繧医・繧医・繝ｬ繧ｳ繝ｼ繝・答</title>
+  
+  <!-- Apple Safari PWA (繝帙・繝逕ｻ髱｢縺ｫ霑ｽ蜉) 逕ｨ縺ｮ繝｡繧ｿ險ｭ螳・-->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b', /* 縺ゅ◆縺溘°縺ｿ縺ｮ縺ゅｋ繧ｪ繝ｬ繝ｳ繧ｸ繧､繧ｨ繝ｭ繝ｼ */
+              600: '#d97706',
+              700: '#b45309',
+            },
+            accent: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981', /* 縺溘・縺励＞繧ｨ繝｡繝ｩ繝ｫ繝峨げ繝ｪ繝ｼ繝ｳ */
+              600: '#059669',
+            },
+            sky: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9', /* 縺輔ｏ繧・°縺ｪ繧ｹ繧ｫ繧､繝悶Ν繝ｼ */
+              600: '#0284c7',
+            }
+          },
+          fontFamily: {
+            sans: ['"Outfit"', '"Noto Sans JP"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* iOS Safari縺ｧ縺ｮ繧ｿ繝・・譎ゅ・繧ｰ繝ｬ繝ｼ縺ｮ繝上う繝ｩ繧､繝医ｒ辟｡蜉ｹ蛹・*/
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    input, textarea {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+    }
+    
+    /* 繧ｹ繝繝ｼ繧ｺ縺ｪ繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ */
+    body {
+      font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+      overscroll-behavior-y: contain; /* PWA縺ｧ縺ｮ蠑輔▲蠑ｵ繧翫Μ繝輔Ξ繝・す繝･繧帝亟豁｢ */
+    }
+    
+    /* html5-qrcode蜀・・繝ｬ繧､繧｢繧ｦ繝亥ｾｮ隱ｿ謨ｴ */
+    #reader {
+      border: none !important;
+    }
+    #reader video {
+      border-radius: 20px !important;
+      object-fit: cover !important;
+    }
+    #reader__scan_region {
+      background: #000;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    #reader__dashboard {
+      padding: 10px 0 !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-brand-50 via-orange-50/20 to-brand-100/40 p-4 pb-24 md:p-8 md:pb-28">
+
+  <!-- 繝｡繧､繝ｳ繧ｳ繝ｳ繝・リ -->
+  <div id="main-app-container" class="max-w-5xl mx-auto bg-white/90 backdrop-blur-md rounded-[32px] shadow-xl border-4 border-brand-200 overflow-hidden flex flex-col min-h-[85vh]">
+    
+    <!-- 繝倥ャ繝繝ｼ繧ｨ繝ｪ繧｢ -->
+    <header class="p-6 md:p-8 border-b-4 border-brand-100 bg-brand-50/50 flex flex-col md:flex-row justify-between items-center gap-4 relative">
+      <div class="w-full md:w-auto flex justify-between items-start md:block">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-black bg-gradient-to-r from-brand-600 to-orange-500 bg-clip-text text-transparent flex items-center gap-2">
+            <span>答 繧医・繧医・繝ｬ繧ｳ繝ｼ繝・/span>
+          </h1>
+          <p class="text-xs md:text-sm font-bold text-brand-700 mt-1">繝舌・繧ｳ繝ｼ繝峨ｒ繝斐ャ縺ｨ繧ｹ繧ｭ繝｣繝ｳ縺励※縲√″縺ｿ縺ｮ隱ｭ譖ｸ雋ｯ驥代ｒ縺､縺上ｍ縺・ｼ・/p>
+        </div>
+        <!-- 繧ｹ繝槭・/繧ｿ繝悶Ξ繝・ヨ逕ｨ 險ｭ螳壹ぐ繧｢繝懊ち繝ｳ -->
+        <button type="button" onclick="showSettingsModal(true)" class="md:hidden p-2 text-brand-500 hover:text-brand-600 active:scale-90 transition-transform">
+          <i class="fa-solid fa-gear text-2xl"></i>
+        </button>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <!-- PC逕ｨ 險ｭ螳壹ぐ繧｢繝懊ち繝ｳ -->
+        <button type="button" onclick="showSettingsModal(true)" class="hidden md:flex p-3 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-500 hover:text-brand-600 border border-brand-200 active:scale-90 transition-all items-center justify-center">
+          <i class="fa-solid fa-gear text-xl"></i>
+        </button>
+        
+        <!-- 隱ｭ譖ｸ雋ｯ驥代き繧ｦ繝ｳ繧ｿ繝ｼ (繧ｳ繧､繝ｳ鬚ｨUI) -->
+        <div class="flex items-center gap-3 bg-amber-100/90 px-6 py-3 rounded-full border-2 border-brand-300 shadow-inner select-none active:scale-98 transition-transform cursor-pointer" onclick="switchTab('tab-gallery')">
+          <span class="text-3xl animate-bounce">ｪ・/span>
+          <div>
+            <div class="text-[10px] font-black text-brand-700 uppercase tracking-widest leading-none">繧医ｓ縺譛ｬ</div>
+            <div class="text-2xl font-black text-brand-600 leading-none mt-1">
+              <span id="dashboard-counter" class="text-3xl">0</span> 蜀・            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 繝翫ン繧ｲ繝ｼ繧ｷ繝ｧ繝ｳ繧ｿ繝・(iPad蟇ｾ蠢懊・螟ｧ蝙九ち繝・・鬆伜沺) -->
+    <nav class="flex p-3 bg-brand-50/30 gap-2 border-b-2 border-brand-100/60">
+      <button type="button" id="nav-btn-scan" onclick="switchTab('tab-scan')" class="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-black text-lg transition-all transform scale-102 bg-brand-400 text-white shadow-lg border border-brand-300">
+        <i class="fa-solid fa-camera-retro text-xl"></i>
+        <span>繝舌・繧ｳ繝ｼ繝峨〒繧ｹ繧ｭ繝｣繝ｳ</span>
+      </button>
+      <button type="button" id="nav-btn-manual" onclick="switchTab('tab-manual')" class="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-bold text-lg transition-all text-brand-700 bg-brand-50/50 hover:bg-brand-100/50 border border-brand-200/60">
+        <i class="fa-solid fa-pen-to-square text-xl"></i>
+        <span>謇句虚縺ｧ逋ｻ骭ｲ縺吶ｋ</span>
+      </button>
+      <button type="button" id="nav-btn-gallery" onclick="switchTab('tab-gallery')" class="flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-bold text-lg transition-all text-brand-700 bg-brand-50/50 hover:bg-brand-100/50 border border-brand-200/60">
+        <i class="fa-solid fa-images text-xl"></i>
+        <span>繧医ｓ縺譛ｬ縺ｮ荳隕ｧ</span>
+      </button>
+    </nav>
+
+    <!-- 繝｡繧､繝ｳ繧ｳ繝ｳ繝・Φ繝・-->
+    <main class="flex-grow p-6 md:p-8">
+      
+      <!-- ================= 1. 繝舌・繧ｳ繝ｼ繝峨せ繧ｭ繝｣繝ｳ繧ｿ繝・================= -->
+      <section id="tab-scan" class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- 繧ｹ繧ｭ繝｣繝ｳ謫堺ｽ懊お繝ｪ繧｢ (蟾ｦ蛛ｴ) -->
+          <div class="lg:col-span-5 bg-brand-50/30 p-5 rounded-[24px] border-2 border-brand-200/60 space-y-4">
+            <h2 class="text-xl font-black text-brand-800 flex items-center gap-2">
+              <i class="fa-solid fa-barcode text-brand-500"></i>
+              繧ｫ繝｡繝ｩ縺ｧ繧ｹ繧ｭ繝｣繝ｳ縺吶ｋ
+            </h2>
+            <p class="text-xs text-brand-600 leading-relaxed">
+              譛ｬ縺ｮ縺・＠繧阪↓縺ゅｋ縲後ヰ繝ｼ繧ｳ繝ｼ繝峨阪ｒ繧ｫ繝｡繝ｩ縺ｫ縺・▽縺吶→縲∵悽縺ｮ縺ｪ縺ｾ縺医ｒ閾ｪ蜍輔〒縺輔′縺励∪縺吶る｣邯壹〒縺ｩ繧薙←繧薙せ繧ｭ繝｣繝ｳ縺ｧ縺阪ｋ繧茨ｼ・            </p>
+            
+            <!-- 繧ｫ繝｡繝ｩ襍ｷ蜍・邨ゆｺ・・繧ｿ繝ｳ -->
+            <div class="space-y-2">
+              <button type="button" id="camera-toggle-btn" onclick="toggleCamera()" class="w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all">
+                <i id="camera-btn-icon" class="fa-solid fa-camera-retro text-xl"></i>
+                <span id="camera-btn-text">繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ・/span>
+              </button>
+              
+              <button type="button" onclick="openScannerWindow()" class="w-full py-3.5 rounded-2xl font-bold text-xs bg-slate-800 hover:bg-slate-700 active:scale-98 text-brand-300 shadow-md flex items-center justify-center gap-2 transition-all">
+                <i class="fa-solid fa-up-right-from-square"></i>
+                iPad縺ｧ蜍輔°縺ｪ縺・凾縺ｯ縺薙■繧会ｼ亥挨繧ｦ繧｣繝ｳ繝峨え縺ｧ髢九￥・・              </button>
+            </div>
+            
+            <!-- 繧ｫ繝｡繝ｩ繝励Ξ繝薙Η繝ｼ陦ｨ遉ｺ鬆伜沺 -->
+            <div class="relative">
+              <div id="reader" class="hidden w-full overflow-hidden rounded-2xl aspect-[4/3] bg-black relative border-4 border-brand-300 shadow-md"></div>
+              <div id="camera-hint-text" class="hidden text-center text-xs text-brand-600 font-bold mt-2 animate-pulse">
+                庁 繝舌・繧ｳ繝ｼ繝峨ｒ蟆代＠縺ｯ縺ｪ縺励※・・0cm縺上ｉ縺・ｼ峨√ヴ繝ｳ繝医ｒ縺ゅｏ縺帙※縺ｭ・・              </div>
+            </div>
+            
+            <!-- 繝舌・繧ｳ繝ｼ繝画焚蟄玲焔蜈･蜉帙お繝ｪ繧｢ (iOS Safari繧ｫ繝｡繝ｩ蛻ｶ髯仙ｯｾ遲・ -->
+            <div class="pt-4 border-t border-brand-200/50 space-y-2 select-text">
+              <label class="block text-xs font-bold text-brand-700">繝舌・繧ｳ繝ｼ繝峨・謨ｰ蟄励ｒ縺ｦ蜈･蜉帙☆繧・/label>
+              <div class="flex gap-2">
+                <input type="text" id="manual-isbn-input" class="flex-grow bg-white text-md text-gray-800 px-4 py-3 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="978縺九ｉ蟋九∪繧・3縺代◆縺ｮ謨ｰ蟄・>
+                <button type="button" onclick="submitManualIsbn()" class="px-5 py-3 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-black text-sm rounded-xl shadow-md transition-all flex-shrink-0">
+                  縺励ｉ縺ｹ繧・                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 荳譎ゅΜ繧ｹ繝郁｡ｨ遉ｺ繧ｨ繝ｪ繧｢ (蜿ｳ蛛ｴ) -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="flex justify-between items-center">
+              <h2 class="text-xl font-black text-brand-800 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-list text-brand-500"></i>
+                繧ｹ繧ｭ繝｣繝ｳ縺励◆譛ｬ・井ｸ譎ゅΜ繧ｹ繝茨ｼ・              </h2>
+              <button type="button" onclick="clearTempListConfirm()" class="text-xs font-bold text-rose-500 hover:underline">
+                繝ｪ繧ｹ繝医ｒ縺九ｉ縺ｫ縺吶ｋ
+              </button>
+            </div>
+            
+            <!-- 繧ｹ繧ｭ繝｣繝ｳ貂医∩荳譎ゅき繝ｼ繝峨Μ繧ｹ繝・-->
+            <div id="temp-list-container" class="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+              <!-- 蛻晄悄陦ｨ遉ｺ (遨ｺ迥ｶ諷・ -->
+              <div class="text-center py-16 px-4 border-4 border-dashed border-brand-200 rounded-3xl bg-brand-50/20">
+                <i class="fa-solid fa-camera-retro text-5xl text-brand-300 mb-4 animate-bounce"></i>
+                <p class="text-lg font-black text-brand-700">繧ｹ繧ｭ繝｣繝ｳ縺励◆譛ｬ縺後％縺薙↓縺ｧ繧九ｈ・・/p>
+                <p class="text-xs text-brand-500 mt-2">荳翫・縲後き繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ√阪・繧ｿ繝ｳ繧偵♀縺励※縲√ヰ繝ｼ繧ｳ繝ｼ繝峨ｒ縺・▽縺励※縺ｭ縲・/p>
+              </div>
+            </div>
+            
+            <!-- 縺ｾ縺ｨ繧√※逋ｻ骭ｲ繝懊ち繝ｳ・井ｸ諡ｬ譖ｸ縺崎ｾｼ縺ｿ・・-->
+            <div id="batch-submit-btn-container" class="p-4 bg-brand-100/70 border border-brand-200 rounded-[24px] flex flex-col sm:flex-row justify-between items-center gap-4 hidden">
+              <div>
+                <p class="text-md font-black text-brand-800">
+                  <span id="temp-count-badge" class="bg-brand-500 text-white px-3 py-1 rounded-full text-xs font-black mr-1">0</span>蜀翫・譛ｬ縺御ｸｦ繧薙〒縺・ｋ繧茨ｼ・                </p>
+                <p class="text-[11px] text-brand-600 mt-0.5">譛ｬ縺ｮ縺ｪ縺ｾ縺医ｄ諢滓Φ繧堤峩縺励※縲∽ｸ九・繝懊ち繝ｳ繧偵♀縺励※縺ｭ縲・/p>
+              </div>
+              <button type="button" onclick="submitBatchBooks()" class="w-full sm:w-auto px-6 py-3.5 bg-accent-500 hover:bg-accent-600 active:scale-95 text-white font-black text-md rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
+                <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+                縺ｾ縺ｨ繧√※逋ｻ骭ｲ縺吶ｋ・・              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. 謇句虚逋ｻ骭ｲ繧ｿ繝・================= -->
+      <section id="tab-manual" class="max-w-2xl mx-auto hidden bg-brand-50/20 p-6 md:p-8 rounded-[28px] border-2 border-brand-200/50">
+        <h2 class="text-2xl font-black text-brand-800 mb-6 flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-brand-500"></i>
+          縺ｦ縺・・縺・↓謇句虚縺ｧ逋ｻ骭ｲ縺吶ｋ
+        </h2>
+        
+        <form onsubmit="submitManualForm(event)" class="space-y-5">
+          <!-- 繧ｿ繧､繝医Ν -->
+          <div>
+            <label class="block text-sm font-bold text-brand-700 mb-1">譛ｬ縺ｮ縺ｪ縺ｾ縺茨ｼ亥ｿ・茨ｼ・/label>
+            <input type="text" id="manual-title" required class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="譛ｬ縺ｮ繧ｿ繧､繝医Ν繧呈嶌縺・※縺ｭ">
+          </div>
+          
+          <!-- 闡苓・-->
+          <div>
+            <label class="block text-sm font-bold text-brand-700 mb-1">縺九＞縺滉ｺｺ・郁送閠・ｼ・/label>
+            <input type="text" id="manual-author" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="菴懆・・縺ｪ縺ｾ縺・>
+          </div>
+          
+          <!-- 繧ｸ繝｣繝ｳ繝ｫ縺ｨ謇譛牙玄蛻・(繧ｰ繝ｪ繝・ラ) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- 謇譛牙玄蛻・-->
+            <div>
+              <label class="block text-sm font-bold text-brand-700 mb-1.5">縺ｩ縺薙↓縺ゅｋ譛ｬ・・/label>
+              <div class="flex bg-white p-1 rounded-xl border-2 border-brand-200">
+                <label class="flex-1 text-center py-2.5 rounded-lg font-bold text-sm cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
+                  <input type="radio" name="manual-owner" value="蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽" checked class="sr-only">
+                  蝗ｳ譖ｸ鬢ｨ縺ｮ譛ｬ
+                </label>
+                <label class="flex-1 text-center py-2.5 rounded-lg font-bold text-sm cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
+                  <input type="radio" name="manual-owner" value="縺翫≧縺｡縺ｮ譛ｬ" class="sr-only">
+                  縺翫≧縺｡縺ｮ譛ｬ
+                </label>
+              </div>
+            </div>
+            
+            <!-- 繧ｸ繝｣繝ｳ繝ｫ -->
+            <div>
+              <label class="block text-sm font-bold text-brand-700 mb-1.5">縺ｩ繧薙↑譛ｬ・滂ｼ医ず繝｣繝ｳ繝ｫ・・/label>
+              <select id="manual-genre" class="w-full bg-white text-md font-bold p-3.5 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none">
+                <option value="迚ｩ隱・ selected>燈 迚ｩ隱・(縺翫・縺ｪ縺・</option>
+                <option value="蝗ｳ髑代・遘大ｭｦ">･ｦ 蝗ｳ髑代・遘大ｭｦ</option>
+                <option value="莨晁ｨ・>荘 莨晁ｨ・(豁ｴ蜿ｲ繧・ｺｺ迚ｩ)</option>
+                <option value="邨ｵ譛ｬ">耳 邨ｵ譛ｬ</option>
+                <option value="縺昴・莉・>箝撰ｸ・縺昴・莉・/option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- 隱ｭ繧薙□譌･莉・-->
+          <div>
+            <label class="block text-sm font-bold text-brand-700 mb-1">隱ｭ繧薙□譌･</label>
+            <input type="date" id="manual-date" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none">
+          </div>
+          
+          <!-- 隧穂ｾ｡・医せ繧ｿ繝ｼ繝ｬ繝ｼ繝・ぅ繝ｳ繧ｰ・・-->
+          <div>
+            <label class="block text-sm font-bold text-brand-700 mb-1.5">縺頑ｰ励↓蜈･繧雁ｺｦ・郁ｩ穂ｾ｡・・/label>
+            <div class="flex items-center gap-2">
+              <input type="hidden" id="manual-rating" value="5">
+              <div id="manual-stars-container" class="flex bg-white px-4 py-2 rounded-xl border-2 border-brand-200">
+                <!-- JS縺ｧ繝ｬ繝ｳ繝繝ｪ繝ｳ繧ｰ -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- 諢滓Φ -->
+          <div>
+            <label class="block text-sm font-bold text-brand-700 mb-1">縺ｲ縺ｨ縺薙→繝｡繝｢・域─諠ｳ・・/label>
+            <textarea id="manual-comment" rows="3" class="w-full bg-white text-md text-gray-800 p-4 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="縺翫ｂ縺励ｍ縺九▲縺溘→縺薙ｍ繧・√∩繧薙↑縺ｫ縺翫☆縺吶ａ縺励◆縺・→縺薙ｍ繧呈嶌縺・※縺ｭ・・></textarea>
+          </div>
+          
+          <!-- 逋ｻ骭ｲ繝懊ち繝ｳ -->
+          <button type="submit" class="w-full py-4 bg-accent-500 hover:bg-accent-600 active:scale-95 text-white font-black text-xl rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all">
+            <i class="fa-solid fa-check text-lg"></i>
+            縺薙・譛ｬ繧堤匳骭ｲ縺吶ｋ・・          </button>
+        </form>
+      </section>
+
+      <!-- ================= 3. 隱ｭ繧薙□譛ｬ縺ｮ荳隕ｧ繧ｿ繝・================= -->
+      <section id="tab-gallery" class="space-y-6 hidden">
+        
+        <!-- 繧ｳ繝ｳ繝医Ο繝ｼ繝ｫ繝代ロ繝ｫ (繧ｽ繝ｼ繝医・繝輔ぅ繝ｫ繧ｿ) -->
+        <div class="bg-brand-50/30 p-5 rounded-[24px] border-2 border-brand-200/50 space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <!-- 繝輔ぅ繝ｫ繧ｿ・壽園譛牙玄蛻・(縺翫≧縺｡/蝗ｳ譖ｸ鬢ｨ) -->
+            <div class="space-y-1.5">
+              <span class="block text-xs font-bold text-brand-700">縺ｩ縺薙↓縺ゅｋ譛ｬ・・/span>
+              <div class="flex bg-white p-1 rounded-xl border border-brand-200">
+                <label class="px-4 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
+                  <input type="radio" name="filter-owner" value="縺吶∋縺ｦ" checked onchange="renderRegisteredBooks()" class="sr-only">
+                  縺吶∋縺ｦ
+                </label>
+                <label class="px-4 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
+                  <input type="radio" name="filter-owner" value="蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽" onchange="renderRegisteredBooks()" class="sr-only">
+                  蝗ｳ譖ｸ鬢ｨ縺ｮ譛ｬ
+                </label>
+                <label class="px-4 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all has-[:checked]:bg-brand-400 has-[:checked]:text-white select-none">
+                  <input type="radio" name="filter-owner" value="縺翫≧縺｡縺ｮ譛ｬ" onchange="renderRegisteredBooks()" class="sr-only">
+                  縺翫≧縺｡縺ｮ譛ｬ
+                </label>
+              </div>
+            </div>
+            
+            <!-- 繝輔ぅ繝ｫ繧ｿ・壹ず繝｣繝ｳ繝ｫ -->
+            <div class="space-y-1.5 flex-grow max-w-xs">
+              <span class="block text-xs font-bold text-brand-700">縺ｩ繧薙↑譛ｬ・滂ｼ医ず繝｣繝ｳ繝ｫ・・/span>
+              <select id="filter-genre" onchange="renderRegisteredBooks()" class="w-full bg-white text-xs font-bold p-2.5 rounded-xl border border-brand-200 focus:outline-none">
+                <option value="縺吶∋縺ｦ">決 縺吶∋縺ｦ縺ｮ繧ｸ繝｣繝ｳ繝ｫ</option>
+                <option value="迚ｩ隱・>燈 迚ｩ隱・(縺翫・縺ｪ縺・</option>
+                <option value="蝗ｳ髑代・遘大ｭｦ">･ｦ 蝗ｳ髑代・遘大ｭｦ</option>
+                <option value="莨晁ｨ・>荘 莨晁ｨ・/option>
+                <option value="邨ｵ譛ｬ">耳 邨ｵ譛ｬ</option>
+                <option value="縺昴・莉・>箝撰ｸ・縺昴・莉・/option>
+              </select>
+            </div>
+            
+            <!-- 繧ｽ繝ｼ繝茨ｼ壽律莉倥∬ｩ穂ｾ｡ -->
+            <div class="space-y-1.5 flex-grow max-w-xs">
+              <span class="block text-xs font-bold text-brand-700">縺ｪ繧峨・縺九∴</span>
+              <select id="sort-by" onchange="renderRegisteredBooks()" class="w-full bg-white text-xs font-bold p-2.5 rounded-xl border border-brand-200 focus:outline-none">
+                <option value="date-desc" selected>套 隱ｭ繧薙□譌･ (譁ｰ縺励＞縺倥ｅ繧・</option>
+                <option value="date-asc">套 隱ｭ繧薙□譌･ (蜿､縺・§繧・ｓ)</option>
+                <option value="rating-desc">醇 縺頑ｰ励↓蜈･繧雁ｺｦ (鬮倥＞縺倥ｅ繧・</option>
+              </select>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- 譛ｬ縺ｮ荳隕ｧ陦ｨ遉ｺ繧ｰ繝ｪ繝・ラ (繧ｫ繝ｼ繝牙梛) -->
+        <div id="registered-list-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <!-- 隱ｭ霎ｼ螳御ｺ・ｾ後↓JS縺ｧ繧ｫ繝ｼ繝峨′霑ｽ蜉縺輔ｌ縺ｾ縺・-->
+        </div>
+      </section>
+      
+    </main>
+  </div>
+
+  <!-- 蜈ｨ逕ｻ髱｢繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ繧ｪ繝ｼ繝舌・繝ｬ繧､ (繧ｹ繝斐リ繝ｼ) -->
+  <div id="loading-overlay" class="fixed inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center z-50 transition-all duration-300 opacity-0 pointer-events-none">
+    <div class="bg-white p-8 rounded-[32px] border-4 border-brand-300 shadow-2xl flex flex-col items-center gap-4 text-center max-w-sm">
+      <div class="relative w-20 h-20">
+        <!-- 螟門・縺ｮ蝗櫁ｻ｢繝ｪ繝ｳ繧ｰ -->
+        <div class="absolute inset-0 rounded-full border-8 border-brand-100"></div>
+        <div class="absolute inset-0 rounded-full border-8 border-brand-400 border-t-transparent animate-spin"></div>
+        <!-- 荳ｭ螟ｮ縺ｮ繧｢繧､繧ｳ繝ｳ -->
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="text-3xl animate-bounce">答</span>
+        </div>
+      </div>
+      <p class="text-lg font-black text-brand-800 mt-2">繧ｹ繝励Ξ繝・ラ繧ｷ繝ｼ繝医→<br>縺翫・縺ｪ縺励＠縺ｦ縺・ｋ繧・..</p>
+      <p class="text-xs text-brand-500">縺｡繧・▲縺ｨ縺ｾ縺｣縺ｦ縺ｭ</p>
+    </div>
+  </div>
+
+  <!-- 繝医・繧ｹ繝磯夂衍 -->
+  <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900/90 backdrop-blur text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 transition-all duration-300 translate-y-24 opacity-0 z-50 pointer-events-none">
+    <span class="text-xl">粕</span>
+    <p id="toast-text" class="font-bold text-sm sm:text-md"></p>
+  </div>
+
+  <!-- Html5Qrcode 繝ｩ繧､繝悶Λ繝ｪ -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  
+  <script>
+    // 蛻･繧ｦ繧｣繝ｳ繝峨え縺ｧ髢九°繧後◆繧ｹ繧ｭ繝｣繝翫・繝｢繝ｼ繝峨°縺ｩ縺・°縺ｮ蛻､螳・    const urlParams = new URLSearchParams(window.location.search);
+    const isScannerMode = urlParams.get('mode') === 'scanner';
+    let webAppUrl = ''; // GAS縺ｧ螳溯｡後＆繧後◆蝣ｴ蜷医↓閾ｪ蜍輔う繝ｳ繧ｸ繧ｧ繧ｯ繧ｷ繝ｧ繝ｳ縺輔ｌ縺ｾ縺・
+    // 邨ｱ蜷医ョ繝ｼ繧ｿ繝吶・繧ｹ繝峨Λ繧､繝舌・
+    const dbDriver = {
+      getGasUrl: function() {
+        if (webAppUrl && webAppUrl.trim() !== '') {
+          return webAppUrl;
+        }
+        return safeStorage.getItem('yomuyomu_gas_url') || '';
+      },
+      getBooks: function(successCb, failureCb) {
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(successCb)
+            .withFailureHandler(failureCb)
+            .getBooks();
+          return;
+        }
+        const url = this.getGasUrl();
+        if (!url) {
+          showSettingsModal(true);
+          failureCb(new Error("GAS URL not set"));
+          return;
+        }
+        fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=getBooks', {
+          method: 'GET',
+          mode: 'cors'
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("GET failed");
+          return response.json();
+        })
+        .then(data => successCb(data))
+        .catch(err => failureCb(err));
+      },
+      addBooks: function(booksPayload, successCb, failureCb) {
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(successCb)
+            .withFailureHandler(failureCb)
+            .addBooks(booksPayload);
+          return;
+        }
+        const url = this.getGasUrl();
+        if (!url) {
+          showSettingsModal(true);
+          failureCb(new Error("GAS URL not set"));
+          return;
+        }
+        fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=addBooks', {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'text/plain'
+          },
+          body: JSON.stringify(booksPayload)
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("POST failed");
+          return response.json();
+        })
+        .then(res => successCb(res))
+        .catch(err => failureCb(err));
+      },
+      fetchBookInfo: function(isbn, successCb, failureCb) {
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(successCb)
+            .withFailureHandler(failureCb)
+            .fetchBookInfoFromBackend(isbn);
+          return;
+        }
+        const url = this.getGasUrl();
+        if (!url) {
+          failureCb(new Error("GAS URL not set"));
+          return;
+        }
+        fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=fetchBookInfo&isbn=' + isbn, {
+          method: 'GET',
+          mode: 'cors'
+        })
+        .then(response => {
+          if (!response.ok) throw new Error("Fetch failed");
+          return response.json();
+        })
+        .then(data => successCb(data))
+        .catch(err => failureCb(err));
+      }
+    };
+
+    // --- PC/iPhone繝ｭ繝ｼ繧ｫ繝ｫ繝・せ繝育畑縺ｮ逍台ｼｼ繝・・繧ｿ繝吶・繧ｹ(LocalStorage)險ｭ螳・---
+    let isLocalStorageAvailable = false;
+    const memoryStorage = {};
+    try {
+      const testKey = '__storage_test__';
+      window.localStorage.setItem(testKey, testKey);
+      window.localStorage.removeItem(testKey);
+      isLocalStorageAvailable = true;
+    } catch (e) {
+      console.warn("LocalStorage is not available. In-memory storage will be used.");
+    }
+
+    const safeStorage = {
+      getItem: function(key) {
+        if (isLocalStorageAvailable) {
+          try {
+            return window.localStorage.getItem(key);
+          } catch (e) {}
+        }
+        return memoryStorage[key] || null;
+      },
+      setItem: function(key, value) {
+        if (isLocalStorageAvailable) {
+          try {
+            window.localStorage.setItem(key, value);
+            return;
+          } catch (e) {}
+        }
+        memoryStorage[key] = String(value);
+      }
+    };
+
+    // 繝帙せ繝亥錐縺ｫgoogle縺悟性縺ｾ繧後ｋ蝣ｴ蜷医・GAS迺ｰ蠅・→蛻､螳・    const isGAS = window.location.hostname.indexOf('google') !== -1;
+    // GAS縺ｮURL縺瑚ｨｭ螳壹＆繧後※縺・ｋ縺狗｢ｺ隱・    const hasGasUrl = !!safeStorage.getItem('yomuyomu_gas_url');
+
+    // GAS迺ｰ蠅・〒縺ｯ縺ｪ縺上√°縺､GAS縺ｮURL繧りｨｭ螳壹＆繧後※縺・↑縺・ｴ蜷医・縺ｿ縲√ユ繧ｹ繝育畑縺ｮ繝｢繝・け・育桝莨ｼ・吋B繧定ｵｷ蜍輔☆繧・    if (!isGAS && !hasGasUrl && typeof google === 'undefined') {
+      console.warn("Running in local mock mode (google.script.run is not available).");
+      
+      const MOCK_DB_KEY = 'yomuyomu_mock_db';
+      // 蛻晄悄繝｢繝・け繝・・繧ｿ縺ｮ菴懈・
+      if (!safeStorage.getItem(MOCK_DB_KEY)) {
+        const initialMockData = [
+          {
+            id: "id_mock_1",
+            date: "2026/06/28 12:00:00",
+            isbn: "9784041012345",
+            title: "繝｢繝｢",
+            author: "繝溘ヲ繝｣繧ｨ繝ｫ繝ｻ繧ｨ繝ｳ繝・,
+            coverUrl: "",
+            ownerType: "蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽",
+            genre: "迚ｩ隱・,
+            comment: "譎る俣繧偵〓縺吶ｓ縺縲梧凾髢薙←繧阪⊂縺・阪↓遶九■蜷代°縺・･ｳ縺ｮ蟄舌・縺願ｩｱ縲ゅ→縺ｦ繧ゅｏ縺上ｏ縺上＠縺滂ｼ・,
+            rating: 5
+          },
+          {
+            id: "id_mock_2",
+            date: "2026/06/27 15:30:00",
+            isbn: "9784834000825",
+            title: "縺舌ｊ縺ｨ縺舌ｉ",
+            author: "縺ｪ縺九′繧・繧翫∴縺・ 縺翫♀繧繧・繧・ｊ縺・,
+            coverUrl: "",
+            ownerType: "縺翫≧縺｡縺ｮ譛ｬ",
+            genre: "邨ｵ譛ｬ",
+            comment: "縺翫♀縺阪↑繧ｫ繧ｹ繝・Λ繧偵▽縺上ｋ縺願ｩｱ縲ゅ∩繧薙↑縺ｧ縺翫＞縺励◎縺・↓縺溘∋繧九→縺薙ｍ縺後☆縺阪・,
+            rating: 4
+          }
+        ];
+        safeStorage.setItem(MOCK_DB_KEY, JSON.stringify(initialMockData));
+      }
+
+      // google.script.run縺ｮ謖吝虚繧偵Δ繝・け
+      window.google = {
+        script: {
+          run: {
+            withSuccessHandler: function(successCb) {
+              return {
+                withFailureHandler: function(failureCb) {
+                  return {
+                    getBooks: function() {
+                      setTimeout(() => {
+                        try {
+                          const data = JSON.parse(safeStorage.getItem(MOCK_DB_KEY) || '[]');
+                          successCb(data);
+                        } catch (e) {
+                          failureCb(e);
+                        }
+                      }, 500);
+                    },
+                    addBooks: function(newBooks) {
+                      setTimeout(() => {
+                        try {
+                          const data = JSON.parse(safeStorage.getItem(MOCK_DB_KEY) || '[]');
+                          const now = new Date();
+                          const timestamp = now.getFullYear() + "/" + 
+                            String(now.getMonth() + 1).padStart(2, '0') + "/" + 
+                            String(now.getDate()).padStart(2, '0') + " " + 
+                            String(now.getHours()).padStart(2, '0') + ":" + 
+                            String(now.getMinutes()).padStart(2, '0') + ":" + 
+                            String(now.getSeconds()).padStart(2, '0');
+                            
+                          const saved = newBooks.map(b => {
+                            const id = "id_mock_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+                            const bookDate = b.date ? b.date.replace(/-/g, "/") + " 00:00:00" : timestamp;
+                            return {
+                              id: id,
+                              date: bookDate,
+                              isbn: b.isbn || "",
+                              title: b.title || "・医ち繧､繝医Ν縺ｪ縺暦ｼ・,
+                              author: b.author || "・郁送閠・ｸ肴・・・,
+                              coverUrl: b.coverUrl || "",
+                              ownerType: b.ownerType || "蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽",
+                              genre: b.genre || "縺昴・莉・,
+                              comment: b.comment || "",
+                              rating: b.rating || 3
+                            };
+                          });
+                          
+                          // 譁ｰ縺励＞譛ｬ繧帝・蛻励・蜈磯ｭ縺ｫ霑ｽ蜉
+                          const updated = [...saved, ...data];
+                          safeStorage.setItem(MOCK_DB_KEY, JSON.stringify(updated));
+                          successCb({ success: true, count: newBooks.length });
+                        } catch (e) {
+                          failureCb(e);
+                        }
+                      }, 800);
+                    }
+                  };
+                }
+              };
+            }
+          }
+        }
+      };
+    }
+
+    // 繧ｰ繝ｭ繝ｼ繝舌Ν迥ｶ諷・    let tempBooks = [];          // 繧ｹ繧ｭ繝｣繝ｳ貂医∩荳譎ゅΜ繧ｹ繝・    let allRegisteredBooks = []; // DB縺九ｉ隱ｭ縺ｿ霎ｼ繧薙□逋ｻ骭ｲ貂医∩縺ｮ譛ｬ
+    let audioCtx = null;         // iOS逕ｨAudioContext
+    let html5QrCode = null;      // 繧ｫ繝｡繝ｩ繧ｪ繝悶ず繧ｧ繧ｯ繝・    let isCameraRunning = false;  // 繧ｫ繝｡繝ｩ遞ｼ蜒堺ｸｭ繝輔Λ繧ｰ
+    let lastScannedIsbn = "";    // 逶ｴ蜑阪せ繧ｭ繝｣繝ｳISBN (驥崎､・亟豁｢)
+    let lastScannedTime = 0;     // 逶ｴ蜑阪せ繧ｭ繝｣繝ｳ譎る俣 (繝溘Μ遘・
+
+    // ================= 繧｢繝励Μ蛻晄悄蛹・=================
+    window.addEventListener('DOMContentLoaded', () => {
+      if (isScannerMode) {
+        // 繝｡繧､繝ｳ繧｢繝励Μ逕ｻ髱｢繧帝撼陦ｨ遉ｺ縺ｫ縺励※縲√せ繧ｭ繝｣繝翫・逕ｻ髱｢繧定｡ｨ遉ｺ
+        document.getElementById('main-app-container').classList.add('hidden');
+        document.getElementById('scanner-only-container').classList.remove('hidden');
+        return; // 繝｡繧､繝ｳ繧｢繝励Μ縺ｮ繝ｭ繝ｼ繝峨・繧ｹ繧ｭ繝・・
+      }
+
+      // 譛ｬ譌･縺ｮ譌･莉倥ｒ謇句虚逋ｻ骭ｲ縺ｮ蛻晄悄蛟､縺ｫ險ｭ螳・      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('manual-date').value = today;
+      
+      // 謇句虚逋ｻ骭ｲ逕ｨ縺ｮ繧ｹ繧ｿ繝ｼ隧穂ｾ｡蛻晄悄蛹・      renderManualStars(5);
+      
+      // 逋ｻ骭ｲ縺輔ｌ縺滓悽繧偵Ο繝ｼ繝・      fetchRegisteredBooks();
+
+      // 蛻･繧ｦ繧｣繝ｳ繝峨え縺ｮ繧ｫ繝｡繝ｩ縺九ｉ縺ｮ繝・・繧ｿ蜿嶺ｿ｡繝ｪ繧ｹ繝翫・
+      window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'isbn_scanned') {
+          const isbn = event.data.isbn;
+          addTempBookPlaceholder(isbn);
+          showToast("蛻･逕ｻ髱｢縺ｧ繝舌・繧ｳ繝ｼ繝峨ｒ讀懃衍縺励◆繧茨ｼ・);
+        }
+      });
+    });
+
+    // ================= 蛻･繧ｦ繧｣繝ｳ繝峨え繧ｫ繝｡繝ｩ襍ｷ蜍・(iOS/iPadOS蟇ｾ遲・ =================
+    function openScannerWindow() {
+      // 髻ｳ螢ｰ蛻晄悄蛹悶→蜻ｼ縺ｳ蜃ｺ縺励ユ繧ｹ繝・      initAudio();
+      playBeep();
+      
+      // Netlify縺ｮURL繧偵・繝ｼ繧ｹ縺ｫ縺励※蛻･繧ｦ繧｣繝ｳ繝峨え繧帝幕縺阪∪縺呻ｼ・AS縺ｮURL繧堤峩謗･髢九￥縺ｨiframe蛻ｶ髯舌〒繧ｫ繝｡繝ｩ縺瑚ｵｷ蜍輔＠縺ｾ縺帙ｓ・・      const currentUrl = window.location.href;
+      const scanUrl = currentUrl + (currentUrl.indexOf('?') === -1 ? '?' : '&') + 'mode=scanner';
+      window.open(scanUrl, '_blank');
+    }
+
+    // ================= 險ｭ螳夂ｮ｡逅・Δ繝ｼ繝繝ｫ蛻ｶ蠕｡ =================
+    function showSettingsModal(show) {
+      const modal = document.getElementById('settings-modal');
+      const input = document.getElementById('settings-gas-url-input');
+      
+      if (show) {
+        input.value = dbDriver.getGasUrl();
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+      } else {
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function saveGasUrlSettings() {
+      const input = document.getElementById('settings-gas-url-input');
+      const url = input.value.trim();
+      
+      if (url === "") {
+        showToast("URL繧貞・蜉帙＠縺ｦ縺上□縺輔＞");
+        return;
+      }
+      
+      if (url.indexOf("https://script.google.com/") !== 0) {
+        showToast("譛牙柑縺ｪGAS繧ｦ繧ｧ繝悶い繝励Μ縺ｮURL縺ｧ縺ｯ縺ゅｊ縺ｾ縺帙ｓ");
+        return;
+      }
+      
+      safeStorage.setItem('yomuyomu_gas_url', url);
+      showToast("GAS繧ｦ繧ｧ繝悶い繝励Μ縺ｮURL繧剃ｿ晏ｭ倥＠縺溘ｈ・Å沁・);
+      showSettingsModal(false);
+      
+      // 繝ｪ繝ｭ繝ｼ繝峨＠縺ｦ繝・・繧ｿ繧貞・隱ｭ縺ｿ霎ｼ縺ｿ
+      showLoading(true);
+      fetchRegisteredBooks();
+    }
+
+    // ================= 繧ｹ繧ｭ繝｣繝翫・蟆ら畑逕ｻ髱｢逕ｨ縺ｮ蜃ｦ逅・=================
+    let scannerQrCode = null;
+    let isScannerCameraRunning = false;
+
+    async function startScannerModeCamera() {
+      const startBtn = document.getElementById('scanner-start-btn');
+      const readerDiv = document.getElementById('scanner-reader');
+      
+      if (isScannerCameraRunning) {
+        if (scannerQrCode) {
+          try {
+            await scannerQrCode.stop();
+          } catch(e) {}
+          scannerQrCode = null;
+        }
+        isScannerCameraRunning = false;
+        startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
+        startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> 繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ・;
+        document.getElementById('scanner-hint-text').classList.add('hidden');
+        return;
+      }
+      
+      try {
+        isScannerCameraRunning = true;
+        startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-rose-500 hover:bg-rose-600 text-white shadow-lg flex items-center justify-center gap-2";
+        startBtn.innerHTML = '<i class="fa-solid fa-circle-stop"></i> 繧ｫ繝｡繝ｩ繧偵→繧√ｋ';
+        
+        scannerQrCode = new Html5Qrcode("scanner-reader");
+        
+        const config = {
+          fps: 15,
+          qrbox: function(width, height) {
+            // 逕ｻ髱｢縺ｮ陦ｨ遉ｺ蟷・↓蜷医ｏ縺帙※縺ｯ縺ｿ蜃ｺ縺輔↑縺・ｈ縺・↓繝ｬ繧ｹ繝昴Φ繧ｷ繝冶ｪｿ謨ｴ (讓ｪ蟷・0%, 邵ｦ蟷・0%)
+            const boxWidth = Math.floor(width * 0.8);
+            const boxHeight = Math.floor(height * 0.3);
+            return { width: boxWidth, height: boxHeight };
+          },
+          // HD隗｣蜒丞ｺｦ縺ｮ蜆ｪ蜈域欠螳・(EAN-13隱ｭ縺ｿ蜿悶ｊ邇・髄荳翫・縺溘ａ縺ｮ繝ｩ繧､繝悶Λ繝ｪ蜈ｬ蠑乗欠螳壽婿豕・
+          videoConstraints: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: "environment"
+          }
+        };
+
+        document.getElementById('scanner-hint-text').classList.remove('hidden');
+
+        // playsinline縺ｮ蠑ｷ蛻ｶ驕ｩ逕ｨ (iOS/iPad Safari蟇ｾ遲・
+        const observer = new MutationObserver((mutations) => {
+          const videoEl = readerDiv.querySelector('video');
+          if (videoEl) {
+            videoEl.setAttribute('playsinline', 'true');
+            videoEl.setAttribute('webkit-playsinline', 'true');
+            videoEl.setAttribute('autoplay', 'true');
+            videoEl.setAttribute('muted', 'true');
+            videoEl.play().catch(err => console.log("Video play intercept failed:", err));
+            observer.disconnect();
+          }
+        });
+        observer.observe(readerDiv, { childList: true, subtree: true });
+
+        try {
+          // iOS Safari蜷代￠縺ｫ environment 縺ｧ襍ｷ蜍・          await scannerQrCode.start(
+            { facingMode: "environment" },
+            config,
+            onScannerScanSuccess,
+            (errorMessage) => {}
+          );
+        } catch (cameraInitErr) {
+          console.warn("閭碁擇繧ｫ繝｡繝ｩ縺ｮ謖・ｮ夊ｵｷ蜍輔↓螟ｱ謨励＠縺ｾ縺励◆縲ゅヵ繧ｩ繝ｼ繝ｫ繝舌ャ繧ｯ縺励∪縺・", cameraInitErr);
+          // 繝・ヰ繧､繧ｹ縺ｮ繝・ヵ繧ｩ繝ｫ繝医き繝｡繝ｩ・亥・阡ｵ繝輔Ο繝ｳ繝医き繝｡繝ｩ縺ｪ縺ｩ・峨〒襍ｷ蜍・          await scannerQrCode.start(
+            {},
+            config,
+            onScannerScanSuccess,
+            (errorMessage) => {}
+          );
+        }
+        
+      } catch (e) {
+        console.error("Scanner mode camera error:", e);
+        alert("繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝医〒縺阪∪縺帙ｓ縺ｧ縺励◆縲ゅき繝｡繝ｩ縺ｸ縺ｮ繧｢繧ｯ繧ｻ繧ｹ繧定ｨｱ蜿ｯ縺励※縺ｭ縲・);
+        isScannerCameraRunning = false;
+        startBtn.className = "w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2";
+        startBtn.innerHTML = '<i class="fa-solid fa-camera-retro"></i> 繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ・;
+      }
+    }
+
+    function onScannerScanSuccess(decodedText, decodedResult) {
+      const isbn = decodedText.trim();
+      // 譌･譛ｬ縺ｮ譖ｸ邀咲畑・壽悽縺ｮ繝舌・繧ｳ繝ｼ繝峨・978縺九ｉ蟋九∪繧九・92蟋九∪繧翫・C繧ｳ繝ｼ繝峨・辟｡隕悶☆繧九・      if (!isbn.startsWith("978")) return;
+      
+      const now = Date.now();
+      if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) return;
+      
+      lastScannedIsbn = isbn;
+      lastScannedTime = now;
+      
+      playBeep();
+      
+      // 隕ｪ繧ｦ繧｣繝ｳ繝峨え縺ｫ邨先棡繧帝∽ｿ｡
+      if (window.opener) {
+        window.opener.postMessage({ type: 'isbn_scanned', isbn: isbn }, '*');
+        
+        // 逕ｻ髱｢繧堤ｷ代↓蜈峨ｉ縺帙※騾夂衍
+        const readerDiv = document.getElementById('scanner-reader');
+        readerDiv.style.borderColor = '#10b981';
+        setTimeout(() => {
+          readerDiv.style.borderColor = '#475569'; // border-slate-600逶ｸ蠖・        }, 1000);
+      } else {
+        alert("繝｡繧､繝ｳ逕ｻ髱｢・郁ｦｪ繧ｦ繧｣繝ｳ繝峨え・峨′隕九▽縺九ｊ縺ｾ縺帙ｓ縲る｣謳ｺ縺ｧ縺阪∪縺帙ｓ縺ｧ縺励◆縲・);
+      }
+    }
+
+    // ================= 髻ｳ螢ｰ繝ｻ繝薙・繝鈴浹蛻ｶ蠕｡ =================
+    // iPad Safari遲峨・髻ｳ螢ｰ髢句ｧ九ヶ繝ｭ繝・け隗｣髯､逕ｨ
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // 繝斐ヴ繝・→縺・≧繝薙・繝鈴浹縺ｮ蜀咲函
+    function playBeep() {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        
+        const now = audioCtx.currentTime;
+        
+        // 1髻ｳ逶ｮ (繝斐ャ)
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(1000, now);
+        gain1.gain.setValueAtTime(0.08, now);
+        gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc1.start(now);
+        osc1.stop(now + 0.08);
+        
+        // 2髻ｳ逶ｮ (繝斐ヴ繝・・蠕悟濠驛ｨ蛻・
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1300, now + 0.09);
+        gain2.gain.setValueAtTime(0.08, now + 0.09);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc2.start(now + 0.09);
+        osc2.stop(now + 0.18);
+        
+      } catch (e) {
+        console.warn("繝薙・繝鈴浹縺ｮ蜀咲函縺ｫ螟ｱ謨励＠縺ｾ縺励◆:", e);
+      }
+    }
+
+    // ================= 繝医・繧ｹ繝・& 繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ蛻ｶ蠕｡ =================
+    function showToast(message) {
+      const toast = document.getElementById('toast-container');
+      const toastText = document.getElementById('toast-text');
+      toastText.textContent = message;
+      
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3000);
+    }
+
+    function showLoading(show) {
+      const overlay = document.getElementById('loading-overlay');
+      if (show) {
+        overlay.classList.remove('opacity-0', 'pointer-events-none');
+        overlay.classList.add('opacity-100');
+      } else {
+        overlay.classList.remove('opacity-100');
+        overlay.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    // ================= 繧ｿ繝門・繧頑崛縺・=================
+    function switchTab(tabId) {
+      document.getElementById('tab-scan').classList.add('hidden');
+      document.getElementById('tab-manual').classList.add('hidden');
+      document.getElementById('tab-gallery').classList.add('hidden');
+      
+      document.getElementById(tabId).classList.remove('hidden');
+      
+      const tabNames = ['scan', 'manual', 'gallery'];
+      tabNames.forEach(t => {
+        const btn = document.getElementById('nav-btn-' + t);
+        if (('tab-' + t) === tabId) {
+          btn.className = "flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-black text-lg transition-all transform scale-102 bg-brand-400 text-white shadow-lg border border-brand-300";
+        } else {
+          btn.className = "flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-bold text-lg transition-all text-brand-700 bg-brand-50/50 hover:bg-brand-100/50 border border-brand-200/60";
+        }
+      });
+      
+      // 繧ｫ繝｡繝ｩ菴懷虚荳ｭ縺九▽繧ｹ繧ｭ繝｣繝ｳ繧ｿ繝紋ｻ･螟悶↓遘ｻ蜍輔＠縺溷ｴ蜷医・繧ｫ繝｡繝ｩ蛛懈ｭ｢
+      if (tabId !== 'tab-scan' && isCameraRunning) {
+        stopCamera();
+      }
+      
+      // 荳隕ｧ繧ｿ繝悶ｒ髢九＞縺溘→縺阪・譛譁ｰ諠・ｱ縺ｫ譖ｴ譁ｰ
+      if (tabId === 'tab-gallery') {
+        fetchRegisteredBooks();
+      }
+    }
+
+    // ================= 繧ｫ繝｡繝ｩ繝ｻ繝舌・繧ｳ繝ｼ繝蛾｣邯壹せ繧ｭ繝｣繝ｳ =================
+    async function toggleCamera() {
+      initAudio(); // 繝ｦ繝ｼ繧ｶ繝ｼ謫堺ｽ懷･第ｩ溘〒繧ｪ繝ｼ繝・ぅ繧ｪ譛牙柑蛹・      
+      const cameraBtn = document.getElementById('camera-toggle-btn');
+      const cameraBtnText = document.getElementById('camera-btn-text');
+      const cameraIcon = document.getElementById('camera-btn-icon');
+      const readerDiv = document.getElementById('reader');
+      
+      if (isCameraRunning) {
+        await stopCamera();
+      } else {
+        try {
+          isCameraRunning = true;
+          readerDiv.classList.remove('hidden');
+          document.getElementById('camera-hint-text').classList.remove('hidden');
+          
+          cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-rose-500 hover:bg-rose-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
+          cameraBtnText.textContent = "繧ｫ繝｡繝ｩ繧偵→繧√ｋ";
+          cameraIcon.className = "fa-solid fa-circle-stop text-xl animate-pulse";
+          
+          html5QrCode = new Html5Qrcode("reader");
+          
+          const config = {
+            fps: 15,
+            qrbox: function(width, height) {
+              // 逕ｻ髱｢縺ｮ陦ｨ遉ｺ蟷・↓蜷医ｏ縺帙※縺ｯ縺ｿ蜃ｺ縺輔↑縺・ｈ縺・↓繝ｬ繧ｹ繝昴Φ繧ｷ繝冶ｪｿ謨ｴ (讓ｪ蟷・0%, 邵ｦ蟷・0%)
+              const boxWidth = Math.floor(width * 0.8);
+              const boxHeight = Math.floor(height * 0.3);
+              return { width: boxWidth, height: boxHeight };
+            },
+            // HD隗｣蜒丞ｺｦ縺ｮ蜆ｪ蜈域欠螳・(EAN-13隱ｭ縺ｿ蜿悶ｊ邇・髄荳翫・縺溘ａ縺ｮ繝ｩ繧､繝悶Λ繝ｪ蜈ｬ蠑乗欠螳壽婿豕・
+            videoConstraints: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              facingMode: "environment"
+            }
+          };
+          
+          // playsinline縺ｮ蠑ｷ蛻ｶ驕ｩ逕ｨ (iOS/iPad Safari蟇ｾ遲・
+          const observer = new MutationObserver((mutations) => {
+            const videoEl = readerDiv.querySelector('video');
+            if (videoEl) {
+              videoEl.setAttribute('playsinline', 'true');
+              videoEl.setAttribute('webkit-playsinline', 'true');
+              videoEl.setAttribute('autoplay', 'true');
+              videoEl.setAttribute('muted', 'true');
+              videoEl.play().catch(err => console.log("Video play intercept failed:", err));
+              observer.disconnect();
+            }
+          });
+          observer.observe(readerDiv, { childList: true, subtree: true });
+
+          try {
+            // iOS Safari蜷代￠縺ｫ environment 縺ｧ襍ｷ蜍・            await html5QrCode.start(
+              { facingMode: "environment" },
+              config,
+              onScanSuccess,
+              (errorMessage) => {}
+            );
+          } catch (cameraInitErr) {
+            console.warn("閭碁擇繧ｫ繝｡繝ｩ縺ｮ謖・ｮ夊ｵｷ蜍輔↓螟ｱ謨励＠縺ｾ縺励◆縲ゅヵ繧ｩ繝ｼ繝ｫ繝舌ャ繧ｯ縺励∪縺・", cameraInitErr);
+            // 繝・ヰ繧､繧ｹ縺ｮ繝・ヵ繧ｩ繝ｫ繝医き繝｡繝ｩ・亥・阡ｵ繝輔Ο繝ｳ繝医き繝｡繝ｩ縺ｪ縺ｩ・峨〒襍ｷ蜍・            await html5QrCode.start(
+              {},
+              config,
+              onScanSuccess,
+              (errorMessage) => {}
+            );
+          }
+          
+        } catch (e) {
+          console.error("Camera error:", e);
+          showToast("繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝医〒縺阪∪縺帙ｓ縺ｧ縺励◆縲ゅき繝｡繝ｩ縺ｸ縺ｮ繧｢繧ｯ繧ｻ繧ｹ繧定ｨｱ蜿ｯ縺励※縺ｭ縲・);
+          isCameraRunning = false;
+          readerDiv.classList.add('hidden');
+          cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
+          cameraBtnText.textContent = "繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ・;
+          cameraIcon.className = "fa-solid fa-camera-retro text-xl";
+        }
+      }
+    }
+
+    async function stopCamera() {
+      if (html5QrCode && isCameraRunning) {
+        try {
+          await html5QrCode.stop();
+        } catch (e) {
+          console.error("Stop camera error:", e);
+        }
+        html5QrCode = null;
+      }
+      isCameraRunning = false;
+      
+      const cameraBtn = document.getElementById('camera-toggle-btn');
+      const cameraBtnText = document.getElementById('camera-btn-text');
+      const cameraIcon = document.getElementById('camera-btn-icon');
+      const readerDiv = document.getElementById('reader');
+      
+      readerDiv.classList.add('hidden');
+      cameraBtn.className = "w-full px-8 py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 active:scale-95 text-white shadow-md flex items-center justify-center gap-3 transition-all";
+      cameraBtnText.textContent = "繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ・;
+      cameraIcon.className = "fa-solid fa-camera-retro text-xl";
+      document.getElementById('camera-hint-text').classList.add('hidden');
+    }
+
+    // 繝舌・繧ｳ繝ｼ繝画､懃衍譎ゅ・蜃ｦ逅・    function onScanSuccess(decodedText, decodedResult) {
+      const isbn = decodedText.trim();
+      
+      // 譌･譛ｬ縺ｮ譖ｸ邀咲畑・壽悽縺ｮ繝舌・繧ｳ繝ｼ繝峨・978縺九ｉ蟋九∪繧九・92蟋九∪繧翫・C繧ｳ繝ｼ繝峨・辟｡隕悶☆繧九・      if (!isbn.startsWith("978")) {
+        return;
+      }
+      
+      const now = Date.now();
+      // 蜷御ｸISBN縺ｮ驥崎､・ｪｭ縺ｿ蜿悶ｊ髦ｲ豁｢・・遘帝俣繧ｹ繧ｭ繝・・・・      if (isbn === lastScannedIsbn && (now - lastScannedTime) < 5000) {
+        return;
+      }
+      
+      lastScannedIsbn = isbn;
+      lastScannedTime = now;
+      
+      // 謌仙粥騾夂衍
+      playBeep();
+      showToast("繝舌・繧ｳ繝ｼ繝峨ｒ縺ｿ縺､縺代◆繧茨ｼ∵悽縺ｮ蜷榊燕繧定ｪｿ縺ｹ縺ｦ縺・∪縺・..");
+      
+      // 荳譎ゅΜ繧ｹ繝医↓霑ｽ蜉 (繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ繝励Ξ繝ｼ繧ｹ繝帙Ν繝繝ｼ)
+      addTempBookPlaceholder(isbn);
+    }
+
+    // ================= openBD + Google Books 繧ｯ繝ｩ繧､繧｢繝ｳ繝亥・逶ｴ謗･讀懃ｴ｢ =================
+    async function fetchBookInfo(isbn) {
+      // 1. 縺ｾ縺壹・譌･譛ｬ蝗ｽ蜀・↓髱槫ｸｸ縺ｫ蠑ｷ縺・openBD API 繧偵ヶ繝ｩ繧ｦ繧ｶ縺九ｉ逶ｴ謗･隧ｦ縺・(CORS繧ｵ繝昴・繝・
+      try {
+        const openBdUrl = 'https://api.openbd.jp/v1/get?isbn=' + isbn;
+        const response = await fetch(openBdUrl);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data[0] && data[0].summary) {
+            const summary = data[0].summary;
+            return {
+              title: summary.title || "",
+              author: summary.author || "・郁送閠・ｸ肴・・・,
+              coverUrl: summary.cover || ""
+            };
+          }
+        }
+      } catch (e) {
+        console.warn("openBD API browser fetch error:", e);
+      }
+
+      // 2. 繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ縺ｨ縺励※ Google Books API 繧偵ヶ繝ｩ繧ｦ繧ｶ縺九ｉ逶ｴ謗･隧ｦ縺・(CORS繧ｵ繝昴・繝・
+      try {
+        const googleUrl = 'https://www.googleapis.com/books/v1/volumes?q=isbn=' + isbn;
+        const response = await fetch(googleUrl);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.totalItems > 0 && data.items && data.items[0]) {
+            const volumeInfo = data.items[0].volumeInfo;
+            let coverUrl = "";
+            if (volumeInfo.imageLinks) {
+              coverUrl = volumeInfo.imageLinks.thumbnail || volumeInfo.imageLinks.smallThumbnail || "";
+              if (coverUrl.startsWith("http://")) {
+                coverUrl = coverUrl.replace("http://", "https://");
+              }
+            }
+            return {
+              title: volumeInfo.title || "",
+              author: volumeInfo.authors ? volumeInfo.authors.join(", ") : "",
+              coverUrl: coverUrl
+            };
+          }
+        }
+      } catch (e) {
+        console.error("Google Books API browser fetch error:", e);
+      }
+
+      // 3. 荳｡譁ｹ縺ｧ隕九▽縺九ｉ縺ｪ縺九▲縺溷ｴ蜷医・遨ｺ繝・・繧ｿ
+      return { title: "", author: "", coverUrl: "" };
+    }
+
+    // ================= 荳譎ゅΜ繧ｹ繝育ｮ｡逅・& 邱ｨ髮・=================
+    function addTempBookPlaceholder(isbn) {
+      const tempId = 'temp_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      
+      const newBook = {
+        tempId: tempId,
+        isbn: isbn,
+        title: "縺励ｉ縺ｹ縺ｦ縺・ｋ繧・..",
+        author: "縺励ｉ縺ｹ縺ｦ縺・ｋ繧・..",
+        coverUrl: "",
+        ownerType: "蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽", // 蛻晄悄蛟､: 蝗ｳ譖ｸ鬢ｨ
+        genre: "迚ｩ隱・,                // 蛻晄悄蛟､: 迚ｩ隱・        comment: "",
+        rating: 5,                   // 蛻晄悄蛟､: 5
+        isLoading: true
+      };
+      
+      // 蜈磯ｭ縺ｫ霑ｽ蜉
+      tempBooks.unshift(newBook);
+      
+      // 荳譎ゅΜ繧ｹ繝医お繝ｪ繧｢縺ｮ蛻晄悄繝・く繧ｹ繝茨ｼ育ｩｺ迥ｶ諷具ｼ峨ｒ豸亥悉縺吶ｋ貅門ｙ縺ｨ縺励※縲・      // 譛蛻昴・隕∫ｴ霑ｽ蜉譎ゅ・縺ｿ隕ｪ繧ｳ繝ｳ繝・リ縺ｮ荳ｭ霄ｫ繧堤ｩｺ縺ｫ縺吶ｋ
+      const container = document.getElementById('temp-list-container');
+      if (tempBooks.length === 1) {
+        container.innerHTML = '';
+      }
+      
+      // DOM縺ｫ譁ｰ隕上き繝ｼ繝峨ｒ霑ｽ蜉 (荳縺九ｉ蜈ｨ驛ｨ蜀肴緒逕ｻ縺帙★縲√ヵ繧ｩ繝ｼ繧ｫ繧ｹ邯ｭ謖√・縺溘ａ縺ｫ蛟句挨霑ｽ蜉)
+      container.insertAdjacentHTML('afterbegin', renderSingleTempBookHTML(newBook));
+      updateTempCountBadge();
+      
+      // 髱槫酔譛溘〒譖ｸ邀肴ュ蝣ｱ繧貞叙蠕・      fetchBookInfo(isbn).then(info => {
+        const book = tempBooks.find(b => b.tempId === tempId);
+        if (book) {
+          book.title = info.title || ('繝舌・繧ｳ繝ｼ繝峨・譛ｬ (' + isbn + ')');
+          book.author = info.author || "・郁送閠・ｸ肴・・・;
+          book.coverUrl = info.coverUrl;
+          book.isLoading = false;
+          
+          // 隧ｲ蠖薙き繝ｼ繝峨・DOM縺ｮ縺ｿ譖ｸ縺肴鋤縺医ｋ
+          updateTempBookCardDOM(book);
+        }
+      });
+    }
+
+    // 繧ｸ繝｣繝ｳ繝ｫ縺ｮ濶ｲ螳夂ｾｩ
+    function getGenreColor(genre) {
+      switch (genre) {
+        case '迚ｩ隱・: return { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-300', fill: '#f43f5e' };
+        case '蝗ｳ髑代・遘大ｭｦ': return { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300', fill: '#10b981' };
+        case '莨晁ｨ・: return { bg: 'bg-indigo-100', text: 'text-indigo-700', border: 'border-indigo-300', fill: '#6366f1' };
+        case '邨ｵ譛ｬ': return { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300', fill: '#a855f7' };
+        default: return { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300', fill: '#f59e0b' };
+      }
+    }
+
+    // 譛ｬ縺ｮ繧ｫ繝舌・HTML縺ｮ蜿門ｾ・    function getBookCoverHTML(coverUrl, title, genre) {
+      if (coverUrl && coverUrl.trim() !== "") {
+        return '<img src="' + coverUrl + '" alt="' + title + '" class="w-full h-full object-cover rounded-xl shadow border border-gray-100" onerror="this.src=\'\'; this.onerror=null; this.parentNode.innerHTML=getFallbackCoverHTML(\'' + (title || '辟｡鬘・).replace(/'/g, "\\'") + '\', \'' + genre + '\')">';
+      }
+      return getFallbackCoverHTML(title, genre);
+    }
+
+    // 繧ｫ繝舌・逕ｻ蜒上′辟｡縺・ｴ蜷医・繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ繝・じ繧､繝ｳ (繧ｸ繝｣繝ｳ繝ｫ蛻･濶ｲ蛻・￠)
+    function getFallbackCoverHTML(title, genre) {
+      const colors = getGenreColor(genre);
+      return [
+        '<div class="w-full h-full ' + colors.bg + ' ' + colors.border + ' border-2 rounded-xl flex flex-col items-center justify-between p-3 shadow relative overflow-hidden">',
+        '  <!-- 鬟ｾ繧願レ陦ｨ邏・-->',
+        '  <div class="absolute left-0 top-0 bottom-0 w-2.5 bg-black opacity-10"></div>',
+        '  <div class="w-full flex justify-end">',
+        '    <span class="text-[9px] font-black px-1.5 py-0.5 rounded-full ' + colors.bg + ' ' + colors.text + ' border border-current">' + genre + '</span>',
+        '  </div>',
+        '  <div class="my-auto text-center px-1">',
+        '    <i class="fa-solid fa-book text-3xl mb-1" style="color: ' + colors.fill + '"></i>',
+        '    <p class="text-xs font-black text-gray-800 line-clamp-3 leading-snug">' + (title || '辟｡鬘・) + '</p>',
+        '  </div>',
+        '  <div class="w-full text-center">',
+        '    <span class="text-[9px] text-gray-400 font-bold tracking-wider">繧医・繧医・</span>',
+        '  </div>',
+        '</div>'
+      ].join('\n');
+    }
+
+    // 繧ｹ繧ｿ繝ｼ縺ｮHTML繝ｬ繝ｳ繝繝ｪ繝ｳ繧ｰ
+    function renderStarsHTML(tempId, rating) {
+      let stars = '';
+      for (let i = 1; i <= 5; i++) {
+        const isGold = i <= rating;
+        const colorClass = isGold ? 'text-amber-400 scale-110' : 'text-gray-300';
+        stars += '<button type="button" onclick="setTempBookRating(\'' + tempId + '\', ' + i + ')" class="text-3xl focus:outline-none transition-transform active:scale-125 px-1">' +
+                 '<i class="fa-solid fa-star ' + colorClass + '"></i>' +
+                 '</button>';
+      }
+      return stars;
+    }
+
+    // 蜊倅ｸ荳譎ゅΜ繧ｹ繝医き繝ｼ繝峨・HTML
+    function renderSingleTempBookHTML(book) {
+      const colors = getGenreColor(book.genre);
+      const isLoading = book.isLoading;
+      const opacityClass = isLoading ? 'opacity-70' : '';
+      
+      return [
+        '<div id="temp-card-' + book.tempId + '" class="bg-white rounded-[24px] p-5 shadow border-2 border-brand-100/80 flex flex-col md:flex-row gap-5 relative transition-all duration-300 ' + opacityClass + '">',
+        '  <!-- 繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ荳ｭ繧ｹ繝斐リ繝ｼ -->',
+        '  <div class="card-loader absolute inset-0 bg-white/60 rounded-[24px] flex items-center justify-center z-10 ' + (isLoading ? '' : 'hidden') + '">',
+        '    <i class="fa-solid fa-circle-notch animate-spin text-3xl text-brand-500"></i>',
+        '  </div>',
+        '  ',
+        '  <!-- 蜑企勁繝懊ち繝ｳ (繧ｿ繝・・鬆伜沺諡｡螟ｧ) -->',
+        '  <button type="button" onclick="deleteTempBook(\'' + book.tempId + '\')" class="absolute -top-3 -right-3 w-10 h-10 bg-rose-500 hover:bg-rose-600 active:scale-90 text-white rounded-full flex items-center justify-center shadow-lg transition-transform focus:outline-none z-20">',
+        '    <i class="fa-solid fa-trash-can text-lg"></i>',
+        '  </button>',
+        '',
+        '  <!-- 譛ｬ縺ｮ繧ｫ繝舌・ -->',
+        '  <div class="cover-container w-24 h-32 mx-auto md:mx-0 flex-shrink-0">',
+        '    ' + getBookCoverHTML(book.coverUrl, book.title, book.genre),
+        '  </div>',
+        '',
+        '  <!-- 蜈･蜉幃・岼繝輔か繝ｼ繝 -->',
+        '  <div class="flex-grow flex flex-col justify-between gap-3">',
+        '    ',
+        '    <!-- 繧ｿ繧､繝医Ν縺ｨ闡苓・(繧､繝ｳ繝ｩ繧､繝ｳ邱ｨ髮・庄閭ｽ) -->',
+        '    <div>',
+        '      <input type="text" value="' + book.title + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'title\', this.value)" class="title-input font-black text-lg text-gray-800 w-full border-b-2 border-dashed border-brand-200 focus:border-brand-500 focus:outline-none bg-transparent py-1 rounded" placeholder="譛ｬ縺ｮ縺ｪ縺ｾ縺医ｒ蜈･蜉帙＠縺ｦ縺ｭ" ' + (isLoading ? 'disabled' : '') + '>',
+        '      <input type="text" value="' + book.author + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'author\', this.value)" class="author-input text-sm text-gray-500 w-full border-b-2 border-dashed border-brand-100 focus:border-brand-400 focus:outline-none bg-transparent py-1 mt-1 rounded" placeholder="縺九＞縺滉ｺｺ縺ｮ縺ｪ縺ｾ縺・ ' + (isLoading ? 'disabled' : '') + '>',
+        '    </div>',
+        '',
+        '    <!-- 謇譛峨→繧ｸ繝｣繝ｳ繝ｫ -->',
+        '    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">',
+        '      <!-- 謇譛牙玄蛻・ヨ繧ｰ繝ｫ繝懊ち繝ｳ -->',
+        '      <div>',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">縺ｩ縺薙↓縺ゅｋ譛ｬ・・/span>',
+        '        <div class="flex bg-brand-50/50 p-0.5 rounded-lg border border-brand-200">',
+        '          <button type="button" id="owner-lib-' + book.tempId + '" onclick="setTempBookOwner(\'' + book.tempId + '\', \'蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽\')" class="flex-1 text-xs font-black py-1.5 rounded transition-all ' + (book.ownerType === '蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽' ? 'bg-brand-400 text-white shadow-sm' : 'text-brand-700 hover:bg-brand-100/30') + '">蝗ｳ譖ｸ鬢ｨ</button>',
+        '          <button type="button" id="owner-home-' + book.tempId + '" onclick="setTempBookOwner(\'' + book.tempId + '\', \'縺翫≧縺｡縺ｮ譛ｬ\')" class="flex-1 text-xs font-black py-1.5 rounded transition-all ' + (book.ownerType === '縺翫≧縺｡縺ｮ譛ｬ' ? 'bg-brand-400 text-white shadow-sm' : 'text-brand-700 hover:bg-brand-100/30') + '">縺翫≧縺｡</button>',
+        '        </div>',
+        '      </div>',
+        '      <div>',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">縺ｩ繧薙↑譛ｬ・・/span>',
+        '        <select onchange="setTempBookGenre(\'' + book.tempId + '\', this.value)" class="w-full bg-white text-xs font-bold p-1.5 rounded-lg border border-brand-200 focus:border-brand-500 focus:outline-none">',
+        '          <option value="迚ｩ隱・ ' + (book.genre === '迚ｩ隱・ ? 'selected' : '') + '>燈 迚ｩ隱・/option>',
+        '          <option value="蝗ｳ髑代・遘大ｭｦ" ' + (book.genre === '蝗ｳ髑代・遘大ｭｦ' ? 'selected' : '') + '>･ｦ 蝗ｳ髑代・遘大ｭｦ</option>',
+        '          <option value="莨晁ｨ・ ' + (book.genre === '莨晁ｨ・ ? 'selected' : '') + '>荘 莨晁ｨ・/option>',
+        '          <option value="邨ｵ譛ｬ" ' + (book.genre === '邨ｵ譛ｬ' ? 'selected' : '') + '>耳 邨ｵ譛ｬ</option>',
+        '          <option value="縺昴・莉・ ' + (book.genre === '縺昴・莉・ ? 'selected' : '') + '>箝撰ｸ・縺昴・莉・/option>',
+        '        </select>',
+        '      </div>',
+        '    </div>',
+        '',
+        '    <!-- 譏溯ｩ穂ｾ｡縺ｨ縺ｲ縺ｨ縺薙→ -->',
+        '    <div class="flex flex-wrap items-center gap-3 justify-between">',
+        '      <div>',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">縺頑ｰ励↓蜈･繧雁ｺｦ</span>',
+        '        <div class="stars-container flex items-center bg-brand-50/50 px-2 py-0.5 rounded-xl border border-brand-200">',
+        '          ' + renderStarsHTML(book.tempId, book.rating),
+        '        </div>',
+        '      </div>',
+        '      <div class="flex-grow min-w-[180px]">',
+        '        <span class="block text-[10px] font-black text-brand-700 mb-0.5">諢滓Φ繝｡繝｢</span>',
+        '        <input type="text" value="' + book.comment + '" oninput="updateTempBookField(\'' + book.tempId + '\', \'comment\', this.value)" class="w-full bg-white text-xs text-gray-700 p-2 rounded-xl border border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="縺翫ｂ縺励ｍ縺九▲縺溘％縺ｨ縺ｪ縺ｩ">',
+        '      </div>',
+        '    </div>',
+        '  </div>',
+        '</div>'
+      ].join('\n');
+    }
+
+    // 髱槫酔譛滓ュ蝣ｱ繝輔ぉ繝・メ螳御ｺ・凾縺ｮDOM譖ｴ譁ｰ
+    function updateTempBookCardDOM(book) {
+      const cardEl = document.getElementById('temp-card-' + book.tempId);
+      if (!cardEl) return;
+      
+      // 繧ｫ繝舌・縺ｮ譖ｴ譁ｰ
+      const coverContainer = cardEl.querySelector('.cover-container');
+      if (coverContainer) {
+        coverContainer.innerHTML = getBookCoverHTML(book.coverUrl, book.title, book.genre);
+      }
+      
+      // 蜈･蜉帛､縺ｮ譖ｴ譁ｰ
+      const titleInput = cardEl.querySelector('.title-input');
+      if (titleInput) {
+        titleInput.value = book.title;
+        titleInput.disabled = false;
+      }
+      const authorInput = cardEl.querySelector('.author-input');
+      if (authorInput) {
+        authorInput.value = book.author;
+        authorInput.disabled = false;
+      }
+      
+      // 繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ縺ｮ髱櫁｡ｨ遉ｺ
+      cardEl.classList.remove('opacity-70');
+      const loader = cardEl.querySelector('.card-loader');
+      if (loader) {
+        loader.classList.add('hidden');
+      }
+    }
+
+    // 繝輔ぅ繝ｼ繝ｫ繝画峩譁ｰ繝上Φ繝峨Λ繝ｼ
+    function updateTempBookField(tempId, field, value) {
+      const book = tempBooks.find(b => b.tempId === tempId);
+      if (book) {
+        book[field] = value;
+      }
+    }
+
+    // 謇譛芽・∈謚槭ワ繝ｳ繝峨Λ繝ｼ
+    function setTempBookOwner(tempId, ownerType) {
+      const book = tempBooks.find(b => b.tempId === tempId);
+      if (book) {
+        book.ownerType = ownerType;
+        
+        const libBtn = document.getElementById('owner-lib-' + tempId);
+        const homeBtn = document.getElementById('owner-home-' + tempId);
+        
+        if (libBtn && homeBtn) {
+          if (ownerType === '蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽') {
+            libBtn.className = "flex-1 text-xs font-black py-1.5 rounded transition-all bg-brand-400 text-white shadow-sm";
+            homeBtn.className = "flex-1 text-xs font-black py-1.5 rounded transition-all text-brand-700 hover:bg-brand-100/30";
+          } else {
+            homeBtn.className = "flex-1 text-xs font-black py-1.5 rounded transition-all bg-brand-400 text-white shadow-sm";
+            libBtn.className = "flex-1 text-xs font-black py-1.5 rounded transition-all text-brand-700 hover:bg-brand-100/30";
+          }
+        }
+      }
+    }
+
+    // 繧ｸ繝｣繝ｳ繝ｫ驕ｸ謚槭ワ繝ｳ繝峨Λ繝ｼ (繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ繧ｫ繝舌・縺御ｾ晏ｭ・
+    function setTempBookGenre(tempId, genre) {
+      const book = tempBooks.find(b => b.tempId === tempId);
+      if (book) {
+        book.genre = genre;
+        if (!book.coverUrl) {
+          const cardEl = document.getElementById('temp-card-' + tempId);
+          if (cardEl) {
+            const coverContainer = cardEl.querySelector('.cover-container');
+            if (coverContainer) {
+              coverContainer.innerHTML = getBookCoverHTML(book.coverUrl, book.title, book.genre);
+            }
+          }
+        }
+      }
+    }
+
+    // 譏溷､画峩繝上Φ繝峨Λ繝ｼ
+    function setTempBookRating(tempId, rating) {
+      const book = tempBooks.find(b => b.tempId === tempId);
+      if (book) {
+        book.rating = rating;
+        const cardEl = document.getElementById('temp-card-' + tempId);
+        if (cardEl) {
+          const starsContainer = cardEl.querySelector('.stars-container');
+          if (starsContainer) {
+            starsContainer.innerHTML = renderStarsHTML(tempId, rating);
+          }
+        }
+      }
+    }
+
+    // 繝ｪ繧ｹ繝医・蛟句挨蜑企勁
+    function deleteTempBook(tempId) {
+      tempBooks = tempBooks.filter(b => b.tempId !== tempId);
+      const cardEl = document.getElementById('temp-card-' + tempId);
+      if (cardEl) {
+        cardEl.remove();
+      }
+      
+      updateTempCountBadge();
+      
+      if (tempBooks.length === 0) {
+        renderTempListEmpty();
+      }
+    }
+
+    // 荳譎ゅΜ繧ｹ繝育ｩｺ迥ｶ諷九Ξ繝ｳ繝繝ｪ繝ｳ繧ｰ
+    function renderTempListEmpty() {
+      const container = document.getElementById('temp-list-container');
+      container.innerHTML = [
+        '<div class="text-center py-16 px-4 border-4 border-dashed border-brand-200 rounded-3xl bg-brand-50/20">',
+        '  <i class="fa-solid fa-camera-retro text-5xl text-brand-300 mb-4 animate-bounce"></i>',
+        '  <p class="text-lg font-black text-brand-700">繧ｹ繧ｭ繝｣繝ｳ縺励◆譛ｬ縺後％縺薙↓縺ｧ繧九ｈ・・/p>',
+        '  <p class="text-xs text-brand-500 mt-2">荳翫・縲後き繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ√阪・繧ｿ繝ｳ繧偵♀縺励※縲√ヰ繝ｼ繧ｳ繝ｼ繝峨ｒ縺・▽縺励※縺ｭ縲・/p>',
+        '</div>'
+      ].join('\n');
+    }
+
+    // 荳譎ゅΜ繧ｹ繝医・繧ｯ繝ｪ繧｢
+    function clearTempListConfirm() {
+      if (tempBooks.length === 0) return;
+      if (confirm("荳譎ゅΜ繧ｹ繝医ｒ縺九ｉ縺ｫ縺励∪縺吶°・・)) {
+        tempBooks = [];
+        renderTempListEmpty();
+        updateTempCountBadge();
+      }
+    }
+
+    // 荳諡ｬ逋ｻ骭ｲ繝舌ャ繧ｸ・・・繧ｿ繝ｳ縺ｮ陦ｨ遉ｺ蛻ｶ蠕｡
+    function updateTempCountBadge() {
+      const badge = document.getElementById('temp-count-badge');
+      const count = tempBooks.length;
+      if (badge) {
+        badge.textContent = count;
+      }
+      const container = document.getElementById('batch-submit-btn-container');
+      if (container) {
+        if (count > 0) {
+          container.classList.remove('hidden');
+        } else {
+          container.classList.add('hidden');
+        }
+      }
+    }
+
+    // 繧ｹ繧ｭ繝｣繝ｳ貂医∩荳譎ゅΜ繧ｹ繝医・荳諡ｬ逋ｻ骭ｲ蜃ｦ逅・    function submitBatchBooks() {
+      if (tempBooks.length === 0) return;
+      
+      // 譛ｪ蜈･蜉幢ｼ医ち繧､繝医Ν辟｡縺暦ｼ峨・繝√ぉ繝・け
+      const invalid = tempBooks.find(b => !b.title || b.title.trim() === "" || b.title === "縺励ｉ縺ｹ縺ｦ縺・ｋ繧・..");
+      if (invalid) {
+        showToast("譛ｬ縺ｮ縺ｪ縺ｾ縺医ｒ蜈･蜉帙＠縺ｦ縺・↑縺・ｂ縺ｮ縺後≠繧九ｈ縲よ嶌縺・※縺ｭ・・);
+        return;
+      }
+      
+      showLoading(true);
+      
+      // GAS騾∽ｿ｡逕ｨ縺ｮ驟榊・縺ｫ螟画鋤
+      const booksPayload = tempBooks.map(b => ({
+        isbn: b.isbn,
+        title: b.title,
+        author: b.author,
+        coverUrl: b.coverUrl,
+        ownerType: b.ownerType,
+        genre: b.genre,
+        comment: b.comment,
+        rating: b.rating
+      }));
+      
+      dbDriver.addBooks(booksPayload, function(res) {
+        showLoading(false);
+        if (res.success) {
+          showToast(res.count + '蜀翫・譛ｬ繧呈眠縺励￥逋ｻ骭ｲ縺励◆繧茨ｼÅ沁・);
+          
+          // 荳譎ゅΜ繧ｹ繝医け繝ｪ繧｢
+          tempBooks = [];
+          renderTempListEmpty();
+          updateTempCountBadge();
+          
+          // 荳隕ｧ繧ｿ繝悶∈蛻・ｊ譖ｿ縺・& 繝ｪ繝ｭ繝ｼ繝・          switchTab('tab-gallery');
+        } else {
+          showToast("逋ｻ骭ｲ縺ｫ縺励▲縺ｱ縺・＠縺｡繧・▲縺溘・);
+        }
+      }, function(err) {
+        showLoading(false);
+        console.error(err);
+        showToast("繝・・繧ｿ繝吶・繧ｹ縺ｨ縺ｮ騾壻ｿ｡縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲・);
+      });
+    }
+
+    // ================= 謇句虚逋ｻ骭ｲ邂｡逅・=================
+    // 謇句虚繧ｹ繧ｿ繝ｼ縺ｮ繝ｬ繝ｳ繝繝ｪ繝ｳ繧ｰ
+    function renderManualStars(rating) {
+      const container = document.getElementById('manual-stars-container');
+      let html = '';
+      for (let i = 1; i <= 5; i++) {
+        const isGold = i <= rating;
+        const colorClass = isGold ? 'text-amber-400 scale-110' : 'text-gray-300';
+        html += '<button type="button" onclick="setManualRating(' + i + ')" class="text-3xl focus:outline-none transition-transform active:scale-125 px-1">' +
+                '<i class="fa-solid fa-star ' + colorClass + '"></i>' +
+                '</button>';
+      }
+      container.innerHTML = html;
+      document.getElementById('manual-rating').value = rating;
+    }
+
+    function setManualRating(rating) {
+      renderManualStars(rating);
+    }
+
+    // 謇句虚繝輔か繝ｼ繝騾∽ｿ｡蜃ｦ逅・    function submitManualForm(event) {
+      event.preventDefault();
+      
+      const title = document.getElementById('manual-title').value.trim();
+      const author = document.getElementById('manual-author').value.trim();
+      const genre = document.getElementById('manual-genre').value;
+      const ownerType = document.querySelector('[name="manual-owner"]:checked').value;
+      const dateVal = document.getElementById('manual-date').value;
+      const rating = Number(document.getElementById('manual-rating').value);
+      const comment = document.getElementById('manual-comment').value.trim();
+      
+      if (!title) {
+        showToast("譛ｬ縺ｮ蜷榊燕繧呈嶌縺・※縺ｭ・・);
+        return;
+      }
+      
+      showLoading(true);
+      
+      const singlePayload = [{
+        isbn: "",
+        title: title,
+        author: author,
+        coverUrl: "", // 謇句虚縺ｯ陦ｨ邏咏┌縺・        ownerType: ownerType,
+        genre: genre,
+        date: dateVal, // 繧ｫ繧ｹ繧ｿ繝逋ｻ骭ｲ譌･
+        comment: comment,
+        rating: rating
+      }];
+      
+      dbDriver.addBooks(singlePayload, function(res) {
+        showLoading(false);
+        if (res.success) {
+          showToast("譛ｬ繧・蜀顔匳骭ｲ縺励◆繧茨ｼÅ沒・);
+          
+          // 繝輔か繝ｼ繝繝ｪ繧ｻ繝・ヨ
+          document.getElementById('manual-title').value = "";
+          document.getElementById('manual-author').value = "";
+          document.getElementById('manual-comment').value = "";
+          const today = new Date().toISOString().split('T')[0];
+          document.getElementById('manual-date').value = today;
+          renderManualStars(5);
+          
+          // 荳隕ｧ縺ｸ
+          switchTab('tab-gallery');
+        } else {
+          showToast("逋ｻ骭ｲ縺ｫ縺励▲縺ｱ縺・＠縺｡繧・▲縺溘・);
+        }
+      }, function(err) {
+        showLoading(false);
+        console.error(err);
+        showToast("繝・・繧ｿ繝吶・繧ｹ縺ｨ縺ｮ騾壻ｿ｡縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲・);
+      });
+    }
+
+    // ================= 隱ｭ譖ｸ螳溽ｸｾ繝繝・す繝･繝懊・繝峨・繝輔ぅ繝ｫ繧ｿ繝ｻ繧ｽ繝ｼ繝・=================
+    // 繧ｹ繝励Ξ繝・ラ繧ｷ繝ｼ繝医°繧峨ョ繝ｼ繧ｿ繧貞叙蠕・    function fetchRegisteredBooks() {
+      showLoading(true);
+      dbDriver.getBooks(function(books) {
+        allRegisteredBooks = books;
+        
+        // 隱ｭ譖ｸ雋ｯ驥代き繧ｦ繝ｳ繧ｿ繝ｼ譖ｴ譁ｰ
+        const counterEl = document.getElementById('dashboard-counter');
+        if (counterEl) {
+          counterEl.textContent = books.length;
+        }
+        
+        // 繧ｮ繝｣繝ｩ繝ｪ繝ｼ繧呈緒逕ｻ
+        renderRegisteredBooks();
+        showLoading(false);
+      }, function(err) {
+        showLoading(false);
+        console.error(err);
+        showToast("繝・・繧ｿ繝吶・繧ｹ縺九ｉ縺ｮ隱ｭ縺ｿ霎ｼ縺ｿ縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲・);
+      });
+    }
+
+    // 繝輔ぅ繝ｫ繧ｿ繝ｻ繧ｽ繝ｼ繝医ｒ驕ｩ逕ｨ縺励※逋ｻ骭ｲ貂医∩譛ｬ繧呈緒逕ｻ
+    function renderRegisteredBooks() {
+      const container = document.getElementById('registered-list-container');
+      if (!container) return;
+      
+      // 繝輔ぅ繝ｫ繧ｿ蛟､縺ｮ蜿門ｾ・      const filterOwner = document.querySelector('[name="filter-owner"]:checked').value;
+      const filterGenre = document.getElementById('filter-genre').value;
+      const sortBy = document.getElementById('sort-by').value;
+      
+      // 繝輔ぅ繝ｫ繧ｿ繝ｪ繝ｳ繧ｰ蜃ｦ逅・      let filtered = allRegisteredBooks.filter(book => {
+        const matchOwner = (filterOwner === '縺吶∋縺ｦ') || (book.ownerType === filterOwner);
+        const matchGenre = (filterGenre === '縺吶∋縺ｦ') || (book.genre === filterGenre);
+        return matchOwner && matchGenre;
+      });
+      
+      // 繧ｽ繝ｼ繝・ぅ繝ｳ繧ｰ蜃ｦ逅・      filtered.sort((a, b) => {
+        if (sortBy === 'date-desc') {
+          // 譌･莉倥・譁ｰ縺励＞鬆・          return new Date(b.date.replace(/\//g, '-')) - new Date(a.date.replace(/\//g, '-'));
+        } else if (sortBy === 'date-asc') {
+          // 譌･莉倥・蜿､縺・・          return new Date(a.date.replace(/\//g, '-')) - new Date(b.date.replace(/\//g, '-'));
+        } else if (sortBy === 'rating-desc') {
+          // 隧穂ｾ｡縺ｮ鬮倥＞鬆・          return b.rating - a.rating;
+        }
+        return 0;
+      });
+      
+      // 繝ｪ繧ｹ繝域緒逕ｻ
+      if (filtered.length === 0) {
+        container.innerHTML = [
+          '<div class="col-span-full text-center py-16 px-4 bg-white/60 rounded-3xl border-2 border-dashed border-gray-200">',
+          '  <i class="fa-solid fa-folder-open text-5xl text-gray-300 mb-4 animate-bounce"></i>',
+          '  <p class="text-lg font-black text-gray-500">縺ゅ※縺ｯ縺ｾ繧区悽縺後↑縺・ｈ</p>',
+          '  <p class="text-xs text-gray-400 mt-2">縺ｻ縺九・縺励⊂繧翫％縺ｿ繧偵◆繧√☆縺九∵眠縺励￥譛ｬ繧堤匳骭ｲ縺励※縺ｿ縺ｦ縺ｭ・・/p>',
+          '</div>'
+        ].join('\n');
+        return;
+      }
+      
+      let html = '';
+      filtered.forEach(book => {
+        const ownerBadgeColor = book.ownerType === '蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700';
+        const ownerLabel = book.ownerType === '蝗ｳ譖ｸ鬢ｨ縺ｧ蛟溘ｊ縺滓悽' ? '蝗ｳ譖ｸ鬢ｨ' : '縺翫≧縺｡';
+        const colors = getGenreColor(book.genre);
+        
+        // 繧ｹ繧ｿ繝ｼ陦ｨ遉ｺ
+        let starsHTML = '';
+        for (let i = 1; i <= 5; i++) {
+          if (i <= book.rating) {
+            starsHTML += '<i class="fa-solid fa-star text-amber-400 text-sm"></i>';
+          } else {
+            starsHTML += '<i class="fa-regular fa-star text-gray-200 text-sm"></i>';
+          }
+        }
+        
+        // 諢滓Φ繝｡繝｢・亥聖縺榊・縺鈴｢ｨ・・        const commentHTML = book.comment ? [
+          '<div class="mt-2.5 relative bg-amber-50/70 border border-amber-100 p-2.5 rounded-xl text-xs text-brand-900 leading-snug">',
+          '  <div class="absolute -top-1 w-2.5 h-2.5 bg-amber-50/70 border-t border-l border-amber-100 rotate-45 left-4"></div>',
+          '  <p class="line-clamp-3">町 ' + book.comment + '</p>',
+          '</div>'
+        ].join('\n') : '';
+        
+        // 譌･莉俶紛蠖｢
+        const displayDate = book.date ? book.date.split(' ')[0] : '譌･莉倅ｸ肴・';
+        
+        html += [
+          '<div class="bg-white rounded-3xl p-4 shadow border border-gray-100 hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between">',
+          '  <div>',
+          '    <!-- 譛ｬ縺ｮ繧ｫ繝舌・ -->',
+          '    <div class="w-full h-36 flex items-center justify-center mb-3">',
+          '      <div class="w-24 h-32">',
+          '        ' + getBookCoverHTML(book.coverUrl, book.title, book.genre),
+          '      </div>',
+          '    </div>',
+          '    ',
+          '    <!-- 蛹ｺ蛻・・繧ｸ繝｣繝ｳ繝ｫ繝舌ャ繧ｸ -->',
+          '    <div class="flex gap-1.5 mb-1.5 flex-wrap">',
+          '      <span class="text-[9px] font-black px-2 py-0.5 rounded-full ' + ownerBadgeColor + '">' + ownerLabel + '</span>',
+          '      <span class="text-[9px] font-black px-2 py-0.5 rounded-full ' + colors.bg + ' ' + colors.text + '">' + book.genre + '</span>',
+          '    </div>',
+          '    ',
+          '    <!-- 繧ｿ繧､繝医Ν縺ｨ菴懆・-->',
+          '    <h3 class="font-black text-sm text-gray-800 line-clamp-2 leading-snug" title="' + book.title + '">' + book.title + '</h3>',
+          '    <p class="text-[11px] text-gray-400 line-clamp-1 mt-0.5">' + (book.author || '・郁送閠・ｸ肴・・・) + '</p>',
+          '  </div>',
+          '  ',
+          '  <div class="mt-2">',
+          '    <!-- 譏溯ｩ穂ｾ｡ -->',
+          '    <div class="flex items-center gap-0.5">',
+          '      ' + starsHTML,
+          '    </div>',
+          '    ',
+          '    <!-- 諢滓Φ -->',
+          '    ' + commentHTML,
+          '    ',
+          '    <!-- 譌･莉倥・繝｡繧ｿ諠・ｱ -->',
+          '    <div class="text-[9px] text-gray-300 mt-3 pt-2 border-t border-gray-100 flex justify-between items-center">',
+          '      <span class="font-bold">套 ' + displayDate + '</span>',
+          '      ' + (book.isbn ? '<span class="font-mono text-gray-300 scale-90">ISBN</span>' : ''),
+          '    </div>',
+          '  </div>',
+          '</div>'
+        ].join('\n');
+      });
+      
+      container.innerHTML = html;
+    }
+
+    // 繝舌・繧ｳ繝ｼ繝会ｼ・SBN・峨・謇句・蜉帶､懃ｴ｢蜃ｦ逅・    function submitManualIsbn() {
+      const input = document.getElementById('manual-isbn-input');
+      if (!input) return;
+      
+      const isbn = input.value.trim().replace(/[-\s]/g, '');
+      if (!/^\d{10}$|^\d{13}$/.test(isbn)) {
+        showToast("繝舌・繧ｳ繝ｼ繝峨・謨ｰ蟄励・10縺代◆縺・3縺代◆縺ｧ蜈･繧後※縺ｭ・・);
+        return;
+      }
+      
+      // 蜈･蜉帶ｬ・ｒ繧ｯ繝ｪ繧｢
+      input.value = "";
+      
+      // 髻ｳ螢ｰ蛻晄悄蛹悶→繝薙・繝鈴浹
+      initAudio();
+      playBeep();
+      showToast("繝舌・繧ｳ繝ｼ繝峨ｒ縺・￠縺､縺代∪縺励◆縲ゅ＠繧峨∋縺ｦ縺・∪縺・..");
+      
+      // 荳譎ゅΜ繧ｹ繝医↓霑ｽ蜉蜃ｦ逅・ｒ髢句ｧ・      addTempBookPlaceholder(isbn);
+    }
+  </script>
+
+  <!-- ================= 險ｭ螳夂ｮ｡逅・Δ繝ｼ繝繝ｫ (GAS URL騾｣謳ｺ逕ｨ) ================= -->
+  <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300 opacity-0 pointer-events-none">
+    <div class="bg-white p-6 md:p-8 rounded-[32px] border-4 border-brand-300 shadow-2xl w-full max-w-md mx-4">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
+          <i class="fa-solid fa-gear text-brand-500"></i>
+          繧ｷ繧ｹ繝・Β險ｭ螳・        </h3>
+        <button type="button" onclick="showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+      </div>
+      
+      <div class="space-y-4">
+        <div class="bg-brand-50 p-4 rounded-2xl border border-brand-200 text-xs text-brand-800 leading-relaxed">
+          <p class="font-bold mb-1">迫 Google Apps Script 騾｣謳ｺ險ｭ螳・/p>
+          <p>Netlify遲峨・螟夜Κ繧ｵ繝ｼ繝舌・縺九ｉ繝・・繧ｿ繧剃ｿ晏ｭ倥・蜿門ｾ励☆繧九◆繧√↓縲∝・髢九＠縺溘隈AS繧ｦ繧ｧ繝悶い繝励Μ縺ｮ繝・・繝ｭ繧､URL縲阪ｒ險ｭ螳壹＠縺ｦ縺上□縺輔＞縲・/p>
+        </div>
+        
+        <div>
+          <label class="block text-xs font-black text-brand-700 mb-1.5">GAS繧ｦ繧ｧ繝悶い繝励Μ縺ｮURL</label>
+          <input type="text" id="settings-gas-url-input" class="w-full bg-slate-50 text-xs text-slate-800 p-3 rounded-xl border-2 border-brand-200 focus:border-brand-500 focus:outline-none" placeholder="https://script.google.com/macros/s/.../exec">
+        </div>
+        
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="saveGasUrlSettings()" class="flex-1 py-3.5 bg-brand-500 hover:bg-brand-600 active:scale-95 text-white font-black text-sm rounded-xl shadow-md transition-all">
+            險ｭ螳壹ｒ菫晏ｭ倥☆繧・          </button>
+          <button type="button" onclick="showSettingsModal(false)" class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-sm rounded-xl transition-all">
+            縺ｨ縺倥ｋ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 繧ｹ繧ｭ繝｣繝翫・蟆ら畑 蜈ｨ逕ｻ髱｢繝ｬ繧､繧｢繧ｦ繝・(iOS Safari逕ｨ) ================= -->
+  <div id="scanner-only-container" class="hidden min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-black text-brand-400">繧医・繧医・繧ｹ繧ｭ繝｣繝翫・ 胴</h1>
+      <p class="text-xs text-slate-400 mt-1">繝｡繧､繝ｳ逕ｻ髱｢縺ｨ騾｣蜍輔＠縺ｦ繝舌・繧ｳ繝ｼ繝峨ｒ隱ｭ縺ｿ蜿悶ｊ縺ｾ縺・/p>
+    </div>
+    
+    <div class="relative w-full max-w-md aspect-square mb-2">
+      <div id="scanner-reader" class="w-full h-full bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-600 relative">
+        <!-- 繧ｫ繝｡繝ｩ陦ｨ遉ｺ鬆伜沺 -->
+      </div>
+      <div id="scanner-hint-text" class="hidden text-center text-xs text-slate-400 font-bold mt-3 animate-pulse">
+        庁 繝舌・繧ｳ繝ｼ繝峨ｒ蟆代＠縺ｯ縺ｪ縺励※・・0cm縺上ｉ縺・ｼ峨√ヴ繝ｳ繝医ｒ縺ゅｏ縺帙※縺ｭ・・      </div>
+    </div>
+    
+    <div class="mt-6 w-full max-w-md flex flex-col gap-4">
+      <button type="button" id="scanner-start-btn" onclick="startScannerModeCamera()" class="w-full py-4 rounded-2xl font-black text-lg bg-brand-500 hover:bg-brand-600 text-white shadow-lg flex items-center justify-center gap-2">
+        <i class="fa-solid fa-camera-retro"></i> 繧ｫ繝｡繝ｩ繧偵せ繧ｿ繝ｼ繝茨ｼ・      </button>
+      <button type="button" onclick="window.close()" class="w-full py-3 rounded-2xl font-bold text-sm bg-slate-800 hover:bg-slate-700 text-slate-300">
+        繧ｹ繧ｭ繝｣繝翫・繧帝哩縺倥ｋ
+      </button>
+    </div>
+  </div>
+</body>
+</html>

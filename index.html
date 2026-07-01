@@ -267,11 +267,9 @@
                   <canvas id="debug-canvas" class="w-24 h-auto bg-black rounded-lg border border-slate-600"></canvas>
                   <div id="debug-capture-result" class="text-yellow-300 font-bold text-[10px]">未解析</div>
                 </div>
-                <div class="border-t border-slate-700 pt-2">
-                  <div class="text-[10px] text-slate-400 mb-1 font-bold">ログコンソール:</div>
-                  <div id="debug-log-console" class="p-2.5 bg-slate-950 text-[10px] text-green-400 h-32 overflow-y-auto rounded-xl border border-slate-900 font-mono leading-relaxed space-y-0.5 select-text">
-                    <div>[SYS] Debug console initialized.</div>
-                  </div>
+                <div id="debug-capture-preview-container" class="hidden flex items-center gap-3 bg-slate-900 p-2 rounded-xl">
+                  <canvas id="debug-canvas" class="w-24 h-auto bg-black rounded-lg border border-slate-600"></canvas>
+                  <div id="debug-capture-result" class="text-yellow-300 font-bold text-[10px]">未解析</div>
                 </div>
               </div>
             </div>
@@ -317,7 +315,6 @@
         </div>
       </section>
 
-      <!-- ================= 2. 手動登録タブ ================= -->
       <section id="tab-manual" class="max-w-2xl mx-auto hidden bg-brand-50/20 p-6 md:p-8 rounded-[28px] border-2 border-brand-200/50">
         <h2 class="text-2xl font-black text-brand-800 mb-6 flex items-center gap-2">
           <i class="fa-solid fa-pen-to-square text-brand-500"></i> 手動で登録する
@@ -368,6 +365,11 @@
               <select id="manual-genre" class="w-full bg-white font-bold p-3.5 rounded-xl border-2 border-brand-200 focus:outline-none">
                 <!-- 動的生成 -->
               </select>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-brand-700 mb-1.5">どんな本？（ジャンル）</label>
+              <select id="manual-genre" class="w-full bg-white font-bold p-3.5 rounded-xl border-2 border-brand-200">
+                </select>
             </div>
           </div>
           
