@@ -1,0 +1,37 @@
+:root {
+  --theme-50: #fffbeb;
+  --theme-100: #fef3c7;
+  --theme-200: #fde68a;
+  --theme-300: #fcd34d;
+  --theme-400: #fbbf24;
+  --theme-500: #f59e0b;
+  --theme-600: #d97706;
+  --theme-700: #b45309;
+  --kid-bg-gradient: linear-gradient(to bottom right, #fffbeb, rgba(254,243,199,0.4));
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input, textarea {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+body {
+  font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+  overscroll-behavior-y: contain;
+  background: var(--kid-bg-gradient);
+  transition: background 0.8s ease;
+}
+
+#reader { border: none !important; }
+#reader video { border-radius: 20px !important; object-fit: cover !important; }
+#reader__scan_region { background: #000; border-radius: 20px; overflow: hidden; }
+#reader__dashboard { padding: 10px 0 !important; }
+
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
