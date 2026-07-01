@@ -705,12 +705,18 @@
         }
         return safeStorage.getItem('yomuyomu_gas_url') || '';
       },
-      getBooks: function(successCb, failureCb) {
+      getBooks: function(sheetName, successCb, failureCb) {
+        // 後方互換: sheetNameが関数の場合、旧シグネチャ(successCb, failureCb)として扱う
+        if (typeof sheetName === 'function') {
+          failureCb = successCb;
+          successCb = sheetName;
+          sheetName = "読書管理";
+        }
         if (typeof google !== 'undefined' && google.script && google.script.run) {
           google.script.run
             .withSuccessHandler(successCb)
             .withFailureHandler(failureCb)
-            .getBooks();
+            .getBooks(sheetName);
           return;
         }
         const url = this.getGasUrl();
@@ -719,7 +725,7 @@
           failureCb(new Error("GAS URL not set"));
           return;
         }
-        fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=getBooks', {
+        fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=getBooks&sheetName=' + encodeURIComponent(sheetName), {
           method: 'GET',
           mode: 'cors'
         })
@@ -3595,6 +3601,34 @@
           </div>
         </div>
       `;
+    }
+
+    // スプレッドシートから現在の子供のシートのデータを取得する (F-03対応版)
+    function fetchRegisteredBooks() {
+      showLoading(true);
+      
+      // 現在選択されている子供のシート名を取得
+      const sheetName = (appSettings && appSettings.kids && appSettings.kids[currentKidIndex])
+        ? appSettings.kids[currentKidIndex].sheetName
+        : "読書管理";
+      
+      dbDriver.getBooks(sheetName, function(books) {
+        allRegisteredBooks = books;
+        
+        // 読書貯金カウンター更新
+        const counterEl = document.getElementById('dashboard-counter');
+        if (counterEl) {
+          counterEl.textContent = books.length;
+        }
+        
+        // ギャラリーを描画
+        renderRegisteredBooks();
+        showLoading(false);
+      }, function(err) {
+        showLoading(false);
+        console.error(err);
+        showToast("データベースからの読み込みに失敗しました。");
+      });
     }
 
     // 本棚の描画処理を新機能向けにオーバーライド
