@@ -370,8 +370,11 @@ const ui = {
     const input = document.getElementById('manual-isbn-input');
     const isbn = input.value.trim().replace(/[-\s]/g, '');
     if (!/^\d{10}$|^\d{13}$/.test(isbn)) { ui.showToast("バーコードは10けたか13けたで入れてね！"); return; }
-    input.value = ""; if(window.scanner) { window.scanner.initAudio(); window.scanner.playBeep(); }
-    ui.showToast("しらべています..."); scanner.addTempBookPlaceholder(isbn);
+    input.value = ""; 
+    if(window.scanner) { window.scanner.initAudio(); window.scanner.playBeep(); }
+    ui.showToast("しらべています..."); 
+    // window.scanner経由で正しく呼び出すよう修正
+    if(window.scanner) { window.scanner.addTempBookPlaceholder(isbn); }
   },
 
   drawGacha: () => {

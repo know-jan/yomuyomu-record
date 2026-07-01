@@ -135,12 +135,20 @@ const scanner = {
     });
   },
 
+
+
   fetchBookInfoExt: async (isbn) => {
     return new Promise((resolve) => {
-      const url = dbDriver.getGasUrl();
+      const driver = window.dbDriver || dbDriver;
+      const url = driver ? driver.getGasUrl() : '';
       if(url) {
-        fetch(url+'?action=fetchBookInfo&isbn='+isbn).then(r=>r.json()).then(resolve).catch(()=>resolve({}));
-      } else resolve({});
+        fetch(url+'?action=fetchBookInfo&isbn='+isbn)
+          .then(r=>r.json())
+          .then(resolve)
+          .catch(()=>resolve({}));
+      } else {
+        resolve({});
+      }
     });
   },
 
