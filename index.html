@@ -2292,7 +2292,10 @@
       } else {
         badge.classList.add("bg-slate-200", "text-slate-700");
         badge.textContent = "待機中";
-        document.getElementById("debug-scan-indicator")?.className = "inline-block w-2 h-2 rounded-full bg-gray-500";
+        const debugIndicator = document.getElementById("debug-scan-indicator");
+        if (debugIndicator) {
+          debugIndicator.className = "inline-block w-2 h-2 rounded-full bg-gray-500";
+        }
         if (document.getElementById("debug-scan-status")) document.getElementById("debug-scan-status").textContent = "待機中";
       }
     }
