@@ -14,11 +14,15 @@ const ui = {
 
   switchTab: (tabId) => {
     ['tab-scan', 'tab-manual', 'tab-gallery'].forEach(id => {
-      document.getElementById(id).classList.add('hidden');
-      document.getElementById(id.replace('tab-', 'nav-btn-')).className = "flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-bold text-lg transition-all text-brand-700 bg-brand-50/50 hover:bg-brand-100/50 border border-brand-200/60";
+      const el = document.getElementById(id);
+      const navBtn = document.getElementById(id.replace('tab-', 'nav-btn-'));
+      if(el) el.classList.add('hidden');
+      if(navBtn) navBtn.className = "flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-bold text-lg transition-all text-brand-700 bg-brand-50/50 hover:bg-brand-100/50 border border-brand-200/60";
     });
-    document.getElementById(tabId).classList.remove('hidden');
-    document.getElementById(tabId.replace('tab-', 'nav-btn-')).className = "flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-black text-lg transition-all transform scale-102 bg-brand-500 text-white shadow-lg border border-brand-400";
+    const targetTab = document.getElementById(tabId);
+    const targetBtn = document.getElementById(tabId.replace('tab-', 'nav-btn-'));
+    if(targetTab) targetTab.classList.remove('hidden');
+    if(targetBtn) targetBtn.className = "flex-1 flex flex-col sm:flex-row items-center justify-center gap-2 py-4 px-3 sm:px-6 rounded-2xl font-black text-lg transition-all transform scale-102 bg-brand-500 text-white shadow-lg border border-brand-400";
     
     if(tabId !== 'tab-scan' && window.scanner && window.scanner.isCameraRunning) window.scanner.stopCamera();
     if(tabId === 'tab-gallery') ui.renderRegisteredBooks();
@@ -80,11 +84,12 @@ const ui = {
 
   renderRegisteredBooks: () => {
     const container = document.getElementById('registered-list-container');
+    if(!container) return;
     const sort = document.getElementById('sort-by').value;
     const fGenre = document.getElementById('filter-genre').value;
     const fOwner = document.getElementById('filter-owner').value;
 
-    let list = window.app.allRegisteredBooks.filter(b => {
+    let list = (window.app.allRegisteredBooks || []).filter(b => {
       return (fGenre==='すべて' || b.genre===fGenre) && (fOwner==='すべて' || b.ownerType===fOwner);
     });
 
@@ -125,7 +130,7 @@ const ui = {
   calculateAndRenderTrophies: () => {
     const container = document.getElementById('trophy-container');
     if(!container || !window.app.appSettings.trophies) return;
-    const books = window.app.allRegisteredBooks;
+    const books = window.app.allRegisteredBooks || [];
     const totalCount = books.length;
     const genreCounts = {}; GENRE_LIST.forEach(g => genreCounts[g] = 0);
     let favCount = 0, repeatCount = 0;
@@ -188,26 +193,30 @@ const ui = {
     setTimeout(() => document.getElementById('trophy-celebration-modal').classList.add('opacity-0', 'pointer-events-none'), 300);
   },
 
+  // ★一時スキャンリストの描画不具合を完全に修正
   renderTempBooks: () => {
     const container = document.getElementById('temp-list-container');
     const badge = document.getElementById('temp-count-badge');
     const btnContainer = document.getElementById('batch-submit-btn-container');
     
-    if(window.app.tempBooks.length===0){
+    if(!container) return;
+    if(!window.app.tempBooks) window.app.tempBooks = [];
+    
+    if(window.app.tempBooks.length === 0){
       container.innerHTML = '<div class="text-center py-16 px-4 bg-white/50 rounded-3xl"><i class="fa-solid fa-barcode text-4xl text-slate-300 mb-2"></i><p class="font-bold text-slate-500">スキャンしてね</p></div>';
-      btnContainer.classList.add('hidden');
+      if(btnContainer) btnContainer.classList.add('hidden');
     } else {
       let html = '';
       window.app.tempBooks.forEach(b => {
         html += `
           <div class="bg-white p-4 rounded-[20px] shadow-sm border border-slate-200 flex gap-4 relative ${b.isLoading?'opacity-60':''}">
             <button onclick="ui.removeTemp('${b.tempId}')" class="absolute -top-2 -right-2 bg-rose-500 text-white w-8 h-8 rounded-full shadow z-10"><i class="fa-solid fa-xmark"></i></button>
-            <div class="w-16 h-24 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
-              ${b.coverUrl ? `<img src="${b.coverUrl}" class="w-full h-full object-cover">` : '<div class="flex h-full items-center justify-center text-slate-300"><i class="fa-solid fa-book"></i></div>'}
+            <div class="w-16 h-24 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+              ${b.coverUrl ? `<img src="${b.coverUrl}" class="w-full h-full object-cover">` : '<div class="text-slate-300"><i class="fa-solid fa-book text-2xl"></i></div>'}
             </div>
-            <div class="flex-grow space-y-2">
-              <input type="text" value="${b.title}" onchange="ui.updateTemp('${b.tempId}','title',this.value)" class="w-full font-bold border-b border-dashed border-slate-300 outline-none">
-              <select onchange="ui.updateTemp('${b.tempId}','genre',this.value)" class="w-full text-xs p-1 bg-slate-50 rounded border border-slate-200">
+            <div class="flex-grow space-y-2 overflow-hidden">
+              <input type="text" value="${b.title || ''}" onchange="ui.updateTemp('${b.tempId}','title',this.value)" class="w-full font-bold border-b border-dashed border-slate-300 outline-none text-sm text-slate-800">
+              <select onchange="ui.updateTemp('${b.tempId}','genre',this.value)" class="w-full text-xs p-1.5 bg-slate-50 rounded border border-slate-200 font-bold text-slate-700">
                 ${GENRE_LIST.map(g => `<option value="${g}" ${b.genre===g?'selected':''}>${g}</option>`).join('')}
               </select>
             </div>
@@ -215,8 +224,8 @@ const ui = {
         `;
       });
       container.innerHTML = html;
-      badge.textContent = window.app.tempBooks.length;
-      btnContainer.classList.remove('hidden');
+      if(badge) badge.textContent = window.app.tempBooks.length;
+      if(btnContainer) btnContainer.classList.remove('hidden');
     }
   },
 
@@ -225,7 +234,7 @@ const ui = {
   clearTempListConfirm: () => { if(confirm("からにする？")){ window.app.tempBooks=[]; ui.renderTempBooks(); } },
 
   submitBatchBooks: () => {
-    if(window.app.tempBooks.length===0) return;
+    if(!window.app.tempBooks || window.app.tempBooks.length===0) return;
     ui.showLoading(true, "保存中...");
     const kid = window.app.appSettings.kids[window.app.currentKidIndex];
     dbDriver.addBooks(window.app.tempBooks, kid.sheetName, (res) => {
@@ -366,19 +375,26 @@ const ui = {
     }, function(err) { ui.showLoading(false); ui.showToast("通信エラーです"); });
   },
 
+  // ★手動でバーコード数字を入力した際の呼び出し不具合を修正
   submitManualIsbn: () => {
     const input = document.getElementById('manual-isbn-input');
+    if(!input) return;
     const isbn = input.value.trim().replace(/[-\s]/g, '');
     if (!/^\d{10}$|^\d{13}$/.test(isbn)) { ui.showToast("バーコードは10けたか13けたで入れてね！"); return; }
+    
     input.value = ""; 
     if(window.scanner) { window.scanner.initAudio(); window.scanner.playBeep(); }
     ui.showToast("しらべています..."); 
-    // window.scanner経由で正しく呼び出すよう修正
-    if(window.scanner) { window.scanner.addTempBookPlaceholder(isbn); }
+    
+    if(window.scanner && typeof window.scanner.addTempBookPlaceholder === 'function') { 
+      window.scanner.addTempBookPlaceholder(isbn); 
+    } else {
+      ui.showToast("スキャナーがじゅんびできていません");
+    }
   },
 
   drawGacha: () => {
-    const homeBooks = window.app.allRegisteredBooks.filter(b => b.ownerType === "おうちの本");
+    const homeBooks = (window.app.allRegisteredBooks || []).filter(b => b.ownerType === "おうちの本");
     if(homeBooks.length === 0){ ui.showToast("おうちの本を登録してから遊んでね！"); return; }
     ui.showLoading(true, "ガチャをまわしているよ... 🎁");
     setTimeout(() => {

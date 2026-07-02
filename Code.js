@@ -1,6 +1,6 @@
 /**
  * よむよむレコード (読書管理アプリ) - GAS バックエンドスクリプト
- * * スプレッドシートのカラム構成 (A列〜M列):
+ * スプレッドシートのカラム構成 (A列〜M列):
  * A列: ID (一意のキー)
  * B列: 登録日時 (yyyy/MM/dd HH:mm:ss)
  * C列: ISBN (13桁のバーコード数値)
@@ -20,27 +20,23 @@
 function doGet(e) {
   var action = e.parameter.action;
   
-  // API経由での設定データ一括取得
   if (action === "getSettings") {
     return ContentService.createTextOutput(JSON.stringify(getSettings()))
         .setMimeType(ContentService.MimeType.JSON);
   }
   
-  // API経由での書籍データ全件取得 (シート名指定対応)
   if (action === "getBooks") {
     var sheetName = e.parameter.sheetName || "読書管理";
     return ContentService.createTextOutput(JSON.stringify(getBooks(sheetName)))
         .setMimeType(ContentService.MimeType.JSON);
   }
   
-  // API経由での書籍情報検索 (CORS回避のためのバックエンド経由フェッチ、テーマ予測機能付き)
   if (action === "fetchBookInfo") {
     var isbn = e.parameter.isbn;
     return ContentService.createTextOutput(JSON.stringify(fetchBookInfoBackend(isbn)))
         .setMimeType(ContentService.MimeType.JSON);
   }
   
-  // API経由でのキーワード（タイトル・著者）による書籍画像検索
   if (action === "fetchBookInfoBySearch") {
     var title = e.parameter.title || "";
     var author = e.parameter.author || "";
@@ -48,13 +44,11 @@ function doGet(e) {
         .setMimeType(ContentService.MimeType.JSON);
   }
 
-  // 通常のウェブアプリ画面表示 (Netlifyを使わず直接GASで開く場合のフォールバック)
   var mode = e.parameter.mode || "";
   var webAppUrl = ScriptApp.getService().getUrl();
   var html = HtmlService.createHtmlOutputFromFile('index');
   var content = html.getContent();
   
-  // サーバーサイドでの簡易インジェクション
   content = content.replace("const isScannerMode = false;", "const isScannerMode = " + (mode === "scanner") + ";");
   content = content.replace("let webAppUrl = '';", "let webAppUrl = '" + webAppUrl + "';");
   
@@ -86,28 +80,19 @@ function doPost(e) {
     responseData.message = "エラーが発生しました: " + err.message;
   }
   
-  // CORSを回避するため JSON MimeType でテキスト出力として返却
   return ContentService.createTextOutput(JSON.stringify(responseData))
       .setMimeType(ContentService.MimeType.JSON);
 }
 
-// アクティブなスプレッドシートを取得する
 function getActiveSpreadsheet() {
   var ss;
-  try {
-    ss = SpreadsheetApp.getActiveSpreadsheet();
-  } catch (e) {
-    // コンテナバインドでない場合のハンドリング
-  }
+  try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}
   if (!ss) {
-    throw new Error(
-      "スプレッドシートが見つかりません。このスクリプトをスプレッドシートの「拡張機能」>「Apps Script」から作成し直すか、スプレッドシートと連携してください。"
-    );
+    throw new Error("スプレッドシートが見つかりません。");
   }
   return ss;
 }
 
-// 指定した名前のシートを取得する（なければ作成し、13列構成にする）
 function getSheet(sheetName) {
   var ss = getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);
@@ -115,10 +100,8 @@ function getSheet(sheetName) {
     sheet = ss.insertSheet(sheetName);
     initSheet(sheet);
   } else {
-    // 既存シートの列数が10列の場合などに自動で13列に拡張する
     var lastCol = sheet.getLastColumn();
     if (lastCol > 0 && lastCol < 13) {
-      // 不足しているヘッダーを追加
       var newHeaders = ["読んだ回数", "あらすじ", "発売日"];
       var headersToSet = newHeaders.slice(lastCol - 10);
       if (headersToSet.length > 0) {
@@ -129,37 +112,18 @@ function getSheet(sheetName) {
   return sheet;
 }
 
-// シート初期化（ヘッダー行の設定 - 13列構成）
 function initSheet(sheet) {
-  var headers = [
-    "ID",
-    "登録日時",
-    "ISBN",
-    "タイトル",
-    "著者",
-    "表紙画像URL",
-    "所有区分",
-    "ジャンル",
-    "一言コメント",
-    "評価",
-    "読んだ回数",
-    "あらすじ",
-    "発売日"
-  ];
+  var headers = ["ID", "登録日時", "ISBN", "タイトル", "著者", "表紙画像URL", "所有区分", "ジャンル", "一言コメント", "評価", "読んだ回数", "あらすじ", "発売日"];
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  sheet.setFrozenRows(1); // 1行目を固定
+  sheet.setFrozenRows(1);
 }
 
-// スプレッドシートから登録済みの本をすべて読み込む (13列対応)
 function getBooks(sheetName) {
   try {
     var sheet = getSheet(sheetName || "読書管理");
     var lastRow = sheet.getLastRow();
-    if (lastRow <= 1) {
-      return []; // ヘッダー行しかない場合は空配列を返す
-    }
+    if (lastRow <= 1) return [];
     
-    // A列〜M列（13列）を取得
     var data = sheet.getRange(2, 1, lastRow - 1, 13).getValues();
     return data.map(function(row) {
       return {
@@ -173,24 +137,19 @@ function getBooks(sheetName) {
         genre: row[7] ? String(row[7]) : "その他",
         comment: row[8] ? String(row[8]) : "",
         rating: row[9] ? Number(row[9]) : 3,
-        readCount: row[10] ? Number(row[10]) : 1, // デフォルト1回
+        readCount: row[10] ? Number(row[10]) : 1,
         description: row[11] ? String(row[11]) : "",
         publishedDate: row[12] ? String(row[12]) : ""
       };
     });
   } catch (e) {
-    Logger.log("getBooksでエラーが発生しました: " + e.message);
     throw new Error("データの読み込みに失敗しました: " + e.message);
   }
 }
 
-// 複数の本を一括追加する (13列対応)
 function addBooks(books, sheetName) {
   try {
-    if (!books || books.length === 0) {
-      return { success: true, count: 0 };
-    }
-    
+    if (!books || books.length === 0) return { success: true, count: 0 };
     var sheet = getSheet(sheetName || "読書管理");
     var lastRow = sheet.getLastRow();
     var now = new Date();
@@ -222,39 +181,29 @@ function addBooks(books, sheetName) {
     sheet.getRange(lastRow + 1, 1, rows.length, rows[0].length).setValues(rows);
     return { success: true, count: books.length };
   } catch (e) {
-    Logger.log("addBooksでエラーが発生しました: " + e.message);
     throw new Error("データの書き込みに失敗しました: " + e.message);
   }
 }
 
-// 本の情報を更新する (ID一致による上書き)
 function updateBook(book, sheetName) {
   try {
-    if (!book || !book.id) {
-      return { success: false, message: "IDが指定されていません" };
-    }
+    if (!book || !book.id) return { success: false, message: "IDが指定されていません" };
     var sheet = getSheet(sheetName || "読書管理");
     var lastRow = sheet.getLastRow();
-    if (lastRow <= 1) {
-      return { success: false, message: "データが存在しません" };
-    }
+    if (lastRow <= 1) return { success: false, message: "データが存在しません" };
     
     var ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
     var targetIndex = -1;
     for (var i = 0; i < ids.length; i++) {
       if (String(ids[i][0]) === String(book.id)) {
-        targetIndex = i + 2; // 行番号 (2から開始)
+        targetIndex = i + 2;
         break;
       }
     }
     
-    if (targetIndex === -1) {
-      return { success: false, message: "指定されたIDの本が見つかりません" };
-    }
+    if (targetIndex === -1) return { success: false, message: "指定されたIDの本が見つかりません" };
     
-    // 現在の行データを取得して部分更新（登録日時などを壊さないため）
     var currentRowValues = sheet.getRange(targetIndex, 1, 1, 13).getValues()[0];
-    
     var updatedRow = [
       book.id,
       book.date ? (book.date.replace(/-/g, "/") + " 00:00:00") : currentRowValues[1],
@@ -274,17 +223,14 @@ function updateBook(book, sheetName) {
     sheet.getRange(targetIndex, 1, 1, 13).setValues([updatedRow]);
     return { success: true };
   } catch (e) {
-    Logger.log("updateBookでエラーが発生しました: " + e.message);
     return { success: false, message: e.message };
   }
 }
 
-// 設定管理シートから設定を取得し、必要なら初期化
 function getSettings() {
   var ss = getActiveSpreadsheet();
   var settings = { kids: [], trophies: [], themeRules: [] };
   
-  // 1. 設定_子供 シート
   var sKids = ss.getSheetByName("設定_子供");
   if (!sKids) {
     sKids = ss.insertSheet("設定_子供");
@@ -300,12 +246,8 @@ function getSettings() {
     return { name: String(row[0]), color: String(row[1]), sheetName: String(row[2]) };
   });
   
-  // 各子供のシートがなければ作成
-  settings.kids.forEach(function(kid) {
-    getSheet(kid.sheetName);
-  });
+  settings.kids.forEach(function(kid) { getSheet(kid.sheetName); });
   
-  // 2. 設定_トロフィー シート
   var sTrophies = ss.getSheetByName("設定_トロフィー");
   if (!sTrophies) {
     sTrophies = ss.insertSheet("設定_トロフィー");
@@ -321,60 +263,36 @@ function getSettings() {
   }
   var rawTrophies = sTrophies.getRange(2, 1, sTrophies.getLastRow() - 1, 7).getValues();
   settings.trophies = rawTrophies.map(function(row) {
-    return {
-      id: String(row[0]),
-      name: String(row[1]),
-      desc: String(row[2]),
-      type: String(row[3]),
-      threshold: Number(row[4]),
-      conditionValue: String(row[5]),
-      icon: String(row[6])
-    };
+    return { id: String(row[0]), name: String(row[1]), desc: String(row[2]), type: String(row[3]), threshold: Number(row[4]), conditionValue: String(row[5]), icon: String(row[6]) };
   });
   
-  // 3. 設定_テーマ判定 シート
   var sTheme = ss.getSheetByName("設定_テーマ判定");
   if (!sTheme) {
     sTheme = ss.insertSheet("設定_テーマ判定");
     sTheme.getRange(1, 1, 1, 2).setValues([["キーワード", "判定ジャンル"]]);
     sTheme.getRange(2, 1, 20, 2).setValues([
-      ["めいろ", "📕 おはなし・めいろ"],
-      ["迷路", "📕 おはなし・めいろ"],
-      ["恐竜", "🐱 どうぶつ・きょうりゅう"],
-      ["動物", "🐱 どうぶつ・きょうりゅう"],
-      ["ずかん", "🐱 どうぶつ・きょうりゅう"],
-      ["のりもの", "🚡 のりもの"],
-      ["電車", "🚡 のりもの"],
-      ["新幹線", "🚡 のりもの"],
-      ["宇宙", "🚀 うちゅう・かがく"],
-      ["しゃぼん玉", "🚀 うちゅう・かがく"],
-      ["世界", "🗾 にほん・せかい"],
-      ["日本", "🗾 にほん・せかい"],
-      ["おしごと", "👗 おしゃれ・おしごと"],
-      ["ドレス", "👗 おしゃれ・おしごと"],
-      ["魔法", "🔮 ファンタジー・ようせい"],
-      ["ようせい", "🔮 ファンタジー・ようせい"],
-      ["学校", "🏫 くらし・べんきょう"],
-      ["ひらがな", "🏫 くらし・べんきょう"],
-      ["ヒーロー", "🦸 ヒーロー・アニメ"],
-      ["アンパンマン", "🦸 ヒーロー・アニメ"]
+      ["めいろ", "📕 おはなし・めいろ"], ["迷路", "📕 おはなし・めいろ"],
+      ["恐竜", "🐱 どうぶつ・きょうりゅう"], ["動物", "🐱 どうぶつ・きょうりゅう"], ["ずかん", "🐱 どうぶつ・きょうりゅう"],
+      ["のりもの", "🚡 のりもの"], ["電車", "🚡 のりもの"], ["新幹線", "🚡 のりもの"],
+      ["宇宙", "🚀 うちゅう・かがく"], ["しゃぼん玉", "🚀 うちゅう・かがく"],
+      ["世界", "🗾 にほん・せかい"], ["日本", "🗾 にほん・せかい"],
+      ["おしごと", "👗 おしゃれ・おしごと"], ["ドレス", "👗 おしゃれ・おしごと"],
+      ["魔法", "🔮 ファンタジー・ようせい"], ["ようせい", "🔮 ファンタジー・ようせい"],
+      ["学校", "🏫 くらし・べんきょう"], ["ひらがな", "🏫 くらし・べんきょう"],
+      ["ヒーロー", "🦸 ヒーロー・アニメ"], ["アンパンマン", "🦸 ヒーロー・アニメ"]
     ]);
     sTheme.setFrozenRows(1);
   }
   var rawTheme = sTheme.getRange(2, 1, sTheme.getLastRow() - 1, 2).getValues();
-  settings.themeRules = rawTheme.map(function(row) {
-    return { keyword: String(row[0]), genre: String(row[1]) };
-  });
+  settings.themeRules = rawTheme.map(function(row) { return { keyword: String(row[0]), genre: String(row[1]) }; });
   
   return settings;
 }
 
-// スプレッドシート編集時の自動トリガー（複数子供用シート対応）
 function onEdit(e) {
   var range = e.range;
   var sheet = range.getSheet();
   var sheetName = sheet.getName();
-  
   if (sheetName.indexOf("読書管理") !== 0) return;
   
   var row = range.getRow();
@@ -388,11 +306,6 @@ function onEdit(e) {
     if (titleCell.getValue().toString().trim() !== "") return;
     
     var info = fetchBookInfoBackend(isbn);
-    if (!info.title) {
-      info.title = "バーコードの本 (" + isbn + ")";
-      info.author = "（著者不明）";
-    }
-    
     sheet.getRange(row, 4).setValue(info.title);
     sheet.getRange(row, 5).setValue(info.author);
     sheet.getRange(row, 6).setValue(info.coverUrl);
@@ -401,29 +314,20 @@ function onEdit(e) {
     sheet.getRange(row, 13).setValue(info.publishedDate || "");
     
     if (sheet.getRange(row, 1).getValue() === "") {
-      var id = "id_" + new Date().getTime() + "_" + Math.floor(Math.random() * 1000);
-      sheet.getRange(row, 1).setValue(id);
+      sheet.getRange(row, 1).setValue("id_" + new Date().getTime() + "_" + Math.floor(Math.random() * 1000));
     }
     if (sheet.getRange(row, 2).getValue() === "") {
-      var now = new Date();
-      var timestamp = Utilities.formatDate(now, Session.getScriptTimeZone(), "yyyy/MM/dd HH:mm:ss");
-      sheet.getRange(row, 2).setValue(timestamp);
+      sheet.getRange(row, 2).setValue(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy/MM/dd HH:mm:ss"));
     }
-    if (sheet.getRange(row, 7).getValue() === "") {
-      sheet.getRange(row, 7).setValue("図書館で借りた本");
-    }
-    if (sheet.getRange(row, 10).getValue() === "") {
-      sheet.getRange(row, 10).setValue(5);
-    }
-    if (sheet.getRange(row, 11).getValue() === "") {
-      sheet.getRange(row, 11).setValue(1);
-    }
+    if (sheet.getRange(row, 7).getValue() === "") sheet.getRange(row, 7).setValue("図書館で借りた本");
+    if (sheet.getRange(row, 10).getValue() === "") sheet.getRange(row, 10).setValue(5);
+    if (sheet.getRange(row, 11).getValue() === "") sheet.getRange(row, 11).setValue(1);
   }
 }
 
-// バックエンド用の書籍情報フェッチ関数 (openBD + Google Books API 二段構え)
+// ★外部APIが完全に死んでいてもフロントに最低限のデータを返す安全弁を追加
 function fetchBookInfoBackend(isbn) {
-  var result = { title: "", author: "", coverUrl: "", genre: "📦 その他", description: "", publishedDate: "" };
+  var result = { title: "バーコードの本 (" + isbn + ")", author: "著者不明", coverUrl: "", genre: "📦 その他", description: "", publishedDate: "" };
   
   try {
     var openBdUrl = 'https://api.openbd.jp/v1/get?isbn=' + isbn;
@@ -433,7 +337,7 @@ function fetchBookInfoBackend(isbn) {
       if (data && data[0]) {
         if (data[0].summary) {
           var summary = data[0].summary;
-          result.title = summary.title || "";
+          if(summary.title) result.title = summary.title;
           result.author = summary.author || "（著者不明）";
           result.coverUrl = summary.cover || "";
           result.publishedDate = summary.pubdate ? (summary.pubdate.substring(0, 4) + "-" + summary.pubdate.substring(4, 6) + "-" + summary.pubdate.substring(6, 8)) : "";
@@ -441,113 +345,77 @@ function fetchBookInfoBackend(isbn) {
         if (data[0].onix && data[0].onix.CollateralDetail && data[0].onix.CollateralDetail.TextContent) {
           var textContents = data[0].onix.CollateralDetail.TextContent;
           for (var i = 0; i < textContents.length; i++) {
-            if (textContents[i].Text) {
-              result.description = textContents[i].Text;
-              break;
-            }
+            if (textContents[i].Text) { result.description = textContents[i].Text; break; }
           }
         }
       }
     }
-  } catch (e) {
-    Logger.log("openBD fetch error: " + e.message);
-  }
+  } catch (e) { Logger.log("openBD fetch error: " + e.message); }
 
-  if (!result.title || !result.coverUrl || !result.description) {
+  try {
     var googleUrl = 'https://www.googleapis.com/books/v1/volumes?q=isbn=' + isbn;
-    try {
-      var response = UrlFetchApp.fetch(googleUrl, { muteHttpExceptions: true });
-      if (response.getResponseCode() === 200) {
-        var data = JSON.parse(response.getContentText());
-        if (data.totalItems > 0 && data.items && data.items[0]) {
-          var volumeInfo = data.items[0].volumeInfo;
-          var googleCoverUrl = "";
-          if (volumeInfo.imageLinks) {
-            googleCoverUrl = volumeInfo.imageLinks.thumbnail || volumeInfo.imageLinks.smallThumbnail || "";
-            if (googleCoverUrl.indexOf("http://") === 0) {
-              googleCoverUrl = googleCoverUrl.replace("http://", "https://");
-            }
-          }
-          
-          if (!result.title) result.title = volumeInfo.title || "";
-          if (!result.author || result.author === "（著者不明）" || result.author === "著者不明") {
-            result.author = volumeInfo.authors ? volumeInfo.authors.join(", ") : "（著者不明）";
-          }
-          if (googleCoverUrl) result.coverUrl = googleCoverUrl;
-          if (!result.description) result.description = volumeInfo.description || "";
-          if (!result.publishedDate) result.publishedDate = volumeInfo.publishedDate || "";
+    var response = UrlFetchApp.fetch(googleUrl, { muteHttpExceptions: true });
+    if (response.getResponseCode() === 200) {
+      var data = JSON.parse(response.getContentText());
+      if (data.totalItems > 0 && data.items && data.items[0]) {
+        var volumeInfo = data.items[0].volumeInfo;
+        if (result.title.indexOf("バーコードの本") === 0 && volumeInfo.title) {
+          result.title = volumeInfo.title;
         }
+        if (result.author === "著者不明" || result.author === "（著者不明）") {
+          result.author = volumeInfo.authors ? volumeInfo.authors.join(", ") : "（著者不明）";
+        }
+        if (!result.coverUrl && volumeInfo.imageLinks) {
+          var img = volumeInfo.imageLinks.thumbnail || volumeInfo.imageLinks.smallThumbnail || "";
+          if (img) result.coverUrl = img.replace("http://", "https://");
+        }
+        if (!result.description) result.description = volumeInfo.description || "";
+        if (!result.publishedDate) result.publishedDate = volumeInfo.publishedDate || "";
       }
-    } catch (e) {
-      Logger.log("Google Books API error: " + e.message);
     }
-  }
+  } catch (e) { Logger.log("Google Books API error: " + e.message); }
 
   try {
     var ss = getActiveSpreadsheet();
     var sTheme = ss.getSheetByName("設定_テーマ判定");
-    if (sTheme) {
-      var lastRow = sTheme.getLastRow();
-      if (lastRow > 1) {
-        var rules = sTheme.getRange(2, 1, lastRow - 1, 2).getValues();
-        var matched = false;
-        var searchTarget = (result.title + " " + result.description).toLowerCase();
-        
-        for (var i = 0; i < rules.length; i++) {
-          var keyword = String(rules[i][0]).trim().toLowerCase();
-          var genre = String(rules[i][1]).trim();
-          
-          if (keyword && searchTarget.indexOf(keyword) !== -1) {
-            result.genre = genre;
-            matched = true;
-            break;
-          }
+    if (sTheme && sTheme.getLastRow() > 1) {
+      var rules = sTheme.getRange(2, 1, sTheme.getLastRow() - 1, 2).getValues();
+      var searchTarget = (result.title + " " + result.description).toLowerCase();
+      for (var i = 0; i < rules.length; i++) {
+        var keyword = String(rules[i][0]).trim().toLowerCase();
+        if (keyword && searchTarget.indexOf(keyword) !== -1) {
+          result.genre = String(rules[i][1]).trim();
+          break;
         }
-        if (!matched) result.genre = "📦 その他";
       }
     }
-  } catch (e) {
-    Logger.log("Theme prediction error: " + e.message);
-  }
+  } catch (e) { Logger.log("Theme prediction error: " + e.message); }
 
   return result;
 }
 
-function fetchBookInfoFromBackend(isbn) {
-  return fetchBookInfoBackend(isbn);
-}
+function fetchBookInfoFromBackend(isbn) { return fetchBookInfoBackend(isbn); }
 
 function fetchBookInfoBySearchBackend(title, author) {
   var covers = [];
   if (!title) return covers;
-  
-  var queryClean = title.replace(/[・\-\/]/g, ' ').trim();
-  var query = 'intitle:' + queryClean;
+  var query = 'intitle:' + title.replace(/[・\-\/]/g, ' ').trim();
   if (author && author !== "（著者不明）" && author !== "著者不明") {
     query += '+inauthor:' + author.replace(/[・\-\/]/g, ' ').trim();
   }
-  
-  var url = 'https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(query) + '&maxResults=5';
   try {
-    var response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    var response = UrlFetchApp.fetch('https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(query) + '&maxResults=5', { muteHttpExceptions: true });
     if (response.getResponseCode() === 200) {
       var data = JSON.parse(response.getContentText());
       if (data && data.items) {
         data.items.forEach(function(item) {
           if (item.volumeInfo && item.volumeInfo.imageLinks) {
             var thumb = item.volumeInfo.imageLinks.thumbnail || item.volumeInfo.imageLinks.smallThumbnail;
-            if (thumb) {
-              if (thumb.indexOf("http://") === 0) {
-                thumb = thumb.replace("http://", "https://");
-              }
-              covers.push(thumb);
-            }
+            if (thumb) covers.push(thumb.replace("http://", "https://"));
           }
         });
       }
     }
-  } catch (e) {
-    Logger.log("fetchBookInfoBySearchBackend error: " + e.message);
-  }
+  } catch (e) {}
   return covers;
 }

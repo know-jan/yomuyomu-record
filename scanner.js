@@ -96,6 +96,10 @@ const scanner = {
     if (scanner.isScanningPaused) return;
     const isbn = String(isbnText).trim();
     if(!isbn.startsWith("978")) return;
+    
+    if (!window.app.tempBooks) window.app.tempBooks = [];
+    if (!window.app.allRegisteredBooks) window.app.allRegisteredBooks = [];
+
     if(window.app.allRegisteredBooks.some(b=>b.isbn===isbn) || window.app.tempBooks.some(b=>b.isbn===isbn)) return;
     const now = Date.now();
     if(isbn===scanner.lastScannedIsbn && now-scanner.lastScannedTime<5000) return;
@@ -115,27 +119,44 @@ const scanner = {
     }, 1500);
   },
 
+  // ★フロントの多重フォールバックガードを完全実装
   addTempBookPlaceholder: (isbn) => {
+    if (!window.app.tempBooks) window.app.tempBooks = [];
     const tId = 'temp_'+Date.now();
-    const nBook = { tempId: tId, isbn: isbn, title: "検索中...", author:"", coverUrl:"", ownerType: "おうちの本", genre: "📕 おはなし・めいろ", comment:"", rating:5, readCount:1, isLoading:true };
+    const nBook = { tempId: tId, isbn: isbn, title: "さがしているよ...", author:"", coverUrl:"", ownerType: "おうちの本", genre: "📕 おはなし・めいろ", comment:"", rating:5, readCount:1, isLoading:true };
+    
     window.app.tempBooks.unshift(nBook);
     ui.renderTempBooks();
     
     scanner.fetchBookInfoExt(isbn).then(info => {
       const b = window.app.tempBooks.find(x=>x.tempId===tId);
       if(b){
-        b.title = info.title || "不明"; b.author = info.author; b.coverUrl = info.coverUrl; b.description = info.description; b.publishedDate = info.publishedDate; b.isLoading = false;
+        // 万が一、GAS側の戻り値オブジェクト自体が虚無だった場合のフロント側ガード
+        const fetchedTitle = info.title || `バーコードの本 (${isbn})`;
+        b.title = fetchedTitle.indexOf("なまえがわからない本") !== -1 ? `バーコードの本 (${isbn})` : fetchedTitle;
+        
+        b.author = info.author || "著者不明"; 
+        b.coverUrl = info.coverUrl || ""; 
+        b.description = info.description || ""; 
+        b.publishedDate = info.publishedDate || info.published || ""; 
+        b.isLoading = false;
+        
         let predictedGenre = "";
-        for(const rule of window.app.appSettings.themeRules) {
-          if(info.description && info.description.includes(rule.keyword)){ predictedGenre = rule.genre; break; }
+        if (info.genre && info.genre !== "📦 その他" && info.genre !== "その他") {
+          predictedGenre = info.genre;
+        } else if (window.app.appSettings && window.app.appSettings.themeRules) {
+          const searchTarget = ((b.title || "") + " " + (b.description || "")).toLowerCase();
+          for(const rule of window.app.appSettings.themeRules) {
+            const kw = String(rule.keyword).toLowerCase();
+            if(searchTarget.includes(kw)){ predictedGenre = rule.genre; break; }
+          }
         }
-        if(predictedGenre) { b.genre = predictedGenre; ui.showToast(`「${predictedGenre}」を自動セットしたよ！`); }
+        
+        if(predictedGenre) b.genre = predictedGenre;
         ui.renderTempBooks();
       }
     });
   },
-
-
 
   fetchBookInfoExt: async (isbn) => {
     return new Promise((resolve) => {
@@ -181,3 +202,5 @@ const scanner = {
     } catch(e) { resDiv.textContent = "エラー"; }
   }
 };
+
+window.scanner = scanner;
