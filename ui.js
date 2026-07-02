@@ -193,7 +193,6 @@ const ui = {
     setTimeout(() => document.getElementById('trophy-celebration-modal').classList.add('opacity-0', 'pointer-events-none'), 300);
   },
 
-  // ★一時スキャンリストの描画不具合を完全に修正
   renderTempBooks: () => {
     const container = document.getElementById('temp-list-container');
     const badge = document.getElementById('temp-count-badge');
@@ -233,13 +232,26 @@ const ui = {
   removeTemp: (id) => { window.app.tempBooks = window.app.tempBooks.filter(x=>x.tempId!==id); ui.renderTempBooks(); },
   clearTempListConfirm: () => { if(confirm("からにする？")){ window.app.tempBooks=[]; ui.renderTempBooks(); } },
 
+  // ★「まとめて登録」成功時に、シートから最新の本棚データを即座に引き抜いてリロードするよう修正
   submitBatchBooks: () => {
     if(!window.app.tempBooks || window.app.tempBooks.length===0) return;
     ui.showLoading(true, "保存中...");
     const kid = window.app.appSettings.kids[window.app.currentKidIndex];
     dbDriver.addBooks(window.app.tempBooks, kid.sheetName, (res) => {
-      ui.showLoading(false);
-      if(res.success){ ui.showToast("登録したよ！"); window.app.tempBooks=[]; ui.renderTempBooks(); ui.switchTab('tab-gallery'); }
+      if(res.success){ 
+        ui.showToast("登録したよ！"); 
+        window.app.tempBooks = []; 
+        ui.renderTempBooks(); 
+        
+        // 画面を切り替える前に最新データをシートから再読み込みして本棚を更新
+        if(typeof window.app.fetchRegisteredBooks === 'function') {
+          window.app.fetchRegisteredBooks();
+        }
+        ui.switchTab('tab-gallery'); 
+      } else {
+        ui.showLoading(false);
+        ui.showToast("登録にしっぱいしました。");
+      }
     }, (e)=>{ ui.showLoading(false); ui.showToast("エラーが発生しました"); });
   },
 
@@ -360,7 +372,6 @@ const ui = {
     
     const kid = window.app.appSettings.kids[window.app.currentKidIndex];
     dbDriver.addBooks(singlePayload, kid.sheetName, function(res) {
-      ui.showLoading(false);
       if (res.success) {
         ui.showToast("本を登録したよ！📖");
         document.getElementById('manual-title').value = "";
@@ -369,13 +380,17 @@ const ui = {
         document.getElementById('manual-date').value = new Date().toISOString().split('T')[0];
         ui.renderManualStars(5);
         ui.clearManualCoverImage();
-        window.app.fetchRegisteredBooks();
+        if(typeof window.app.fetchRegisteredBooks === 'function') {
+          window.app.fetchRegisteredBooks();
+        }
         ui.switchTab('tab-gallery');
-      } else { ui.showToast("登録にしっぱいしちゃった。"); }
+      } else { 
+        ui.showLoading(false);
+        ui.showToast("登録にしっぱいしちゃった。"); 
+      }
     }, function(err) { ui.showLoading(false); ui.showToast("通信エラーです"); });
   },
 
-  // ★手動でバーコード数字を入力した際の呼び出し不具合を修正
   submitManualIsbn: () => {
     const input = document.getElementById('manual-isbn-input');
     if(!input) return;
