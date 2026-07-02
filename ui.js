@@ -233,28 +233,82 @@ const ui = {
   clearTempListConfirm: () => { if(confirm("からにする？")){ window.app.tempBooks=[]; ui.renderTempBooks(); } },
 
   // ★「まとめて登録」成功時に、シートから最新の本棚データを即座に引き抜いてリロードするよう修正
-  submitBatchBooks: () => {
-    if(!window.app.tempBooks || window.app.tempBooks.length===0) return;
-    ui.showLoading(true, "保存中...");
+// ★エラーガード＆即時コレクション反映を完璧にした「まとめて登録」処理
+  submitBatchBooks: function() {
+    if (!window.app.tempBooks || window.app.tempBooks.length === 0) return;
+    
+    // 未入力（タイトルが「しらべているよ...」のまま）のガード
+    const invalid = window.app.tempBooks.find(b => !b.title || b.title.trim() === "" || b.title === "しらべているよ...");
+    if (invalid) {
+      ui.showToast("本のなまえを入力していないものがあるよ。書いてね！");
+      return;
+    }
+
+    // 安全弁：子供の設定配列自体が存在しないか、空の場合のクラッシュ防止
+    if (!window.app.appSettings || !window.app.appSettings.kids || window.app.appSettings.kids.length === 0) {
+      ui.showToast("子供の設定データがまだよみこめていません。すこし待ってね！");
+      return;
+    }
+
     const kid = window.app.appSettings.kids[window.app.currentKidIndex];
-    dbDriver.addBooks(window.app.tempBooks, kid.sheetName, (res) => {
-      if(res.success){ 
-        ui.showToast("登録したよ！"); 
-        window.app.tempBooks = []; 
-        ui.renderTempBooks(); 
+    if (!kid || !kid.sheetName) {
+      ui.showToast("えらんだ子供のシート名がみつかりません。設定をたしかめてね！");
+      return;
+    }
+
+    ui.showLoading(true, "スプレッドシートにほぞん中...");
+    
+    // 送信データの形をバックエンドの受け口（13列）に完全同期
+    const booksPayload = window.app.tempBooks.map(b => ({
+      isbn: b.isbn || "",
+      title: b.title,
+      author: b.author || "（著者不明）",
+      coverUrl: b.coverUrl || "",
+      ownerType: b.ownerType || "おうちの本",
+      genre: b.genre || "📦 その他",
+      comment: b.comment || "",
+      rating: Number(b.rating || 5),
+      readCount: Number(b.readCount || 1),
+      description: b.description || "",
+      published: b.publishedDate || b.published || ""
+    }));
+    
+    dbDriver.addBooks(booksPayload, kid.sheetName, function(res) {
+      if (res && res.success) {
+        if (typeof playBeep === 'function') playBeep("coin");
+        if (typeof animateCoinCounter === 'function') animateCoinCounter(true);
+        ui.showToast("本棚に登録したよ！📚✨");
         
-        // 画面を切り替える前に最新データをシートから再読み込みして本棚を更新
-        if(typeof window.app.fetchRegisteredBooks === 'function') {
+        // 一時リストをきれいに初期化
+        window.app.tempBooks = [];
+        if (typeof saveTempBooksToStorage === 'function') saveTempBooksToStorage();
+        if (typeof renderTempListEmpty === 'function') {
+          renderTempListEmpty();
+        } else {
+          ui.renderTempBooks();
+        }
+        updateTempCountBadge();
+        
+        // ページ全体をリロードせず、選択中の子供の最新コレクションを即座に裏で再取得して描画
+        if (typeof window.app.fetchRegisteredBooks === 'function') {
           window.app.fetchRegisteredBooks();
         }
-        ui.switchTab('tab-gallery'); 
+        ui.switchTab('tab-gallery');
       } else {
         ui.showLoading(false);
-        ui.showToast("登録にしっぱいしました。");
+        ui.showToast("登録にしっぱいしちゃった。");
       }
-    }, (e)=>{ ui.showLoading(false); ui.showToast("エラーが発生しました"); });
+    }, function(err) {
+      ui.showLoading(false);
+      console.error("addBooks通信エラー:", err);
+      ui.showToast("データベースとの通信に失敗しました。");
+    });
   },
 
+
+
+
+  
   renderManualStars: (rating) => {
     const container = document.getElementById('manual-stars-container');
     if(!container) return;

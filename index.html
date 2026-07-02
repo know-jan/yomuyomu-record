@@ -9,7 +9,31 @@
   
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: 'var(--theme-50, #fffbeb)',
+              100: 'var(--theme-100, #fef3c7)',
+              200: 'var(--theme-200, #fde68a)',
+              300: 'var(--theme-300, #fcd34d)',
+              400: 'var(--theme-400, #fbbf24)',
+              500: 'var(--theme-500, #f59e0b)', 
+              600: 'var(--theme-600, #d97706)',
+              700: 'var(--theme-700, #b45309)',
+            }
+          },
+          fontFamily: {
+            sans: ['"Outfit"', '"Noto Sans JP"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="min-h-screen p-4 pb-24 md:p-8 md:pb-28 transition-colors duration-500">
@@ -138,7 +162,7 @@
                 </div>
                 <div id="debug-capture-preview-container" class="hidden flex items-center gap-3 bg-slate-900 p-2 rounded-xl">
                   <canvas id="debug-canvas" class="w-24 h-auto bg-black rounded-lg border border-slate-600"></canvas>
-                  <div id="debug-capture-result" class="text-yellow-300 font-bold text-[10px]">未解析</div>
+                  <div id="debug-capture-preview-container" class="text-yellow-300 font-bold text-[10px]">未解析</div>
                 </div>
               </div>
             </div>
@@ -393,7 +417,7 @@
     <div class="bg-white p-6 md:p-8 rounded-[32px] border-4 border-brand-300 shadow-2xl w-full max-w-md">
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-xl font-black text-brand-800 flex items-center gap-2">
-          <i class="fa-solid fa-gear text-brand-500"></i> システム設定
+          <i class="fa-solid fa-gear text-brand-500"></i> System Settings
         </h3>
         <button type="button" onclick="ui.showSettingsModal(false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
       </div>
