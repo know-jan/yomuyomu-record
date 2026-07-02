@@ -119,7 +119,7 @@ const scanner = {
     }, 1500);
   },
 
-  // ★フロントの多重フォールバックガードを完全実装
+  // ★Vercel環境用にGAS経由と直接GoogleAPIフェッチのハイブリッド構造に強化
   addTempBookPlaceholder: (isbn) => {
     if (!window.app.tempBooks) window.app.tempBooks = [];
     const tId = 'temp_'+Date.now();
@@ -128,22 +128,52 @@ const scanner = {
     window.app.tempBooks.unshift(nBook);
     ui.renderTempBooks();
     
-    scanner.fetchBookInfoExt(isbn).then(info => {
+    // 安定板のロジックを参考に、フロント側から直接Google Books APIも並行して叩きにいく安全設計
+    const fetchDirectGoogle = fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn=${isbn}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.totalItems > 0 && data.items && data.items[0]) {
+          const vInfo = data.items[0].volumeInfo;
+          let cov = "";
+          if(vInfo.imageLinks) {
+            cov = vInfo.imageLinks.thumbnail || vInfo.imageLinks.smallThumbnail || "";
+            cov = cov.replace("http://", "https://"); // MixContent対策
+          }
+          return {
+            title: vInfo.title || "",
+            author: vInfo.authors ? vInfo.authors.join(", ") : "",
+            coverUrl: cov,
+            description: vInfo.description || "",
+            publishedDate: vInfo.publishedDate || ""
+          };
+        }
+        return null;
+      }).catch(() => null);
+
+    // GASからの取得と直接取得の早い方、あるいは確実な方をマージする
+    Promise.all([scanner.fetchBookInfoExt(isbn), fetchDirectGoogle]).then(([gasInfo, googleInfo]) => {
       const b = window.app.tempBooks.find(x=>x.tempId===tId);
       if(b){
-        // 万が一、GAS側の戻り値オブジェクト自体が虚無だった場合のフロント側ガード
-        const fetchedTitle = info.title || `バーコードの本 (${isbn})`;
-        b.title = fetchedTitle.indexOf("なまえがわからない本") !== -1 ? `バーコードの本 (${isbn})` : fetchedTitle;
-        
-        b.author = info.author || "著者不明"; 
-        b.coverUrl = info.coverUrl || ""; 
-        b.description = info.description || ""; 
-        b.publishedDate = info.publishedDate || info.published || ""; 
+        // どちらか有効なデータが入っている方をブレンドして適用
+        const finalInfo = {
+          title: (gasInfo && gasInfo.title && !gasInfo.title.startsWith("バーコードの本")) ? gasInfo.title : (googleInfo ? googleInfo.title : `バーコードの本 (${isbn})`),
+          author: (gasInfo && gasInfo.author && gasInfo.author !== "著者不明") ? gasInfo.author : (googleInfo ? googleInfo.author : "著者不明"),
+          coverUrl: (gasInfo && gasInfo.coverUrl) ? gasInfo.coverUrl : (googleInfo ? googleInfo.coverUrl : ""),
+          description: (gasInfo && gasInfo.description) ? gasInfo.description : (googleInfo ? googleInfo.description : ""),
+          genre: (gasInfo && gasInfo.genre) ? gasInfo.genre : "📦 その他",
+          publishedDate: (gasInfo && (gasInfo.publishedDate || gasInfo.published)) ? (gasInfo.publishedDate || gasInfo.published) : (googleInfo ? googleInfo.publishedDate : "")
+        };
+
+        b.title = finalInfo.title;
+        b.author = finalInfo.author;
+        b.coverUrl = finalInfo.coverUrl.replace("http://", "https://"); // Vercelセキュリティ対策
+        b.description = finalInfo.description;
+        b.publishedDate = finalInfo.publishedDate;
         b.isLoading = false;
         
         let predictedGenre = "";
-        if (info.genre && info.genre !== "📦 その他" && info.genre !== "その他") {
-          predictedGenre = info.genre;
+        if (finalInfo.genre && finalInfo.genre !== "📦 その他") {
+          predictedGenre = finalInfo.genre;
         } else if (window.app.appSettings && window.app.appSettings.themeRules) {
           const searchTarget = ((b.title || "") + " " + (b.description || "")).toLowerCase();
           for(const rule of window.app.appSettings.themeRules) {
