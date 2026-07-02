@@ -82,17 +82,21 @@ const ui = {
     document.documentElement.style.setProperty('--kid-bg-gradient', `linear-gradient(to bottom right, #fff, ${color}22, #fff)`);
   },
 
+  // ★「シリーズでまとめる」のグループ化ロジックを完全実装
   renderRegisteredBooks: () => {
     const container = document.getElementById('registered-list-container');
     if(!container) return;
     const sort = document.getElementById('sort-by').value;
     const fGenre = document.getElementById('filter-genre').value;
     const fOwner = document.getElementById('filter-owner').value;
+    const groupBy = document.getElementById('group-by').value; // シリーズ選択状態の取得
 
+    // 1. フィルター処理
     let list = (window.app.allRegisteredBooks || []).filter(b => {
       return (fGenre==='すべて' || b.genre===fGenre) && (fOwner==='すべて' || b.ownerType===fOwner);
     });
 
+    // 2. ソート処理
     list.sort((a,b)=>{
       if(sort==='date-desc') return new Date(b.date) - new Date(a.date);
       if(sort==='date-asc') return new Date(a.date) - new Date(b.date);
@@ -105,11 +109,96 @@ const ui = {
     if(list.length===0) { container.innerHTML = '<div class="col-span-full text-center py-10 text-slate-500 font-bold">みつからないよ</div>'; return; }
 
     let html = '';
+
+    // 3. シリーズまとめ（グループ化）判定
+    if (groupBy === 'series') {
+      // 本のタイトルから共通プレフィックス（シリーズ名）を抽出してまとめるマップ
+      const groups = {};
+      
+      list.forEach(b => {
+        // タイトルから「巻」「作」などの数字やサブタイトルを削ってコアなシリーズ名を作る簡易判定
+        let seriesName = b.title.split(/[0-9１２３４５６７８９０]/)[0].trim();
+        // 記号（の巻、など）をクリーンに
+        seriesName = seriesName.replace(/(の巻|第|巻|作|編)$/, "").trim();
+        if (seriesName.length < 2) seriesName = b.title; // 短すぎる場合はフルタイトル
+
+        if (!groups[seriesName]) {
+          groups[seriesName] = [];
+        }
+        groups[seriesName].push(b);
+      });
+
+      // まとめたシリーズの描画
+      Object.keys(groups).forEach(sName => {
+        const booksInGroup = groups[sName];
+        const primaryBook = booksInGroup[0]; // 代表として1冊目の本（カバーなど）を使用
+        const count = booksInGroup.length;
+        
+        html += `
+          <div onclick="ui.openSeriesDetail('${encodeURIComponent(sName)}')" class="bg-white rounded-[24px] p-3 shadow-sm border-2 border-brand-200 active:scale-95 transition-transform cursor-pointer relative overflow-hidden bg-gradient-to-br from-white to-brand-50/20">
+            <div class="absolute top-2 right-2 bg-brand-500 text-white font-black text-[10px] px-2 py-1 rounded-full z-10 shadow-sm">
+              ${count}さつ
+            </div>
+            <div class="w-full h-32 flex justify-center mb-2 relative">
+              <div class="w-20 h-full rounded shadow opacity-40 bg-slate-300 absolute transform translate-x-3 translate-y-1"></div>
+              <div class="w-22 h-full rounded shadow opacity-70 bg-slate-200 absolute transform translate-x-1.5 translate-y-0.5"></div>
+              <div class="w-24 h-full rounded shadow overflow-hidden bg-slate-100 relative z-0">
+                ${primaryBook.coverUrl ? `<img src="${primaryBook.coverUrl}" class="w-full h-full object-cover">` : '<div class="flex h-full items-center justify-center"><i class="fa-solid fa-book text-slate-300"></i></div>'}
+              </div>
+            </div>
+            <div class="text-[9px] px-2 py-0.5 bg-brand-100 text-brand-700 rounded-full inline-block mb-1 font-bold truncate max-w-full">📚 シリーズ</div>
+            <h4 class="font-black text-xs text-slate-800 line-clamp-2 leading-tight">${sName}</h4>
+            <p class="text-[10px] text-slate-400 font-bold mt-1 truncate">${primaryBook.author || '著者不明'}</p>
+          </div>
+        `;
+      });
+    } else {
+      // 通常の1冊ずつ並べる描画
+      list.forEach(b => {
+        const rc = b.readCount || 1;
+        html += `
+          <div onclick="ui.openBookDetail('${b.id}')" class="bg-white rounded-[24px] p-3 shadow-sm border border-slate-100 active:scale-95 transition-transform cursor-pointer relative overflow-hidden">
+            ${b.rating===5 ? '<div class="absolute -top-4 -right-4 w-12 h-12 bg-amber-400 rotate-45 z-10 flex items-end justify-center pb-1"><i class="fa-solid fa-star text-white text-[10px]"></i></div>' : ''}
+            <div class="w-full h-32 flex justify-center mb-2">
+              <div class="w-24 h-full rounded shadow overflow-hidden bg-slate-100">
+                ${b.coverUrl ? `<img src="${b.coverUrl}" class="w-full h-full object-cover">` : '<div class="flex h-full items-center justify-center"><i class="fa-solid fa-book text-slate-300"></i></div>'}
+              </div>
+            </div>
+            <div class="text-[9px] px-2 py-0.5 bg-slate-100 rounded-full inline-block mb-1 font-bold text-slate-600 truncate max-w-full">${b.genre}</div>
+            <h4 class="font-black text-xs text-slate-800 line-clamp-2 leading-tight">${b.title}</h4>
+            <div class="flex justify-between items-center mt-2">
+              <div class="text-amber-400 text-[10px]">${'<i class="fa-solid fa-star"></i>'.repeat(b.rating)}</div>
+              ${rc>1 ? `<span class="text-[10px] font-black text-brand-600 bg-brand-50 px-1 rounded">読${rc}回</span>` : ''}
+            </div>
+          </div>
+        `;
+      });
+    }
+    
+    container.innerHTML = html;
+  },
+
+  // ★シリーズをタップした時に中身をポップアップ表示するか、フィルターを自動適用する関数
+  openSeriesDetail: (encodedSeriesName) => {
+    const sName = decodeURIComponent(encodedSeriesName);
+    ui.showToast(`「${sName}」シリーズをあつめて表示したよ！`);
+    
+    // シリーズをタップした際は、まとめかたを一時的に解除して、該当タイトルが入っている本だけを綺麗に一覧表示させる
+    document.getElementById('group-by').value = 'none';
+    const container = document.getElementById('registered-list-container');
+    
+    let list = (window.app.allRegisteredBooks || []).filter(b => b.title.includes(sName));
+    let html = `
+      <div class="col-span-full bg-brand-50 p-3 rounded-xl border border-brand-200 flex justify-between items-center">
+        <span class="text-xs font-black text-brand-800">🔍 シリーズ「${sName}」の内訳</span>
+        <button onclick="ui.renderRegisteredBooks()" class="text-xs bg-white px-2 py-1 rounded shadow text-slate-600 font-bold">もどる</button>
+      </div>
+    `;
+    
     list.forEach(b => {
       const rc = b.readCount || 1;
       html += `
         <div onclick="ui.openBookDetail('${b.id}')" class="bg-white rounded-[24px] p-3 shadow-sm border border-slate-100 active:scale-95 transition-transform cursor-pointer relative overflow-hidden">
-          ${b.rating===5 ? '<div class="absolute -top-4 -right-4 w-12 h-12 bg-amber-400 rotate-45 z-10 flex items-end justify-center pb-1"><i class="fa-solid fa-star text-white text-[10px]"></i></div>' : ''}
           <div class="w-full h-32 flex justify-center mb-2">
             <div class="w-24 h-full rounded shadow overflow-hidden bg-slate-100">
               ${b.coverUrl ? `<img src="${b.coverUrl}" class="w-full h-full object-cover">` : '<div class="flex h-full items-center justify-center"><i class="fa-solid fa-book text-slate-300"></i></div>'}
@@ -232,19 +321,15 @@ const ui = {
   removeTemp: (id) => { window.app.tempBooks = window.app.tempBooks.filter(x=>x.tempId!==id); ui.renderTempBooks(); },
   clearTempListConfirm: () => { if(confirm("からにする？")){ window.app.tempBooks=[]; ui.renderTempBooks(); } },
 
-  // ★「まとめて登録」成功時に、シートから最新の本棚データを即座に引き抜いてリロードするよう修正
-// ★エラーガード＆即時コレクション反映を完璧にした「まとめて登録」処理
-  submitBatchBooks: function() {
+  submitBatchBooks: () => {
     if (!window.app.tempBooks || window.app.tempBooks.length === 0) return;
     
-    // 未入力（タイトルが「しらべているよ...」のまま）のガード
     const invalid = window.app.tempBooks.find(b => !b.title || b.title.trim() === "" || b.title === "しらべているよ...");
     if (invalid) {
       ui.showToast("本のなまえを入力していないものがあるよ。書いてね！");
       return;
     }
 
-    // 安全弁：子供の設定配列自体が存在しないか、空の場合のクラッシュ防止
     if (!window.app.appSettings || !window.app.appSettings.kids || window.app.appSettings.kids.length === 0) {
       ui.showToast("子供の設定データがまだよみこめていません。すこし待ってね！");
       return;
@@ -258,7 +343,6 @@ const ui = {
 
     ui.showLoading(true, "スプレッドシートにほぞん中...");
     
-    // 送信データの形をバックエンドの受け口（13列）に完全同期
     const booksPayload = window.app.tempBooks.map(b => ({
       isbn: b.isbn || "",
       title: b.title,
@@ -275,21 +359,9 @@ const ui = {
     
     dbDriver.addBooks(booksPayload, kid.sheetName, function(res) {
       if (res && res.success) {
-        if (typeof playBeep === 'function') playBeep("coin");
-        if (typeof animateCoinCounter === 'function') animateCoinCounter(true);
         ui.showToast("本棚に登録したよ！📚✨");
-        
-        // 一時リストをきれいに初期化
         window.app.tempBooks = [];
-        if (typeof saveTempBooksToStorage === 'function') saveTempBooksToStorage();
-        if (typeof renderTempListEmpty === 'function') {
-          renderTempListEmpty();
-        } else {
-          ui.renderTempBooks();
-        }
-        updateTempCountBadge();
-        
-        // ページ全体をリロードせず、選択中の子供の最新コレクションを即座に裏で再取得して描画
+        ui.renderTempBooks();
         if (typeof window.app.fetchRegisteredBooks === 'function') {
           window.app.fetchRegisteredBooks();
         }
@@ -300,15 +372,10 @@ const ui = {
       }
     }, function(err) {
       ui.showLoading(false);
-      console.error("addBooks通信エラー:", err);
       ui.showToast("データベースとの通信に失敗しました。");
     });
   },
 
-
-
-
-  
   renderManualStars: (rating) => {
     const container = document.getElementById('manual-stars-container');
     if(!container) return;
